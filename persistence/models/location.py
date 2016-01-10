@@ -23,10 +23,8 @@ class Location(persistence.base.Base):
     stain_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('stains.id'))
     stain = sqlalchemy.orm.relationship('Stain')
 
-    center_mass_intensity_x = sqlalchemy.Column(sqlalchemy.Float)
+    center_mass_intensity_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('coordinates.id'))
+    center_mass_intensity = sqlalchemy.orm.relationship('Coordinate')
 
-    center_mass_intensity_y = sqlalchemy.Column(sqlalchemy.Float)
-
-    max_intensity_x = sqlalchemy.Column(sqlalchemy.Float)
-
-    max_intensity_y = sqlalchemy.Column(sqlalchemy.Float)
+    max_intensity_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('coordinates.id'))
+    max_intensity = sqlalchemy.orm.relationship('Coordinate')
