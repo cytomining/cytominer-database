@@ -17,12 +17,24 @@ class Match(persistence.base.Base):
 
     __tablename__ = 'matches'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    image_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('images.id'))
+    image = sqlalchemy.orm.relationship('Image')
 
-    object_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
+    neighborhood_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('neighborhoods.id'))
+    neighborhood = sqlalchemy.orm.relationship('Neighborhood')
 
-    neighborhood = sqlalchemy.orm.relationship('Neighborhood', backref='matches', uselist=False)
+    pattern_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('patterns.id'))
+    pattern = sqlalchemy.orm.relationship('Pattern')
 
-    shape = sqlalchemy.orm.relationship('Shape', backref='matches', uselist=False)
+    shape_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('shapes.id'))
+    shape = sqlalchemy.orm.relationship('Shape')
 
-    stains = sqlalchemy.orm.relationship('Stain', backref='matches')
+    correlations = sqlalchemy.orm.relationship('Correlation', backref='matches')
+
+    intensities = sqlalchemy.orm.relationship('Intensity', backref='matches')
+
+    locations = sqlalchemy.orm.relationship('Location', backref='matches')
+
+    radial_distributions = sqlalchemy.orm.relationship('RadialDistribution', backref='matches')
+
+    textures = sqlalchemy.orm.relationship('Texture', backref='matches')

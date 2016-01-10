@@ -17,12 +17,13 @@ class Correlation(persistence.base.Base):
 
     __tablename__ = 'correlations'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    dependent_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('stains.id'))
+    dependent = sqlalchemy.orm.relationship('Stain', foreign_keys=[dependent_id])
 
-    stain_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('stains.id'))
+    independent_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('stains.id'))
+    independent = sqlalchemy.orm.relationship('Stain', foreign_keys=[independent_id])
 
-    stain = sqlalchemy.orm.relationship('Stain')
-
-    y = sqlalchemy.Column(sqlalchemy.Text)
+    match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
+    match = sqlalchemy.orm.relationship('Match')
 
     coefficient = sqlalchemy.Column(sqlalchemy.Float)

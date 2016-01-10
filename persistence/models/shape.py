@@ -17,19 +17,16 @@ class Shape(persistence.base.Base):
 
     __tablename__ = 'shapes'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    center_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('coordinates.id'))
+    center = sqlalchemy.orm.relationship('Coordinate', backref='shapes', uselist=False)
 
-    match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
-
-    match = sqlalchemy.orm.relationship('Match')
+    match = sqlalchemy.orm.relationship('Match', backref='shapes', uselist=False)
 
     moments = sqlalchemy.orm.relationship('Moment', backref='shapes')
 
     area = sqlalchemy.Column(sqlalchemy.Float)
 
     coordinate_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('coordinate.id'))
-
-    center = sqlalchemy.orm.relationship('Coordinate', backref='shapes', uselist=False)
 
     compactness = sqlalchemy.Column(sqlalchemy.Float)
 

@@ -17,6 +17,7 @@ class Angle(persistence.base.Base):
 
     __tablename__ = 'angles'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    texture_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('textures.id'))
+    texture = sqlalchemy.orm.relationship('Texture')
 
     degree = sqlalchemy.Column(sqlalchemy.Integer)

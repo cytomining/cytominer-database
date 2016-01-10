@@ -17,6 +17,4 @@ class Image(persistence.base.Base):
 
     __tablename__ = 'images'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-
-    objects = sqlalchemy.orm.relationship('Object', backref='images')
+    matches = sqlalchemy.orm.relationship('Match', backref='images')

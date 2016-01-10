@@ -17,10 +17,10 @@ class Intensity(persistence.base.Base):
 
     __tablename__ = 'intensities'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
+    match = sqlalchemy.orm.relationship('Match')
 
     stain_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('stains.id'))
-
     stain = sqlalchemy.orm.relationship('Stain')
 
     integrated_intensity = sqlalchemy.Column(sqlalchemy.Float)

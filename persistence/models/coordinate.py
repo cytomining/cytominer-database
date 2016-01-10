@@ -17,10 +17,6 @@ class Coordinate(persistence.base.Base):
 
     __tablename__ = 'coordinates'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    abscissa = sqlalchemy.Column(sqlalchemy.Integer)
 
-    x = sqlalchemy.Column(sqlalchemy.Integer)
-
-    y = sqlalchemy.Column(sqlalchemy.Integer)
-
-    z = sqlalchemy.Column(sqlalchemy.Integer)
+    ordinate = sqlalchemy.Column(sqlalchemy.Integer)

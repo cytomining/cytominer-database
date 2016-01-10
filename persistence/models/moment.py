@@ -17,10 +17,7 @@ class Moment(persistence.base.Base):
 
     __tablename__ = 'moments'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-
     shape_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('shapes.id'))
-
     shape = sqlalchemy.orm.relationship('Shape')
 
     a = sqlalchemy.Column(sqlalchemy.Integer)

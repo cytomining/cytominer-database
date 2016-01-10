@@ -17,15 +17,13 @@ class Texture(persistence.base.Base):
 
     __tablename__ = 'textures'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-
-    angle = sqlalchemy.orm.relationship('Angle')
-
-    angle_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('angles.id'))
-
-    stain = sqlalchemy.orm.relationship('Stain')
+    match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
+    match = sqlalchemy.orm.relationship('Match')
 
     stain_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('stains.id'))
+    stain = sqlalchemy.orm.relationship('Stain')
+
+    angles = sqlalchemy.orm.relationship('Angle', backref='textures')
 
     angular_second_moment = sqlalchemy.Column(sqlalchemy.Float)
 

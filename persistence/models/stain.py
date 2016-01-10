@@ -17,12 +17,6 @@ class Stain(persistence.base.Base):
 
     __tablename__ = 'stains'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-
-    match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
-
-    match = sqlalchemy.orm.relationship('Match')
-
     correlations = sqlalchemy.orm.relationship('Correlation', backref='stains')
 
     description = sqlalchemy.Column(sqlalchemy.Text)

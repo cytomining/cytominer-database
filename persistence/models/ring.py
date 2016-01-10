@@ -17,4 +17,5 @@ class Ring(persistence.base.Base):
 
     __tablename__ = 'rings'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    radial_distribution_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('radial_distributions.id'))
+    radial_distribution = sqlalchemy.orm.relationship('RadialDistribution')

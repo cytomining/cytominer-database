@@ -17,10 +17,10 @@ class Location(persistence.base.Base):
 
     __tablename__ = 'locations'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
+    match = sqlalchemy.orm.relationship('Match')
 
     stain_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('stains.id'))
-
     stain = sqlalchemy.orm.relationship('Stain')
 
     center_mass_intensity_x = sqlalchemy.Column(sqlalchemy.Float)

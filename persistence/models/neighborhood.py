@@ -17,11 +17,7 @@ class Neighborhood(persistence.base.Base):
 
     __tablename__ = 'neighborhoods'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-
-    match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
-
-    match = sqlalchemy.orm.relationship('Match')
+    match = sqlalchemy.orm.relationship('Match', backref='neighborhoods', uselist=False)
 
     angle_between_neighbors_5 = sqlalchemy.Column(sqlalchemy.Float)
 

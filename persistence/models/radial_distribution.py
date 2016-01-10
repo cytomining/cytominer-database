@@ -17,15 +17,13 @@ class RadialDistribution(persistence.base.Base):
 
     __tablename__ = 'radial_distributions'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-
-    ring = sqlalchemy.orm.relationship('Ring')
-
-    ring_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('stains.id'))
-
-    stain = sqlalchemy.orm.relationship('Stain')
+    match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
+    match = sqlalchemy.orm.relationship('Match')
 
     stain_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('stains.id'))
+    stain = sqlalchemy.orm.relationship('Stain')
+
+    rings = sqlalchemy.orm.relationship('Ring', backref='radial_distributions')
 
     frac_at_d = sqlalchemy.Column(sqlalchemy.Float)
 
