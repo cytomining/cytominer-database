@@ -34,33 +34,19 @@ def __main__(filename):
     image_identifiers = example.records[('Image', 'ImageNumber')].unique()
 
     for image_identifier in image_identifiers:
-        image = perturbation.model.image.Image().find_or_create_by(
-            session,
+        image = perturbation.model.image.Image().find_or_create_by(session, id=image_identifier)
 
-            id=image_identifier
-        )
-
-        match_identifiers = example.records[
-            example.records[
-                ('Image', 'ImageNumber')
-            ] == image_identifier
-        ][
-            ('Object', 'ObjectNumber')
-        ].unique()
+        match_identifiers = example.records[example.records[('Image', 'ImageNumber')] == image_identifier][('Object', 'ObjectNumber')].unique()
 
         for pattern_description in example.__patterns__():
-            pattern = perturbation.model.pattern.Pattern().find_or_create_by(
-                session,
-
-                description=pattern_description
-            )
+            pattern = perturbation.model.pattern.Pattern().find_or_create_by(session, description=pattern_description)
 
             for match_identifier in match_identifiers:
-                match = perturbation.model.match.Match().find_or_create_by(
-                    session,
+                match = perturbation.model.match.Match().find_or_create_by(session, id=match_identifier)
 
-                    id=match_identifier
-                )
+                match.image = image
+
+                match.pattern = pattern
 
 if __name__ == '__main__':
     __main__(filename='../test/data/object.csv')
