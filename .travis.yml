@@ -1,0 +1,13 @@
+addons:
+    apt:
+        packages:
+            - python-numpy
+            - python-pandas
+install:
+    - pip install --user -e .
+language:
+    - python
+python:
+    - 3.5
+script:
+    - python setup.py test
