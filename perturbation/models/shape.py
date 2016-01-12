@@ -2,7 +2,7 @@
 
 """
 
-import persistence.base
+import perturbation.base
 import sqlalchemy
 import sqlalchemy.exc
 import sqlalchemy.ext.declarative
@@ -10,7 +10,7 @@ import sqlalchemy.orm
 import sqlalchemy.orm.exc
 
 
-class Shape(persistence.base.Base):
+class Shape(perturbation.base.Base):
     """
 
     """
@@ -25,8 +25,6 @@ class Shape(persistence.base.Base):
     moments = sqlalchemy.orm.relationship('Moment', backref='shapes')
 
     area = sqlalchemy.Column(sqlalchemy.Float)
-
-    coordinate_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('coordinate.id'))
 
     compactness = sqlalchemy.Column(sqlalchemy.Float)
 

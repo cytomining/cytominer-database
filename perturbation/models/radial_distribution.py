@@ -2,7 +2,7 @@
 
 """
 
-import persistence.base
+import perturbation.base
 import sqlalchemy
 import sqlalchemy.exc
 import sqlalchemy.ext.declarative
@@ -10,7 +10,7 @@ import sqlalchemy.orm
 import sqlalchemy.orm.exc
 
 
-class RadialDistribution(persistence.base.Base):
+class RadialDistribution(perturbation.base.Base):
     """
 
     """

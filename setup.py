@@ -1,22 +1,23 @@
 import setuptools
 
 setuptools.setup(
-    name='persistence',
+    name='perturbation',
     version='0.0.0',
     author='Allen Goodman',
     author_email='allen.goodman@icloud.com',
     packages=setuptools.find_packages(
             exclude=[
-
+                'test'
             ]
     ),
     install_requires=[
         'pandas',
+        'pytest',
         'sqlalchemy'
     ],
     entry_points={
         'console_scripts': [
-            'persistence=persistence:__main__',
+            'perturbation=perturbation:__main__',
         ]
     }
 )
