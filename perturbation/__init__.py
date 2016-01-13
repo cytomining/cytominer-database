@@ -21,7 +21,7 @@ import sqlalchemy.orm
 
 
 def __main__(filename):
-    engine = sqlalchemy.create_engine('sqlite://', echo=False)
+    engine = sqlalchemy.create_engine('sqlite:///example.sqlite', echo=False)
 
     perturbation.base.Base.metadata.create_all(engine)
 
@@ -47,6 +47,8 @@ def __main__(filename):
                 match.image = image
 
                 match.pattern = pattern
+
+    session.commit()
 
 if __name__ == '__main__':
     __main__(filename='../test/data/object.csv')
