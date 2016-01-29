@@ -17,11 +17,13 @@ class Intensity(perturbation.base.Base):
 
     __tablename__ = 'intensities'
 
-    match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
-    match = sqlalchemy.orm.relationship('Match')
+    channel_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('channels.id'))
 
-    stain_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('stains.id'))
-    stain = sqlalchemy.orm.relationship('Stain')
+    channel = sqlalchemy.orm.relationship('Channel')
+
+    match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
+
+    match = sqlalchemy.orm.relationship('Match')
 
     integrated_intensity = sqlalchemy.Column(sqlalchemy.Float)
 

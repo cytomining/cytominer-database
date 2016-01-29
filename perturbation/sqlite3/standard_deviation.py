@@ -11,10 +11,30 @@ class StandardDeviation(object):
     """
 
     def __init__(self):
-        self.elements = []
+        """
 
-    def step(self, element):
-        self.elements.append(element)
+        :return:
+
+        """
+
+        self.sample = []
+
+    def step(self, observation):
+        """
+
+        :param observation:
+
+        :return:
+
+        """
+
+        self.sample.append(observation)
 
     def finalize(self):
-        return statistics.stdev(self.elements)
+        """
+
+        :return:
+
+        """
+
+        return statistics.stdev(self.sample)

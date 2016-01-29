@@ -17,5 +17,4 @@ class Ring(perturbation.base.Base):
 
     __tablename__ = 'rings'
 
-    radial_distribution_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('radial_distributions.id'))
-    radial_distribution = sqlalchemy.orm.relationship('RadialDistribution')
+    radial_distributions = sqlalchemy.orm.relationship('RadialDistribution', backref='rings')

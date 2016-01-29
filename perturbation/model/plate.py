@@ -17,9 +17,10 @@ class Plate(perturbation.base.Base):
 
     __tablename__ = 'plates'
 
-    well_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('wells.id'))
-    well = sqlalchemy.orm.relationship('Well')
-
     images = sqlalchemy.orm.relationship('Image', backref='plates')
+
+    well_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('wells.id'))
+
+    well = sqlalchemy.orm.relationship('Well')
 
     barcode = sqlalchemy.Column(sqlalchemy.Integer)

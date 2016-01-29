@@ -17,6 +17,4 @@ class Scale(perturbation.base.Base):
 
     __tablename__ = 'scales'
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-
     parameter = sqlalchemy.Column(sqlalchemy.Integer)

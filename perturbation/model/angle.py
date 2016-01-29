@@ -17,7 +17,6 @@ class Angle(perturbation.base.Base):
 
     __tablename__ = 'angles'
 
-    texture_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('textures.id'))
-    texture = sqlalchemy.orm.relationship('Texture')
+    textures = sqlalchemy.orm.relationship('Texture', backref='angles')
 
     degree = sqlalchemy.Column(sqlalchemy.Integer)

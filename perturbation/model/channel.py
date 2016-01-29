@@ -6,11 +6,11 @@ import perturbation.base
 import sqlalchemy
 
 
-class Stain(perturbation.base.Base):
+class Channel(perturbation.base.Base):
     """
 
     """
 
-    __tablename__ = 'stains'
+    __tablename__ = 'channels'
 
     description = sqlalchemy.Column(sqlalchemy.String)

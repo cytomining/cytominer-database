@@ -18,11 +18,8 @@ class Shape(perturbation.base.Base):
     __tablename__ = 'shapes'
 
     center_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('coordinates.id'))
+
     center = sqlalchemy.orm.relationship('Coordinate', backref='shapes', uselist=False)
-
-    match = sqlalchemy.orm.relationship('Match', backref='shapes', uselist=False)
-
-    moments = sqlalchemy.orm.relationship('Moment', backref='shapes')
 
     area = sqlalchemy.Column(sqlalchemy.Float)
 
@@ -38,6 +35,8 @@ class Shape(perturbation.base.Base):
 
     major_axis_length = sqlalchemy.Column(sqlalchemy.Float)
 
+    match = sqlalchemy.orm.relationship('Match', backref='shapes', uselist=False)
+
     max_feret_diameter = sqlalchemy.Column(sqlalchemy.Float)
 
     maximum_radius = sqlalchemy.Column(sqlalchemy.Float)
@@ -49,6 +48,8 @@ class Shape(perturbation.base.Base):
     min_feret_diameter = sqlalchemy.Column(sqlalchemy.Float)
 
     minor_axis_length = sqlalchemy.Column(sqlalchemy.Float)
+
+    moments = sqlalchemy.orm.relationship('Moment', backref='shapes')
 
     orientation = sqlalchemy.Column(sqlalchemy.Float)
 

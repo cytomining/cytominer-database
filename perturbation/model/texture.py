@@ -17,13 +17,17 @@ class Texture(perturbation.base.Base):
 
     __tablename__ = 'textures'
 
+    angle_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('angles.id'))
+
+    angle = sqlalchemy.orm.relationship('Angle')
+
+    channel_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('channels.id'))
+
+    channel = sqlalchemy.orm.relationship('Channel')
+
     match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
+
     match = sqlalchemy.orm.relationship('Match')
-
-    stain_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('stains.id'))
-    stain = sqlalchemy.orm.relationship('Stain')
-
-    angles = sqlalchemy.orm.relationship('Angle', backref='textures')
 
     angular_second_moment = sqlalchemy.Column(sqlalchemy.Float)
 

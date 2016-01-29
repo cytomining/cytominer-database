@@ -42,6 +42,8 @@ setuptools.setup(
                 ]
         ),
         install_requires=[
+            'click',
+            'odo',
             'pandas',
             'pytest',
             'sqlalchemy'

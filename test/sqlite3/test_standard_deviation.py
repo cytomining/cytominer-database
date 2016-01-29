@@ -2,19 +2,10 @@
 
 """
 
-import statistics
 
-
-class StandardDeviation(object):
+class TestStandardDeviation:
     """
 
     """
 
-    def __init__(self):
-        self.elements = []
-
-    def step(self, element):
-        self.elements.append(element)
-
-    def finalize(self):
-        return statistics.stdev(self.elements)
+    pass

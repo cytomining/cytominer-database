@@ -17,7 +17,10 @@ class Well(perturbation.base.Base):
 
     __tablename__ = 'wells'
 
+    plates = sqlalchemy.orm.relationship('Plate', backref='wells')
+
     position_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('coordinates.id'))
+
     position = sqlalchemy.orm.relationship('Coordinate')
 
-    plates = sqlalchemy.orm.relationship('Plate', backref='wells')
+    description = sqlalchemy.Column(sqlalchemy.String)

@@ -18,6 +18,7 @@ class Moment(perturbation.base.Base):
     __tablename__ = 'moments'
 
     shape_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('shapes.id'))
+
     shape = sqlalchemy.orm.relationship('Shape')
 
     a = sqlalchemy.Column(sqlalchemy.Integer)
