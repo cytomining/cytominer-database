@@ -4,27 +4,8 @@ import os
 import IPython
 import pandas
 import perturbation.base
-import perturbation.model.angle
-import perturbation.model.coordinate
-import perturbation.model.correlation
-import perturbation.model.image
-import perturbation.model.intensity
-import perturbation.model.location
-import perturbation.model.match
-import perturbation.model.moment
-import perturbation.model.neighborhood
-import perturbation.model.pattern
-import perturbation.model.plate
-import perturbation.model.radial_distribution
-import perturbation.model.standardized_radial_distribution
-import perturbation.model.ring
-import perturbation.model.scale
-import perturbation.model.shape
-import perturbation.model.channel
-import perturbation.model.texture
-import perturbation.model.well
-from perturbation.sqlite3.standard_deviation import StandardDeviation
-from perturbation.sqlite3.standard_score import StandardScore
+from perturbation.model import *
+from perturbation.sqlite3 import *
 import sqlalchemy
 import sqlite3
 import sqlalchemy.orm
@@ -54,33 +35,24 @@ def __main__(a, b):
 
     for chunk in pandas.read_csv('test/data/image.csv', chunksize=4):
         for index, row in chunk.iterrows():
-            position = perturbation.model.coordinate.Coordinate.find_or_create_by(
-                session,
-                abscissa=row['Metadata_WellColumn'],
-                ordinate=ord(row['Metadata_WellRow'])
-            )
-
-            well = perturbation.model.well.Well.find_or_create_by(
-                session,
-                position=position,
+            well = Well.find_or_create_by(
+                session=session,
                 description=row['Metadata_Well']
             )
 
-            plate = perturbation.model.plate.Plate.find_or_create_by(
-                session,
-                id=row['Metadata_Site'],
+            plate = Plate.find_or_create_by(
+                session=session,
                 barcode=row['Metadata_Barcode']
             )
 
-            well.plates.append(plate)
+            plate.wells.append(well)
 
-            metadata = perturbation.model.image.Image.find_or_create_by(
-                session,
-                id=row['ImageNumber'],
-                plate_id=plate.id
+            image = Image.find_or_create_by(
+                session=session,
+                id=row['ImageNumber']
             )
 
-            plate.images.append(metadata)
+            well.images.append(image)
 
     filenames = []
 
@@ -96,11 +68,9 @@ def __main__(a, b):
     patterns = []
 
     for pattern_description in pattern_descriptions:
-        pattern = perturbation.model.pattern.Pattern.find_or_create_by(session, description=pattern_description)
+        pattern = Pattern.find_or_create_by(session, description=pattern_description)
 
         patterns.append(pattern)
-
-    session.commit()
 
     data = pandas.read_csv('test/data/cell.csv')
 
@@ -112,8 +82,8 @@ def __main__(a, b):
         split_columns = column.split('_')
 
         if split_columns[0] == 'Correlation':
-            a = perturbation.model.channel.Channel.find_or_create_by(session, description=split_columns[2])
-            b = perturbation.model.channel.Channel.find_or_create_by(session, description=split_columns[3])
+            a = Channel.find_or_create_by(session, description=split_columns[2])
+            b = Channel.find_or_create_by(session, description=split_columns[3])
 
             correlation_columns.append((a, b))
 
@@ -130,15 +100,12 @@ def __main__(a, b):
     channels = []
 
     for channel_description in channel_descriptions:
-        channel = perturbation.model.channel.Channel.find_or_create_by(
-                session,
-
-                description=channel_description
+        channel = Channel.find_or_create_by(
+            session,
+            description=channel_description
         )
 
         channels.append(channel)
-
-    session.commit()
 
     degrees = []
 
@@ -150,31 +117,23 @@ def __main__(a, b):
 
     degrees = set(degrees)
 
-    angles = []
-
-    for degree in degrees:
-        angles.append(perturbation.model.angle.Angle.find_or_create_by(session, degree=degree))
-
-    angles = set(angles)
-
-    session.commit()
-
-    ring_ids = []
+    counts = []
 
     for column in columns:
         split_columns = column.split('_')
 
         if split_columns[0] == 'RadialDistribution':
-            ring_ids.append(split_columns[3][0])
+            counts.append(split_columns[3][0])
 
-    ring_ids = set(ring_ids)
+    counts = set(counts)
 
-    rings = []
+    moments = []
 
-    for ring_id in ring_ids:
-        rings.append(perturbation.model.ring.Ring.find_or_create_by(session, id=ring_id))
+    for column in columns:
+        split_columns = column.split('_')
 
-    rings = set(rings)
+        if split_columns[0] == 'AreaShape' and split_columns[1] == 'Zernike':
+            moments.append((split_columns[2], split_columns[3]))
 
     session.commit()
 
@@ -182,56 +141,83 @@ def __main__(a, b):
         data = pandas.read_csv('test/data/{}.csv'.format(pattern.description))
 
         for index, row in data.iterrows():
-            image = perturbation.model.image.Image.find_or_create_by(session, id=row['ImageNumber'])
-
-            # neighborhood = perturbation.model.neighborhood.Neighborhood.find_or_create_by(
-            #         session,
-            #         angle_between_neighbors_5=row['Neighbors_AngleBetweenNeighbors_5'],
-            #         angle_between_neighbors_adjacent=row['Neighbors_AngleBetweenNeighbors_Adjacent'],
-            #         first_closest_distance_5=row['Neighbors_FirstClosestDistance_5'],
-            #         first_closest_distance_adjacent=row['Neighbors_FirstClosestDistance_Adjacent'],
-            #         first_closest_object_number_5=row['Neighbors_FirstClosestObjectNumber_5'],
-            #         first_closest_object_number_adjacent=row['Neighbors_FirstClosestObjectNumber_Adjacent'],
-            #         number_of_neighbors_5=row['Neighbors_NumberOfNeighbors_5'],
-            #         number_of_neighbors_adjacent=row['Neighbors_NumberOfNeighbors_Adjacent'],
-            #         percent_touching_5=row['Neighbors_PercentTouching_5'],
-            #         percent_touching_adjacent=row['Neighbors_PercentTouching_Adjacent'],
-            #         second_closest_distance_5=row['Neighbors_SecondClosestDistance_5'],
-            #         second_closest_distance_adjacent=row['Neighbors_SecondClosestDistance_Adjacent'],
-            #         second_closest_object_number_5=row['Neighbors_SecondClosestObjectNumber_5'],
-            #         second_closest_object_number_adjacent=row['Neighbors_SecondClosestObjectNumber_Adjacent']
-            # )
-
-            shape = perturbation.model.shape.Shape.find_or_create_by(
-                session,
-                center=perturbation.model.coordinate.Coordinate.find_or_create_by(
-                    session,
-                    abscissa=row['AreaShape_Center_X'],
-                    ordinate=row['AreaShape_Center_Y']
-                ),
-                area=row['AreaShape_Area'],
-                compactness=row['AreaShape_Compactness'],
-                eccentricity=row['AreaShape_Compactness'],
-                euler_number=row['AreaShape_Compactness'],
-                extent=row['AreaShape_Compactness'],
-                form_factor=row['AreaShape_Compactness'],
-                major_axis_length=row['AreaShape_Compactness'],
-                max_feret_diameter=row['AreaShape_Compactness'],
-                maximum_radius=row['AreaShape_Compactness'],
-                mean_radius=row['AreaShape_Compactness'],
-                median_radius=row['AreaShape_Compactness'],
-                min_feret_diameter=row['AreaShape_Compactness'],
-                minor_axis_length=row['AreaShape_Compactness'],
-                orientation=row['AreaShape_Compactness'],
-                perimeter=row['AreaShape_Compactness'],
-                solidity=row['AreaShape_Compactness']
+            image = Image.find_or_create_by(
+                session=session,
+                id=row['ImageNumber']
             )
 
-            match = perturbation.model.match.Match.find_or_create_by(session, id=row['ObjectNumber'])
+            center = Coordinate.find_or_create_by(
+                session=session,
+                abscissa=int(round(row['AreaShape_Center_X'])),
+                ordinate=int(round(row['AreaShape_Center_Y']))
+            )
+
+            shape = Shape.find_or_create_by(
+                session=session,
+                area=row['AreaShape_Area'],
+                compactness=row['AreaShape_Compactness'],
+                eccentricity=row['AreaShape_Eccentricity'],
+                euler_number=row['AreaShape_EulerNumber'],
+                extent=row['AreaShape_Extent'],
+                form_factor=row['AreaShape_FormFactor'],
+                major_axis_length=row['AreaShape_MajorAxisLength'],
+                max_feret_diameter=row['AreaShape_MaxFeretDiameter'],
+                maximum_radius=row['AreaShape_MaximumRadius'],
+                mean_radius=row['AreaShape_MeanRadius'],
+                median_radius=row['AreaShape_MedianRadius'],
+                min_feret_diameter=row['AreaShape_MinFeretDiameter'],
+                minor_axis_length=row['AreaShape_MinorAxisLength'],
+                orientation=row['AreaShape_Orientation'],
+                perimeter=row['AreaShape_Perimeter'],
+                solidity=row['AreaShape_Solidity']
+            )
+
+            shape.center = center
+
+            for moment in moments:
+                moment = Moment.find_or_create_by(
+                    session=session,
+                    a=moment[0],
+                    b=moment[1],
+                    score=row[
+                        'AreaShape_Zernike_{}_{}'.format(
+                            moment[0],
+                            moment[1]
+                        )
+                    ]
+                )
+
+                moment.shape = shape
+
+            match = Match.find_or_create_by(
+                session=session,
+                id=row['ObjectNumber']
+            )
+
+            try:
+                neighborhood = Neighborhood.find_or_create_by(
+                    session=session,
+                    angle_between_neighbors_5=row['Neighbors_AngleBetweenNeighbors_5'],
+                    angle_between_neighbors_adjacent=row['Neighbors_AngleBetweenNeighbors_Adjacent'],
+                    first_closest_distance_5=row['Neighbors_FirstClosestDistance_5'],
+                    first_closest_distance_adjacent=row['Neighbors_FirstClosestDistance_Adjacent'],
+                    first_closest_object_number_5=row['Neighbors_FirstClosestObjectNumber_5'],
+                    first_closest_object_number_adjacent=row['Neighbors_FirstClosestObjectNumber_Adjacent'],
+                    number_of_neighbors_5=row['Neighbors_NumberOfNeighbors_5'],
+                    number_of_neighbors_adjacent=row['Neighbors_NumberOfNeighbors_Adjacent'],
+                    percent_touching_5=row['Neighbors_PercentTouching_5'],
+                    percent_touching_adjacent=row['Neighbors_PercentTouching_Adjacent'],
+                    second_closest_distance_5=row['Neighbors_SecondClosestDistance_5'],
+                    second_closest_distance_adjacent=row['Neighbors_SecondClosestDistance_Adjacent'],
+                    second_closest_object_number_5=row['Neighbors_SecondClosestObjectNumber_5'],
+                    second_closest_object_number_adjacent=row['Neighbors_SecondClosestObjectNumber_Adjacent']
+                )
+
+                neighborhood.match = match
+            except KeyError:
+                pass
 
             match.image = image
-
-            # match.neighborhood = neighborhood
 
             match.pattern = pattern
 
@@ -240,90 +226,104 @@ def __main__(a, b):
             for correlation_column in correlation_columns:
                 dependent, independent = correlation_column
 
-                perturbation.model.correlation.Correlation.find_or_create_by(
-                    session,
-                    dependent=dependent,
-                    independent=independent,
-                    match=match,
-                    coefficient=row[
-                        'Correlation_Correlation_{}_{}'.format(dependent.description, independent.description)
-                    ]
+                correlation = Correlation.find_or_create_by(
+                    session=session,
+                    coefficient=row['Correlation_Correlation_{}_{}'.format(dependent.description, independent.description)]
                 )
+
+                correlation.dependent = dependent
+
+                correlation.independent = independent
+
+                correlation.match = match
 
             for channel in channels:
-                perturbation.model.intensity.Intensity.find_or_create_by(
-                    session,
-                    channel=channel,
-                    match=match,
-                    integrated_intensity=row['Intensity_IntegratedIntensity_{}'.format(channel.description)],
-                    integrated_intensity_edge=row['Intensity_IntegratedIntensityEdge_{}'.format(channel.description)],
-                    lower_quartile_intensity=row['Intensity_LowerQuartileIntensity_{}'.format(channel.description)],
-                    mad_intensity=row['Intensity_MADIntensity_{}'.format(channel.description)],
+                intensity = Intensity.find_or_create_by(
+                    session=session,
+                    first_quartile=row['Intensity_LowerQuartileIntensity_{}'.format(channel.description)],
+                    integrated=row['Intensity_IntegratedIntensity_{}'.format(channel.description)],
                     mass_displacement=row['Intensity_MassDisplacement_{}'.format(channel.description)],
-                    max_intensity=row['Intensity_MaxIntensity_{}'.format(channel.description)],
-                    max_intensity_edge=row['Intensity_MaxIntensityEdge_{}'.format(channel.description)],
-                    mean_intensity=row['Intensity_MeanIntensity_{}'.format(channel.description)],
-                    mean_intensity_edge=row['Intensity_MeanIntensityEdge_{}'.format(channel.description)],
-                    median_intensity=row['Intensity_MedianIntensity_{}'.format(channel.description)],
-                    min_intensity=row['Intensity_MinIntensity_{}'.format(channel.description)],
-                    min_intensity_edge=row['Intensity_MinIntensityEdge_{}'.format(channel.description)],
-                    std_intensity=row['Intensity_StdIntensity_{}'.format(channel.description)],
-                    std_intensity_edge=row['Intensity_StdIntensityEdge_{}'.format(channel.description)],
-                    upper_quartile_intensity=row['Intensity_UpperQuartileIntensity_{}'.format(channel.description)]
+                    maximum=row['Intensity_MaxIntensity_{}'.format(channel.description)],
+                    mean=row['Intensity_MeanIntensity_{}'.format(channel.description)],
+                    median=row['Intensity_MedianIntensity_{}'.format(channel.description)],
+                    median_absolute_deviation=row['Intensity_MADIntensity_{}'.format(channel.description)],
+                    minimum=row['Intensity_MinIntensity_{}'.format(channel.description)],
+                    standard_deviation=row['Intensity_StdIntensity_{}'.format(channel.description)],
+                    third_quartile=row['Intensity_UpperQuartileIntensity_{}'.format(channel.description)]
                 )
 
-                perturbation.model.location.Location.find_or_create_by(
-                        session,
-                        center_mass_intensity=perturbation.model.coordinate.Coordinate.find_or_create_by(
-                            session,
-                            abscissa=row['Location_CenterMassIntensity_X_{}'.format(channel.description)],
-                            ordinate=row['Location_CenterMassIntensity_Y_{}'.format(channel.description)]
-                        ),
-                        match=match,
-                        max_intensity=perturbation.model.coordinate.Coordinate.find_or_create_by(
-                            session,
-                            abscissa=row['Location_MaxIntensity_X_{}'.format(channel.description)],
-                            ordinate=row['Location_MaxIntensity_Y_{}'.format(channel.description)]
-                        ),
-                        channel=channel
+                intensity.channel = channel
+
+                intensity.match = match
+
+                edge = Edge.find_or_create_by(
+                    session=session,
+                    integrated=row['Intensity_IntegratedIntensityEdge_{}'.format(channel.description)],
+                    maximum=row['Intensity_MaxIntensityEdge_{}'.format(channel.description)],
+                    mean=row['Intensity_MeanIntensityEdge_{}'.format(channel.description)],
+                    minimum=row['Intensity_MinIntensityEdge_{}'.format(channel.description)],
+                    standard_deviation=row['Intensity_StdIntensityEdge_{}'.format(channel.description)]
                 )
 
-                for angle in angles:
-                    perturbation.model.texture.Texture.find_or_create_by(
-                        session,
-                        angle=angle,
-                        match=match,
-                        channel=channel,
-                        angular_second_moment=row['Texture_AngularSecondMoment_{}_{}_0'.format(channel.description, angle.degree)],
-                        contrast=row['Texture_Contrast_{}_{}_0'.format(channel.description, angle.degree)],
-                        correlation=row['Texture_Correlation_{}_{}_0'.format(channel.description, angle.degree)],
-                        difference_entropy=row['Texture_DifferenceEntropy_{}_{}_0'.format(channel.description, angle.degree)],
-                        difference_variance=row['Texture_DifferenceVariance_{}_{}_0'.format(channel.description, angle.degree)],
-                        entropy=row['Texture_Entropy_{}_{}_0'.format(channel.description, angle.degree)],
-                        gabor=row['Texture_Gabor_{}_{}'.format(channel.description, angle.degree)],
-                        info_meas_1=row['Texture_InfoMeas1_{}_{}_0'.format(channel.description, angle.degree)],
-                        info_meas_2=row['Texture_InfoMeas2_{}_{}_0'.format(channel.description, angle.degree)],
-                        inverse_difference_moment=row['Texture_InverseDifferenceMoment_{}_{}_0'.format(channel.description, angle.degree)],
-                        sum_average=row['Texture_SumAverage_{}_{}_0'.format(channel.description, angle.degree)],
-                        sum_entropy=row['Texture_SumEntropy_{}_{}_0'.format(channel.description, angle.degree)],
-                        sum_variance=row['Texture_SumVariance_{}_{}_0'.format(channel.description, angle.degree)],
-                        variance=row['Texture_Variance_{}_{}_0'.format(channel.description, angle.degree)]
+                edge.intensity = intensity
+
+                location = Location.find_or_create_by(
+                    session=session,
+                    center_mass_intensity=Coordinate.find_or_create_by(
+                        session=session,
+                        abscissa=int(round(row['Location_CenterMassIntensity_X_{}'.format(channel.description)])),
+                        ordinate=int(round(row['Location_CenterMassIntensity_Y_{}'.format(channel.description)]))
+                    ),
+                    max_intensity=Coordinate.find_or_create_by(
+                        session=session,
+                        abscissa=int(round(row['Location_MaxIntensity_X_{}'.format(channel.description)])),
+                        ordinate=int(round(row['Location_MaxIntensity_Y_{}'.format(channel.description)]))
+                    )
+                )
+
+                location.channel = channel
+
+                location.match = match
+
+                for degree in degrees:
+                    texture = Texture.find_or_create_by(
+                        session=session,
+                        angular_second_moment=row['Texture_AngularSecondMoment_{}_{}_0'.format(channel.description, degree)],
+                        contrast=row['Texture_Contrast_{}_{}_0'.format(channel.description, degree)],
+                        correlation=row['Texture_Correlation_{}_{}_0'.format(channel.description, degree)],
+                        difference_entropy=row['Texture_DifferenceEntropy_{}_{}_0'.format(channel.description, degree)],
+                        difference_variance=row['Texture_DifferenceVariance_{}_{}_0'.format(channel.description, degree)],
+                        direction=degree,
+                        entropy=row['Texture_Entropy_{}_{}_0'.format(channel.description, degree)],
+                        gabor=row['Texture_Gabor_{}_{}'.format(channel.description, degree)],
+                        info_meas_1=row['Texture_InfoMeas1_{}_{}_0'.format(channel.description, degree)],
+                        info_meas_2=row['Texture_InfoMeas2_{}_{}_0'.format(channel.description, degree)],
+                        inverse_difference_moment=row['Texture_InverseDifferenceMoment_{}_{}_0'.format(channel.description, degree)],
+                        sum_average=row['Texture_SumAverage_{}_{}_0'.format(channel.description, degree)],
+                        sum_entropy=row['Texture_SumEntropy_{}_{}_0'.format(channel.description, degree)],
+                        sum_variance=row['Texture_SumVariance_{}_{}_0'.format(channel.description, degree)],
+                        variance=row['Texture_Variance_{}_{}_0'.format(channel.description, degree)]
                     )
 
-                for ring in rings:
-                    perturbation.model.radial_distribution.RadialDistribution.find_or_create_by(
-                        session,
-                        channel=channel,
-                        match=match,
-                        ring=ring,
-                        frac_at_d=row['RadialDistribution_FracAtD_{}_{}of4'.format(channel.description, ring.id)],
-                        mean_frac=row['RadialDistribution_MeanFrac_{}_{}of4'.format(channel.description, ring.id)],
-                        radial_cv=row['RadialDistribution_RadialCV_{}_{}of4'.format(channel.description, ring.id)]
+                    texture.channel = channel
+
+                    texture.match = match
+
+                for count in counts:
+                    radial_distribution = RadialDistribution.find_or_create_by(
+                        session=session,
+                        bins=count,
+                        frac_at_d=row['RadialDistribution_FracAtD_{}_{}of4'.format(channel.description, count)],
+                        mean_frac=row['RadialDistribution_MeanFrac_{}_{}of4'.format(channel.description, count)],
+                        radial_cv=row['RadialDistribution_RadialCV_{}_{}of4'.format(channel.description, count)]
                     )
+
+                    radial_distribution.channel = channel
+
+                    radial_distribution.match = match
+
 
         session.commit()
-
-    IPython.embed()
 
 if __name__ == '__main__':
     __main__()
