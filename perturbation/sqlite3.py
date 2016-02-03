@@ -5,6 +5,20 @@
 import numpy
 
 
+def standardize(observation, μ, σ):
+    """
+
+    :param observation:
+    :param μ:
+    :param σ:
+
+    :return:
+
+    """
+
+    return observation - μ / σ
+
+
 class StandardDeviation(object):
     """
 
@@ -38,40 +52,3 @@ class StandardDeviation(object):
         """
 
         return numpy.std(self.sample)
-
-
-class StandardScore(object):
-    """
-
-    """
-
-    def __init__(self):
-        """
-
-        :return:
-
-        """
-
-        self.scores = []
-
-    def step(self, observation, μ, σ):
-        """
-
-        :param observation:
-        :param μ:
-        :param σ:
-
-        :return:
-
-        """
-
-        self.scores.append(observation - μ / σ)
-
-    def finalize(self):
-        """
-
-        :return:
-
-        """
-
-        return self.scores

@@ -168,8 +168,6 @@ class Match(perturbation.base.Base):
 
     locations = sqlalchemy.orm.relationship('Location', backref='matches')
 
-    neighborhood = sqlalchemy.orm.relationship('Neighborhood')
-
     pattern_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('patterns.id'))
 
     pattern = sqlalchemy.orm.relationship('Pattern')
@@ -208,13 +206,17 @@ class Neighborhood(perturbation.base.Base):
 
     __tablename__ = 'neighborhoods'
 
+    closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
+
+    closest = sqlalchemy.orm.relationship('Match', foreign_keys=[closest_id])
+
     match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
 
-    match = sqlalchemy.orm.relationship('Match', primaryjoin="and_(Neighborhood.match_id==Match.id)")
+    match = sqlalchemy.orm.relationship('Match', foreign_keys=[match_id])
 
-    # closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
-    #
-    # closest = sqlalchemy.orm.relationship('Match', foreign_keys=[closest_id])
+    second_closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
+
+    second_closest = sqlalchemy.orm.relationship('Match', foreign_keys=[second_closest_id])
 
     angle_between_neighbors_5 = sqlalchemy.Column(sqlalchemy.Float)
 
@@ -224,13 +226,11 @@ class Neighborhood(perturbation.base.Base):
 
     first_closest_distance_adjacent = sqlalchemy.Column(sqlalchemy.Float)
 
-    first_closest_object_number_5 = sqlalchemy.Column(sqlalchemy.Float)
+    first_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
 
-    first_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Float)
+    number_of_neighbors_5 = sqlalchemy.Column(sqlalchemy.Integer)
 
-    number_of_neighbors_5 = sqlalchemy.Column(sqlalchemy.Float)
-
-    number_of_neighbors_adjacent = sqlalchemy.Column(sqlalchemy.Float)
+    number_of_neighbors_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
 
     percent_touching_5 = sqlalchemy.Column(sqlalchemy.Float)
 
@@ -240,9 +240,7 @@ class Neighborhood(perturbation.base.Base):
 
     second_closest_distance_adjacent = sqlalchemy.Column(sqlalchemy.Float)
 
-    second_closest_object_number_5 = sqlalchemy.Column(sqlalchemy.Float)
-
-    second_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Float)
+    second_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
 
 
 class Pattern(perturbation.base.Base):
@@ -339,21 +337,6 @@ class Shape(perturbation.base.Base):
     perimeter = sqlalchemy.Column(sqlalchemy.Float)
 
     solidity = sqlalchemy.Column(sqlalchemy.Float)
-
-
-class StandardizedIntensity(perturbation.base.Base):
-    """
-
-    """
-
-    __table__ = perturbation.view.create_view(
-        metadata=perturbation.base.Base.metadata,
-        name="standardized_intensities",
-        selectable=sqlalchemy.select([
-            Intensity.id.label('id'),
-            sqlalchemy.func.count(Intensity.median).label('median')
-        ]).select_from(Intensity).group_by(Intensity.id)
-    )
 
 
 class StandardizedRadialDistribution(perturbation.base.Base):

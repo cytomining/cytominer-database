@@ -16,7 +16,7 @@ def create():
 
     connection.create_aggregate('standard_deviation', 1, StandardDeviation)
 
-    connection.create_aggregate('standard_score', 3, StandardScore)
+    connection.create_function('standard_score', 3, standardize)
 
     return connection
 
@@ -201,7 +201,6 @@ def __main__(a, b):
                     angle_between_neighbors_adjacent=row['Neighbors_AngleBetweenNeighbors_Adjacent'],
                     first_closest_distance_5=row['Neighbors_FirstClosestDistance_5'],
                     first_closest_distance_adjacent=row['Neighbors_FirstClosestDistance_Adjacent'],
-                    first_closest_object_number_5=row['Neighbors_FirstClosestObjectNumber_5'],
                     first_closest_object_number_adjacent=row['Neighbors_FirstClosestObjectNumber_Adjacent'],
                     number_of_neighbors_5=row['Neighbors_NumberOfNeighbors_5'],
                     number_of_neighbors_adjacent=row['Neighbors_NumberOfNeighbors_Adjacent'],
@@ -209,11 +208,24 @@ def __main__(a, b):
                     percent_touching_adjacent=row['Neighbors_PercentTouching_Adjacent'],
                     second_closest_distance_5=row['Neighbors_SecondClosestDistance_5'],
                     second_closest_distance_adjacent=row['Neighbors_SecondClosestDistance_Adjacent'],
-                    second_closest_object_number_5=row['Neighbors_SecondClosestObjectNumber_5'],
                     second_closest_object_number_adjacent=row['Neighbors_SecondClosestObjectNumber_Adjacent']
                 )
 
+                closest = Match.find_or_create_by(
+                    session=session,
+                    id=row['Neighbors_FirstClosestObjectNumber_5']
+                )
+
+                second_closest = Match.find_or_create_by(
+                    session=session,
+                    id=row['Neighbors_SecondClosestObjectNumber_5']
+                )
+
+                neighborhood.closest = closest
+
                 neighborhood.match = match
+
+                neighborhood.second_closest = second_closest
             except KeyError:
                 pass
 
@@ -228,7 +240,8 @@ def __main__(a, b):
 
                 correlation = Correlation.find_or_create_by(
                     session=session,
-                    coefficient=row['Correlation_Correlation_{}_{}'.format(dependent.description, independent.description)]
+                    coefficient=row[
+                        'Correlation_Correlation_{}_{}'.format(dependent.description, independent.description)]
                 )
 
                 correlation.dependent = dependent
@@ -288,17 +301,20 @@ def __main__(a, b):
                 for degree in degrees:
                     texture = Texture.find_or_create_by(
                         session=session,
-                        angular_second_moment=row['Texture_AngularSecondMoment_{}_{}_0'.format(channel.description, degree)],
+                        angular_second_moment=row[
+                            'Texture_AngularSecondMoment_{}_{}_0'.format(channel.description, degree)],
                         contrast=row['Texture_Contrast_{}_{}_0'.format(channel.description, degree)],
                         correlation=row['Texture_Correlation_{}_{}_0'.format(channel.description, degree)],
                         difference_entropy=row['Texture_DifferenceEntropy_{}_{}_0'.format(channel.description, degree)],
-                        difference_variance=row['Texture_DifferenceVariance_{}_{}_0'.format(channel.description, degree)],
+                        difference_variance=row[
+                            'Texture_DifferenceVariance_{}_{}_0'.format(channel.description, degree)],
                         direction=degree,
                         entropy=row['Texture_Entropy_{}_{}_0'.format(channel.description, degree)],
                         gabor=row['Texture_Gabor_{}_{}'.format(channel.description, degree)],
                         info_meas_1=row['Texture_InfoMeas1_{}_{}_0'.format(channel.description, degree)],
                         info_meas_2=row['Texture_InfoMeas2_{}_{}_0'.format(channel.description, degree)],
-                        inverse_difference_moment=row['Texture_InverseDifferenceMoment_{}_{}_0'.format(channel.description, degree)],
+                        inverse_difference_moment=row[
+                            'Texture_InverseDifferenceMoment_{}_{}_0'.format(channel.description, degree)],
                         sum_average=row['Texture_SumAverage_{}_{}_0'.format(channel.description, degree)],
                         sum_entropy=row['Texture_SumEntropy_{}_{}_0'.format(channel.description, degree)],
                         sum_variance=row['Texture_SumVariance_{}_{}_0'.format(channel.description, degree)],
@@ -322,8 +338,9 @@ def __main__(a, b):
 
                     radial_distribution.match = match
 
-
         session.commit()
+
+    IPython.embed()
 
 if __name__ == '__main__':
     __main__()
