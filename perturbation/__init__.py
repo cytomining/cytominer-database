@@ -165,6 +165,26 @@ def __main__(a, b):
 
             match.object = obj
 
+            center = Coordinate.find_or_create_by(
+                session=session,
+                abscissa=int(
+                    round(
+                        row[
+                            'Location_Center_X'
+                        ]
+                    )
+                ),
+                ordinate=int(
+                    round(
+                        row[
+                            'Location_Center_Y'
+                        ]
+                    )
+                )
+            )
+
+            match.center = center
+            
             session.add(match)
 
             center = Coordinate.find_or_create_by(

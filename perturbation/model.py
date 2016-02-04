@@ -150,6 +150,9 @@ class Match(perturbation.base.Base):
 
     __tablename__ = 'matches'
 
+    center_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('coordinates.id'))
+    center = sqlalchemy.orm.relationship('Coordinate')
+
     correlations = sqlalchemy.orm.relationship('Correlation', backref='matches')
 
     edges = sqlalchemy.orm.relationship('Edge', backref='matches')
