@@ -37,19 +37,25 @@ def __main__(a, b):
         for index, row in chunk.iterrows():
             well = Well.find_or_create_by(
                 session=session,
-                description=row['Metadata_Well']
+                description=row[
+                    'Metadata_Well'
+                ]
             )
 
             plate = Plate.find_or_create_by(
                 session=session,
-                barcode=row['Metadata_Barcode']
+                barcode=row[
+                    'Metadata_Barcode'
+                ]
             )
 
             plate.wells.append(well)
 
             image = Image.find_or_create_by(
                 session=session,
-                id=row['ImageNumber']
+                id=row[
+                    'ImageNumber'
+                ]
             )
 
             well.images.append(image)
@@ -143,12 +149,16 @@ def __main__(a, b):
         for index, row in data.iterrows():
             obj = Object.find_or_create_by(
                 session=session,
-                id=row['ObjectNumber']
+                id=row[
+                    'ObjectNumber'
+                ]
             )
 
             obj.image = Image.find_or_create_by(
                 session=session,
-                id=row['ImageNumber']
+                id=row[
+                    'ImageNumber'
+                ]
             )
 
             match = Match()
@@ -159,28 +169,72 @@ def __main__(a, b):
 
             center = Coordinate.find_or_create_by(
                 session=session,
-                abscissa=int(round(row['AreaShape_Center_X'])),
-                ordinate=int(round(row['AreaShape_Center_Y']))
+                abscissa=int(
+                    round(
+                        row[
+                            'AreaShape_Center_X'
+                        ]
+                    )
+                ),
+                ordinate=int(
+                    round(
+                        row[
+                            'AreaShape_Center_Y'
+                        ]
+                    )
+                )
             )
 
             shape = Shape.find_or_create_by(
                 session=session,
-                area=row['AreaShape_Area'],
-                compactness=row['AreaShape_Compactness'],
-                eccentricity=row['AreaShape_Eccentricity'],
-                euler_number=row['AreaShape_EulerNumber'],
-                extent=row['AreaShape_Extent'],
-                form_factor=row['AreaShape_FormFactor'],
-                major_axis_length=row['AreaShape_MajorAxisLength'],
-                max_feret_diameter=row['AreaShape_MaxFeretDiameter'],
-                maximum_radius=row['AreaShape_MaximumRadius'],
-                mean_radius=row['AreaShape_MeanRadius'],
-                median_radius=row['AreaShape_MedianRadius'],
-                min_feret_diameter=row['AreaShape_MinFeretDiameter'],
-                minor_axis_length=row['AreaShape_MinorAxisLength'],
-                orientation=row['AreaShape_Orientation'],
-                perimeter=row['AreaShape_Perimeter'],
-                solidity=row['AreaShape_Solidity']
+                area=row[
+                    'AreaShape_Area'
+                ],
+                compactness=row[
+                    'AreaShape_Compactness'
+                ],
+                eccentricity=row[
+                    'AreaShape_Eccentricity'
+                ],
+                euler_number=row[
+                    'AreaShape_EulerNumber'
+                ],
+                extent=row[
+                    'AreaShape_Extent'
+                ],
+                form_factor=row[
+                    'AreaShape_FormFactor'
+                ],
+                major_axis_length=row[
+                    'AreaShape_MajorAxisLength'
+                ],
+                max_feret_diameter=row[
+                    'AreaShape_MaxFeretDiameter'
+                ],
+                maximum_radius=row[
+                    'AreaShape_MaximumRadius'
+                ],
+                mean_radius=row[
+                    'AreaShape_MeanRadius'
+                ],
+                median_radius=row[
+                    'AreaShape_MedianRadius'
+                ],
+                min_feret_diameter=row[
+                    'AreaShape_MinFeretDiameter'
+                ],
+                minor_axis_length=row[
+                    'AreaShape_MinorAxisLength'
+                ],
+                orientation=row[
+                    'AreaShape_Orientation'
+                ],
+                perimeter=row[
+                    'AreaShape_Perimeter'
+                ],
+                solidity=row[
+                    'AreaShape_Solidity'
+                ]
             )
 
             shape.center = center
@@ -241,14 +295,14 @@ def __main__(a, b):
                     ]
                 )
 
-                closest = Match.find_or_create_by(
+                closest = Object.find_or_create_by(
                     session=session,
                     id=row[
                         'Neighbors_FirstClosestObjectNumber_5'
                     ]
                 )
 
-                second_closest = Match.find_or_create_by(
+                second_closest = Object.find_or_create_by(
                     session=session,
                     id=row[
                         'Neighbors_SecondClosestObjectNumber_5'
@@ -257,7 +311,7 @@ def __main__(a, b):
 
                 neighborhood.closest = closest
 
-                neighborhood.match = match
+                neighborhood.object = obj
 
                 neighborhood.second_closest = second_closest
             except KeyError:

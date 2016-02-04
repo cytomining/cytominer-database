@@ -30,7 +30,6 @@ class Coordinate(perturbation.base.Base):
     __tablename__ = 'coordinates'
 
     abscissa = sqlalchemy.Column(sqlalchemy.Integer)
-
     ordinate = sqlalchemy.Column(sqlalchemy.Integer)
 
 
@@ -42,15 +41,12 @@ class Correlation(perturbation.base.Base):
     __tablename__ = 'correlations'
 
     dependent_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('channels.id'))
-
     dependent = sqlalchemy.orm.relationship('Channel', foreign_keys=[dependent_id])
 
     independent_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('channels.id'))
-
     independent = sqlalchemy.orm.relationship('Channel', foreign_keys=[independent_id])
 
     match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
-
     match = sqlalchemy.orm.relationship('Match')
 
     coefficient = sqlalchemy.Column(sqlalchemy.Float)
@@ -90,7 +86,6 @@ class Image(perturbation.base.Base):
     objects = sqlalchemy.orm.relationship('Object', backref='images')
 
     well_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('wells.id'))
-
     well = sqlalchemy.orm.relationship('Well')
 
 
@@ -136,19 +131,15 @@ class Location(perturbation.base.Base):
     __tablename__ = 'locations'
 
     center_mass_intensity_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('coordinates.id'))
-
     center_mass_intensity = sqlalchemy.orm.relationship('Coordinate', foreign_keys=[center_mass_intensity_id])
 
     channel_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('channels.id'))
-
     channel = sqlalchemy.orm.relationship('Channel')
 
     match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
-
     match = sqlalchemy.orm.relationship('Match')
 
     max_intensity_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('coordinates.id'))
-
     max_intensity = sqlalchemy.orm.relationship('Coordinate', foreign_keys=[max_intensity_id])
 
 
@@ -163,22 +154,19 @@ class Match(perturbation.base.Base):
 
     edges = sqlalchemy.orm.relationship('Edge', backref='matches')
 
-    object_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
-
-    object = sqlalchemy.orm.relationship('Object')
-
     intensities = sqlalchemy.orm.relationship('Intensity', backref='matches')
 
     locations = sqlalchemy.orm.relationship('Location', backref='matches')
 
-    pattern_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('patterns.id'))
+    object_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
+    object = sqlalchemy.orm.relationship('Object')
 
+    pattern_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('patterns.id'))
     pattern = sqlalchemy.orm.relationship('Pattern')
 
     radial_distributions = sqlalchemy.orm.relationship('RadialDistribution', backref='matches')
 
     shape_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('shapes.id'))
-
     shape = sqlalchemy.orm.relationship('Shape')
 
     textures = sqlalchemy.orm.relationship('Texture', backref='matches')
@@ -192,7 +180,6 @@ class Moment(perturbation.base.Base):
     __tablename__ = 'moments'
 
     shape_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('shapes.id'))
-
     shape = sqlalchemy.orm.relationship('Shape')
 
     a = sqlalchemy.Column(sqlalchemy.Integer)
@@ -209,17 +196,14 @@ class Neighborhood(perturbation.base.Base):
 
     __tablename__ = 'neighborhoods'
 
-    closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
+    closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
+    closest = sqlalchemy.orm.relationship('Object', foreign_keys=[closest_id])
 
-    closest = sqlalchemy.orm.relationship('Match', foreign_keys=[closest_id])
+    object_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
+    object = sqlalchemy.orm.relationship('Object', foreign_keys=[object_id])
 
-    match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
-
-    match = sqlalchemy.orm.relationship('Match', foreign_keys=[match_id])
-
-    second_closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
-
-    second_closest = sqlalchemy.orm.relationship('Match', foreign_keys=[second_closest_id])
+    second_closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
+    second_closest = sqlalchemy.orm.relationship('Object', foreign_keys=[second_closest_id])
 
     angle_between_neighbors_5 = sqlalchemy.Column(sqlalchemy.Float)
 
@@ -254,10 +238,11 @@ class Object(perturbation.base.Base):
     __tablename__ = 'objects'
 
     image_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('images.id'))
-
     image = sqlalchemy.orm.relationship('Image')
 
     matches = sqlalchemy.orm.relationship('Match', backref='objects')
+
+    neighborhood = sqlalchemy.orm.relationship('Neighborhood', foreign_keys="Neighborhood.object_id")
 
 
 class Pattern(perturbation.base.Base):
@@ -291,15 +276,13 @@ class RadialDistribution(perturbation.base.Base):
 
     __tablename__ = 'radial_distributions'
 
-    channel_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('channels.id'))
+    bins = sqlalchemy.Column(sqlalchemy.Integer)
 
+    channel_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('channels.id'))
     channel = sqlalchemy.orm.relationship('Channel')
 
     match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
-
     match = sqlalchemy.orm.relationship('Match')
-
-    bins = sqlalchemy.Column(sqlalchemy.Integer)
 
     frac_at_d = sqlalchemy.Column(sqlalchemy.Float)
 
@@ -316,8 +299,11 @@ class Shape(perturbation.base.Base):
     __tablename__ = 'shapes'
 
     center_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('coordinates.id'))
-
     center = sqlalchemy.orm.relationship('Coordinate', backref='shapes', uselist=False)
+
+    match = sqlalchemy.orm.relationship('Match', backref='shapes', uselist=False)
+
+    moments = sqlalchemy.orm.relationship('Moment', backref='shapes')
 
     area = sqlalchemy.Column(sqlalchemy.Float)
 
@@ -333,8 +319,6 @@ class Shape(perturbation.base.Base):
 
     major_axis_length = sqlalchemy.Column(sqlalchemy.Float)
 
-    match = sqlalchemy.orm.relationship('Match', backref='shapes', uselist=False)
-
     max_feret_diameter = sqlalchemy.Column(sqlalchemy.Float)
 
     maximum_radius = sqlalchemy.Column(sqlalchemy.Float)
@@ -347,49 +331,11 @@ class Shape(perturbation.base.Base):
 
     minor_axis_length = sqlalchemy.Column(sqlalchemy.Float)
 
-    moments = sqlalchemy.orm.relationship('Moment', backref='shapes')
-
     orientation = sqlalchemy.Column(sqlalchemy.Float)
 
     perimeter = sqlalchemy.Column(sqlalchemy.Float)
 
     solidity = sqlalchemy.Column(sqlalchemy.Float)
-
-
-class StandardizedRadialDistribution(perturbation.base.Base):
-    """
-
-    """
-
-    __table__ = perturbation.view.create_view(
-        metadata=perturbation.base.Base.metadata,
-        name="standardized_radial_distributions",
-        selectable=sqlalchemy.select(
-            [
-                RadialDistribution.id.label('id'),
-                sqlalchemy.func.standard_deviation(RadialDistribution.frac_at_d).label('frac_at_d'),
-                sqlalchemy.func.standard_deviation(RadialDistribution.mean_frac).label('mean_frac'),
-                sqlalchemy.func.standard_deviation(RadialDistribution.radial_cv).label('radial_cv')
-            ]
-        ).select_from(RadialDistribution).group_by(RadialDistribution.id)
-    )
-
-
-class StandardizedIntensity(perturbation.base.Base):
-    """
-
-    """
-
-    __table__ = perturbation.view.create_view(
-        metadata=perturbation.base.Base.metadata,
-        name="standardized_intensities",
-        selectable=sqlalchemy.select(
-            [
-                Intensity.id.label('id'),
-                sqlalchemy.func.standard_deviation(Intensity.integrated).label('integrated')
-            ]
-        ).select_from(Intensity).group_by(Intensity.id)
-    )
 
 
 class Texture(perturbation.base.Base):
@@ -400,11 +346,9 @@ class Texture(perturbation.base.Base):
     __tablename__ = 'textures'
 
     channel_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('channels.id'))
-
     channel = sqlalchemy.orm.relationship('Channel')
 
     match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
-
     match = sqlalchemy.orm.relationship('Match')
 
     angular_second_moment = sqlalchemy.Column(sqlalchemy.Float)
@@ -448,7 +392,6 @@ class Well(perturbation.base.Base):
     images = sqlalchemy.orm.relationship('Image', backref='wells')
 
     plate_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('plates.id'))
-
     plate = sqlalchemy.orm.relationship('Plate')
 
     description = sqlalchemy.Column(sqlalchemy.String)
