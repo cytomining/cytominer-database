@@ -278,7 +278,7 @@ def __main__(a, b):
                     standard_deviation=row['Intensity_StdIntensityEdge_{}'.format(channel.description)]
                 )
 
-                edge.intensity = intensity
+                edge.match = match
 
                 location = Location.find_or_create_by(
                     session=session,

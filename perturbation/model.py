@@ -63,8 +63,11 @@ class Edge(perturbation.base.Base):
 
     __tablename__ = 'edges'
 
-    intensity_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('intensities.id'))
-    intensity = sqlalchemy.orm.relationship('Intensity')
+    channel_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('channels.id'))
+    channel = sqlalchemy.orm.relationship('Channel')
+
+    match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
+    match = sqlalchemy.orm.relationship('Match')
 
     integrated = sqlalchemy.Column(sqlalchemy.Float)
 
@@ -100,8 +103,6 @@ class Intensity(perturbation.base.Base):
 
     channel_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('channels.id'))
     channel = sqlalchemy.orm.relationship('Channel')
-
-    edge = sqlalchemy.orm.relationship('Edge')
 
     match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
     match = sqlalchemy.orm.relationship('Match')
@@ -159,6 +160,8 @@ class Match(perturbation.base.Base):
     __tablename__ = 'matches'
 
     correlations = sqlalchemy.orm.relationship('Correlation', backref='matches')
+
+    edges = sqlalchemy.orm.relationship('Edge', backref='matches')
 
     image_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('images.id'))
 
@@ -355,6 +358,23 @@ class StandardizedRadialDistribution(perturbation.base.Base):
                 sqlalchemy.func.standard_deviation(RadialDistribution.radial_cv).label('radial_cv')
             ]
         ).select_from(RadialDistribution).group_by(RadialDistribution.id)
+    )
+
+
+class StandardizedIntensity(perturbation.base.Base):
+    """
+
+    """
+
+    __table__ = perturbation.view.create_view(
+        metadata=perturbation.base.Base.metadata,
+        name="standardized_intensities",
+        selectable=sqlalchemy.select(
+            [
+                Intensity.id.label('id'),
+                sqlalchemy.func.standard_deviation(Intensity.integrated).label('integrated')
+            ]
+        ).select_from(Intensity).group_by(Intensity.id)
     )
 
 
