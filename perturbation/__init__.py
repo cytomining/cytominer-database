@@ -141,10 +141,21 @@ def __main__(a, b):
         data = pandas.read_csv('test/data/{}.csv'.format(pattern.description))
 
         for index, row in data.iterrows():
-            image = Image.find_or_create_by(
+            obj = Object.find_or_create_by(
+                session=session,
+                id=row['ObjectNumber']
+            )
+
+            obj.image = Image.find_or_create_by(
                 session=session,
                 id=row['ImageNumber']
             )
+
+            match = Match()
+
+            match.object = obj
+
+            session.add(match)
 
             center = Coordinate.find_or_create_by(
                 session=session,
@@ -189,36 +200,59 @@ def __main__(a, b):
 
                 moment.shape = shape
 
-            match = Match.find_or_create_by(
-                session=session,
-                id=row['ObjectNumber']
-            )
-
             try:
                 neighborhood = Neighborhood.find_or_create_by(
                     session=session,
-                    angle_between_neighbors_5=row['Neighbors_AngleBetweenNeighbors_5'],
-                    angle_between_neighbors_adjacent=row['Neighbors_AngleBetweenNeighbors_Adjacent'],
-                    first_closest_distance_5=row['Neighbors_FirstClosestDistance_5'],
-                    first_closest_distance_adjacent=row['Neighbors_FirstClosestDistance_Adjacent'],
-                    first_closest_object_number_adjacent=row['Neighbors_FirstClosestObjectNumber_Adjacent'],
-                    number_of_neighbors_5=row['Neighbors_NumberOfNeighbors_5'],
-                    number_of_neighbors_adjacent=row['Neighbors_NumberOfNeighbors_Adjacent'],
-                    percent_touching_5=row['Neighbors_PercentTouching_5'],
-                    percent_touching_adjacent=row['Neighbors_PercentTouching_Adjacent'],
-                    second_closest_distance_5=row['Neighbors_SecondClosestDistance_5'],
-                    second_closest_distance_adjacent=row['Neighbors_SecondClosestDistance_Adjacent'],
-                    second_closest_object_number_adjacent=row['Neighbors_SecondClosestObjectNumber_Adjacent']
+                    angle_between_neighbors_5=row[
+                        'Neighbors_AngleBetweenNeighbors_5'
+                    ],
+                    angle_between_neighbors_adjacent=row[
+                        'Neighbors_AngleBetweenNeighbors_Adjacent'
+                    ],
+                    first_closest_distance_5=row[
+                        'Neighbors_FirstClosestDistance_5'
+                    ],
+                    first_closest_distance_adjacent=row[
+                        'Neighbors_FirstClosestDistance_Adjacent'
+                    ],
+                    first_closest_object_number_adjacent=row[
+                        'Neighbors_FirstClosestObjectNumber_Adjacent'
+                    ],
+                    number_of_neighbors_5=row[
+                        'Neighbors_NumberOfNeighbors_5'
+                    ],
+                    number_of_neighbors_adjacent=row[
+                        'Neighbors_NumberOfNeighbors_Adjacent'
+                    ],
+                    percent_touching_5=row[
+                        'Neighbors_PercentTouching_5'
+                    ],
+                    percent_touching_adjacent=row[
+                        'Neighbors_PercentTouching_Adjacent'
+                    ],
+                    second_closest_distance_5=row[
+                        'Neighbors_SecondClosestDistance_5'
+                    ],
+                    second_closest_distance_adjacent=row[
+                        'Neighbors_SecondClosestDistance_Adjacent'
+                    ],
+                    second_closest_object_number_adjacent=row[
+                        'Neighbors_SecondClosestObjectNumber_Adjacent'
+                    ]
                 )
 
                 closest = Match.find_or_create_by(
                     session=session,
-                    id=row['Neighbors_FirstClosestObjectNumber_5']
+                    id=row[
+                        'Neighbors_FirstClosestObjectNumber_5'
+                    ]
                 )
 
                 second_closest = Match.find_or_create_by(
                     session=session,
-                    id=row['Neighbors_SecondClosestObjectNumber_5']
+                    id=row[
+                        'Neighbors_SecondClosestObjectNumber_5'
+                    ]
                 )
 
                 neighborhood.closest = closest
@@ -228,8 +262,6 @@ def __main__(a, b):
                 neighborhood.second_closest = second_closest
             except KeyError:
                 pass
-
-            match.image = image
 
             match.pattern = pattern
 
@@ -241,7 +273,11 @@ def __main__(a, b):
                 correlation = Correlation.find_or_create_by(
                     session=session,
                     coefficient=row[
-                        'Correlation_Correlation_{}_{}'.format(dependent.description, independent.description)]
+                        'Correlation_Correlation_{}_{}'.format(
+                            dependent.description,
+                            independent.description
+                        )
+                    ]
                 )
 
                 correlation.dependent = dependent
@@ -253,16 +289,56 @@ def __main__(a, b):
             for channel in channels:
                 intensity = Intensity.find_or_create_by(
                     session=session,
-                    first_quartile=row['Intensity_LowerQuartileIntensity_{}'.format(channel.description)],
-                    integrated=row['Intensity_IntegratedIntensity_{}'.format(channel.description)],
-                    mass_displacement=row['Intensity_MassDisplacement_{}'.format(channel.description)],
-                    maximum=row['Intensity_MaxIntensity_{}'.format(channel.description)],
-                    mean=row['Intensity_MeanIntensity_{}'.format(channel.description)],
-                    median=row['Intensity_MedianIntensity_{}'.format(channel.description)],
-                    median_absolute_deviation=row['Intensity_MADIntensity_{}'.format(channel.description)],
-                    minimum=row['Intensity_MinIntensity_{}'.format(channel.description)],
-                    standard_deviation=row['Intensity_StdIntensity_{}'.format(channel.description)],
-                    third_quartile=row['Intensity_UpperQuartileIntensity_{}'.format(channel.description)]
+                    first_quartile=row[
+                        'Intensity_LowerQuartileIntensity_{}'.format(
+                            channel.description
+                        )
+                    ],
+                    integrated=row[
+                        'Intensity_IntegratedIntensity_{}'.format(
+                            channel.description
+                        )
+                    ],
+                    mass_displacement=row[
+                        'Intensity_MassDisplacement_{}'.format(
+                            channel.description
+                        )
+                    ],
+                    maximum=row[
+                        'Intensity_MaxIntensity_{}'.format(
+                            channel.description
+                        )
+                    ],
+                    mean=row[
+                        'Intensity_MeanIntensity_{}'.format(
+                            channel.description
+                        )
+                    ],
+                    median=row[
+                        'Intensity_MedianIntensity_{}'.format(
+                            channel.description
+                        )
+                    ],
+                    median_absolute_deviation=row[
+                        'Intensity_MADIntensity_{}'.format(
+                            channel.description
+                        )
+                    ],
+                    minimum=row[
+                        'Intensity_MinIntensity_{}'.format(
+                            channel.description
+                        )
+                    ],
+                    standard_deviation=row[
+                        'Intensity_StdIntensity_{}'.format(
+                            channel.description
+                        )
+                    ],
+                    third_quartile=row[
+                        'Intensity_UpperQuartileIntensity_{}'.format(
+                            channel.description
+                        )
+                    ]
                 )
 
                 intensity.channel = channel
@@ -271,11 +347,31 @@ def __main__(a, b):
 
                 edge = Edge.find_or_create_by(
                     session=session,
-                    integrated=row['Intensity_IntegratedIntensityEdge_{}'.format(channel.description)],
-                    maximum=row['Intensity_MaxIntensityEdge_{}'.format(channel.description)],
-                    mean=row['Intensity_MeanIntensityEdge_{}'.format(channel.description)],
-                    minimum=row['Intensity_MinIntensityEdge_{}'.format(channel.description)],
-                    standard_deviation=row['Intensity_StdIntensityEdge_{}'.format(channel.description)]
+                    integrated=row[
+                        'Intensity_IntegratedIntensityEdge_{}'.format(
+                            channel.description
+                        )
+                    ],
+                    maximum=row[
+                        'Intensity_MaxIntensityEdge_{}'.format(
+                            channel.description
+                        )
+                    ],
+                    mean=row[
+                        'Intensity_MeanIntensityEdge_{}'.format(
+                            channel.description
+                        )
+                    ],
+                    minimum=row[
+                        'Intensity_MinIntensityEdge_{}'.format(
+                            channel.description
+                        )
+                    ],
+                    standard_deviation=row[
+                        'Intensity_StdIntensityEdge_{}'.format(
+                            channel.description
+                        )
+                    ]
                 )
 
                 edge.channel = channel
@@ -286,13 +382,45 @@ def __main__(a, b):
                     session=session,
                     center_mass_intensity=Coordinate.find_or_create_by(
                         session=session,
-                        abscissa=int(round(row['Location_CenterMassIntensity_X_{}'.format(channel.description)])),
-                        ordinate=int(round(row['Location_CenterMassIntensity_Y_{}'.format(channel.description)]))
+                        abscissa=int(
+                            round(
+                                row[
+                                    'Location_CenterMassIntensity_X_{}'.format(
+                                        channel.description
+                                    )
+                                ]
+                            )
+                        ),
+                        ordinate=int(
+                            round(
+                                row[
+                                    'Location_CenterMassIntensity_Y_{}'.format(
+                                        channel.description
+                                    )
+                                ]
+                            )
+                        )
                     ),
                     max_intensity=Coordinate.find_or_create_by(
                         session=session,
-                        abscissa=int(round(row['Location_MaxIntensity_X_{}'.format(channel.description)])),
-                        ordinate=int(round(row['Location_MaxIntensity_Y_{}'.format(channel.description)]))
+                        abscissa=int(
+                            round(
+                                row[
+                                    'Location_MaxIntensity_X_{}'.format(
+                                        channel.description
+                                    )
+                                ]
+                            )
+                        ),
+                        ordinate=int(
+                            round(
+                                row[
+                                    'Location_MaxIntensity_Y_{}'.format(
+                                        channel.description
+                                    )
+                                ]
+                            )
+                        )
                     )
                 )
 
@@ -304,23 +432,90 @@ def __main__(a, b):
                     texture = Texture.find_or_create_by(
                         session=session,
                         angular_second_moment=row[
-                            'Texture_AngularSecondMoment_{}_{}_0'.format(channel.description, degree)],
-                        contrast=row['Texture_Contrast_{}_{}_0'.format(channel.description, degree)],
-                        correlation=row['Texture_Correlation_{}_{}_0'.format(channel.description, degree)],
-                        difference_entropy=row['Texture_DifferenceEntropy_{}_{}_0'.format(channel.description, degree)],
+                            'Texture_AngularSecondMoment_{}_{}_0'.format(
+                                channel.description,
+                                degree
+                            )
+                        ],
+                        contrast=row[
+                            'Texture_Contrast_{}_{}_0'.format(
+                                channel.description,
+                                degree
+                            )
+                        ],
+                        correlation=row[
+                            'Texture_Correlation_{}_{}_0'.format(
+                                channel.description,
+                                degree
+                            )
+                        ],
+                        difference_entropy=row[
+                            'Texture_DifferenceEntropy_{}_{}_0'.format(
+                                channel.description,
+                                degree
+                            )
+                        ],
                         difference_variance=row[
-                            'Texture_DifferenceVariance_{}_{}_0'.format(channel.description, degree)],
+                            'Texture_DifferenceVariance_{}_{}_0'.format(
+                                channel.description,
+                                degree
+                            )
+                        ],
                         direction=degree,
-                        entropy=row['Texture_Entropy_{}_{}_0'.format(channel.description, degree)],
-                        gabor=row['Texture_Gabor_{}_{}'.format(channel.description, degree)],
-                        info_meas_1=row['Texture_InfoMeas1_{}_{}_0'.format(channel.description, degree)],
-                        info_meas_2=row['Texture_InfoMeas2_{}_{}_0'.format(channel.description, degree)],
+                        entropy=row[
+                            'Texture_Entropy_{}_{}_0'.format(
+                                channel.description,
+                                degree
+                            )
+                        ],
+                        gabor=row[
+                            'Texture_Gabor_{}_{}'.format(
+                                channel.description,
+                                degree
+                            )
+                        ],
+                        info_meas_1=row[
+                            'Texture_InfoMeas1_{}_{}_0'.format(
+                                channel.description,
+                                degree
+                            )
+                        ],
+                        info_meas_2=row[
+                            'Texture_InfoMeas2_{}_{}_0'.format(
+                                channel.description,
+                                degree
+                            )
+                        ],
                         inverse_difference_moment=row[
-                            'Texture_InverseDifferenceMoment_{}_{}_0'.format(channel.description, degree)],
-                        sum_average=row['Texture_SumAverage_{}_{}_0'.format(channel.description, degree)],
-                        sum_entropy=row['Texture_SumEntropy_{}_{}_0'.format(channel.description, degree)],
-                        sum_variance=row['Texture_SumVariance_{}_{}_0'.format(channel.description, degree)],
-                        variance=row['Texture_Variance_{}_{}_0'.format(channel.description, degree)]
+                            'Texture_InverseDifferenceMoment_{}_{}_0'.format(
+                                channel.description,
+                                degree
+                            )
+                        ],
+                        sum_average=row[
+                            'Texture_SumAverage_{}_{}_0'.format(
+                                channel.description,
+                                degree
+                            )
+                        ],
+                        sum_entropy=row[
+                            'Texture_SumEntropy_{}_{}_0'.format(
+                                channel.description,
+                                degree
+                            )
+                        ],
+                        sum_variance=row[
+                            'Texture_SumVariance_{}_{}_0'.format(
+                                channel.description,
+                                degree
+                            )
+                        ],
+                        variance=row[
+                            'Texture_Variance_{}_{}_0'.format(
+                                channel.description,
+                                degree
+                            )
+                        ]
                     )
 
                     texture.channel = channel
@@ -331,9 +526,24 @@ def __main__(a, b):
                     radial_distribution = RadialDistribution.find_or_create_by(
                         session=session,
                         bins=count,
-                        frac_at_d=row['RadialDistribution_FracAtD_{}_{}of4'.format(channel.description, count)],
-                        mean_frac=row['RadialDistribution_MeanFrac_{}_{}of4'.format(channel.description, count)],
-                        radial_cv=row['RadialDistribution_RadialCV_{}_{}of4'.format(channel.description, count)]
+                        frac_at_d=row[
+                            'RadialDistribution_FracAtD_{}_{}of4'.format(
+                                channel.description,
+                                count
+                            )
+                        ],
+                        mean_frac=row[
+                            'RadialDistribution_MeanFrac_{}_{}of4'.format(
+                                channel.description,
+                                count
+                            )
+                        ],
+                        radial_cv=row[
+                            'RadialDistribution_RadialCV_{}_{}of4'.format(
+                                channel.description,
+                                count
+                            )
+                        ]
                     )
 
                     radial_distribution.channel = channel
@@ -343,6 +553,7 @@ def __main__(a, b):
         session.commit()
 
     IPython.embed()
+
 
 if __name__ == '__main__':
     __main__()

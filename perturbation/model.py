@@ -87,7 +87,7 @@ class Image(perturbation.base.Base):
 
     __tablename__ = 'images'
 
-    matches = sqlalchemy.orm.relationship('Match', backref='images')
+    objects = sqlalchemy.orm.relationship('Object', backref='images')
 
     well_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('wells.id'))
 
@@ -163,9 +163,9 @@ class Match(perturbation.base.Base):
 
     edges = sqlalchemy.orm.relationship('Edge', backref='matches')
 
-    image_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('images.id'))
+    object_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
 
-    image = sqlalchemy.orm.relationship('Image')
+    object = sqlalchemy.orm.relationship('Object')
 
     intensities = sqlalchemy.orm.relationship('Intensity', backref='matches')
 
@@ -244,6 +244,20 @@ class Neighborhood(perturbation.base.Base):
     second_closest_distance_adjacent = sqlalchemy.Column(sqlalchemy.Float)
 
     second_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
+
+
+class Object(perturbation.base.Base):
+    """
+
+    """
+
+    __tablename__ = 'objects'
+
+    image_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('images.id'))
+
+    image = sqlalchemy.orm.relationship('Image')
+
+    matches = sqlalchemy.orm.relationship('Match', backref='objects')
 
 
 class Pattern(perturbation.base.Base):
