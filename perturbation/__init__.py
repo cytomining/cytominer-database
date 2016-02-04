@@ -113,15 +113,15 @@ def __main__(a, b):
 
         channels.append(channel)
 
-    degrees = []
+    scales = []
 
     for column in columns:
         split_columns = column.split('_')
 
         if split_columns[0] == 'Texture':
-            degrees.append(split_columns[3])
+            scales.append(split_columns[3])
 
-    degrees = set(degrees)
+    scales = set(scales)
 
     counts = []
 
@@ -502,92 +502,92 @@ def __main__(a, b):
 
                 location.match = match
 
-                for degree in degrees:
+                for scale in scales:
                     texture = Texture.find_or_create_by(
                         session=session,
                         angular_second_moment=row[
                             'Texture_AngularSecondMoment_{}_{}_0'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ],
                         contrast=row[
                             'Texture_Contrast_{}_{}_0'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ],
                         correlation=row[
                             'Texture_Correlation_{}_{}_0'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ],
                         difference_entropy=row[
                             'Texture_DifferenceEntropy_{}_{}_0'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ],
                         difference_variance=row[
                             'Texture_DifferenceVariance_{}_{}_0'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ],
-                        direction=degree,
+                        scale=scale,
                         entropy=row[
                             'Texture_Entropy_{}_{}_0'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ],
                         gabor=row[
                             'Texture_Gabor_{}_{}'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ],
                         info_meas_1=row[
                             'Texture_InfoMeas1_{}_{}_0'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ],
                         info_meas_2=row[
                             'Texture_InfoMeas2_{}_{}_0'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ],
                         inverse_difference_moment=row[
                             'Texture_InverseDifferenceMoment_{}_{}_0'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ],
                         sum_average=row[
                             'Texture_SumAverage_{}_{}_0'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ],
                         sum_entropy=row[
                             'Texture_SumEntropy_{}_{}_0'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ],
                         sum_variance=row[
                             'Texture_SumVariance_{}_{}_0'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ],
                         variance=row[
                             'Texture_Variance_{}_{}_0'.format(
                                 channel.description,
-                                degree
+                                scale
                             )
                         ]
                     )

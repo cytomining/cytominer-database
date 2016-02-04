@@ -364,7 +364,7 @@ class Texture(perturbation.base.Base):
 
     difference_variance = sqlalchemy.Column(sqlalchemy.Float)
 
-    direction = sqlalchemy.Column(sqlalchemy.Integer)
+    scale = sqlalchemy.Column(sqlalchemy.Integer)
 
     entropy = sqlalchemy.Column(sqlalchemy.Float)
 
