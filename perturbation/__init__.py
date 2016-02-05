@@ -129,7 +129,7 @@ def __main__(a, b):
         split_columns = column.split('_')
 
         if split_columns[0] == 'RadialDistribution':
-            counts.append(split_columns[3][0])
+            counts.append(split_columns.split('of')[0])
 
     counts = set(counts)
 
