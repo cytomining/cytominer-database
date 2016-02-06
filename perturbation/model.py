@@ -163,7 +163,8 @@ class Match(perturbation.base.Base):
 
     locations = sqlalchemy.orm.relationship('Location', backref='matches')
 
-    neighborhoods = sqlalchemy.orm.relationship('Neighborhood', backref='matches')
+    neighborhood_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('neighborhoods.id'))
+    neighborhood = sqlalchemy.orm.relationship('Neighborhood')
 
     object_id = sqlalchemy.Column(sqlalchemy.Integer)
     object = sqlalchemy.orm.relationship('Object')
@@ -232,9 +233,8 @@ class Neighborhood(perturbation.base.Base):
 
     first_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
 
-    match_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('matches.id'))
-    match = sqlalchemy.orm.relationship('Match')
-    
+    match = sqlalchemy.orm.relationship('Match', backref='neighborhoods', uselist=False)
+
     number_of_neighbors_5 = sqlalchemy.Column(sqlalchemy.Integer)
 
     number_of_neighbors_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
