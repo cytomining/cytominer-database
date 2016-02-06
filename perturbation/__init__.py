@@ -9,6 +9,9 @@ from perturbation.sqlite3 import *
 import sqlalchemy
 import sqlite3
 import sqlalchemy.orm
+import logging
+
+logger = logging.getLogger(__name__)
 
 try:
     from line_profiler import LineProfiler
@@ -366,7 +369,7 @@ def __main__(a, b):
 
                 neighborhood.second_closest = second_closest
             except KeyError:
-                pass
+                logger.debug(KeyError)
 
             match.pattern = pattern
 
@@ -661,4 +664,5 @@ def __main__(a, b):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
     __main__()
