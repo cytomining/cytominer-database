@@ -192,45 +192,45 @@ class Moment(perturbation.base.Base):
     score = sqlalchemy.Column(sqlalchemy.Float)
 
 
-class Neighborhood(perturbation.base.Base):
-    """
-
-    """
-
-    __tablename__ = 'neighborhoods'
-
-    closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
-    closest = sqlalchemy.orm.relationship('Object', foreign_keys=[closest_id])
-
-    object_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
-    object = sqlalchemy.orm.relationship('Object', foreign_keys=[object_id])
-
-    second_closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
-    second_closest = sqlalchemy.orm.relationship('Object', foreign_keys=[second_closest_id])
-
-    angle_between_neighbors_5 = sqlalchemy.Column(sqlalchemy.Float)
-
-    angle_between_neighbors_adjacent = sqlalchemy.Column(sqlalchemy.Float)
-
-    first_closest_distance_5 = sqlalchemy.Column(sqlalchemy.Float)
-
-    first_closest_distance_adjacent = sqlalchemy.Column(sqlalchemy.Float)
-
-    first_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
-
-    number_of_neighbors_5 = sqlalchemy.Column(sqlalchemy.Integer)
-
-    number_of_neighbors_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
-
-    percent_touching_5 = sqlalchemy.Column(sqlalchemy.Float)
-
-    percent_touching_adjacent = sqlalchemy.Column(sqlalchemy.Float)
-
-    second_closest_distance_5 = sqlalchemy.Column(sqlalchemy.Float)
-
-    second_closest_distance_adjacent = sqlalchemy.Column(sqlalchemy.Float)
-
-    second_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
+# class Neighborhood(perturbation.base.Base):
+#     """
+#
+#     """
+#
+#     __tablename__ = 'neighborhoods'
+#
+#     closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
+#     closest = sqlalchemy.orm.relationship('Object', foreign_keys=[closest_id])
+#
+#     object_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
+#     object = sqlalchemy.orm.relationship('Object', foreign_keys=[object_id])
+#
+#     second_closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
+#     second_closest = sqlalchemy.orm.relationship('Object', foreign_keys=[second_closest_id])
+#
+#     angle_between_neighbors_5 = sqlalchemy.Column(sqlalchemy.Float)
+#
+#     angle_between_neighbors_adjacent = sqlalchemy.Column(sqlalchemy.Float)
+#
+#     first_closest_distance_5 = sqlalchemy.Column(sqlalchemy.Float)
+#
+#     first_closest_distance_adjacent = sqlalchemy.Column(sqlalchemy.Float)
+#
+#     first_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
+#
+#     number_of_neighbors_5 = sqlalchemy.Column(sqlalchemy.Integer)
+#
+#     number_of_neighbors_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
+#
+#     percent_touching_5 = sqlalchemy.Column(sqlalchemy.Float)
+#
+#     percent_touching_adjacent = sqlalchemy.Column(sqlalchemy.Float)
+#
+#     second_closest_distance_5 = sqlalchemy.Column(sqlalchemy.Float)
+#
+#     second_closest_distance_adjacent = sqlalchemy.Column(sqlalchemy.Float)
+#
+#     second_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
 
 
 class Object(perturbation.base.Base):
@@ -245,7 +245,7 @@ class Object(perturbation.base.Base):
 
     matches = sqlalchemy.orm.relationship('Match', backref='objects')
 
-    neighborhood = sqlalchemy.orm.relationship('Neighborhood', foreign_keys="Neighborhood.object_id")
+    #neighborhood = sqlalchemy.orm.relationship('Neighborhood', foreign_keys="Neighborhood.object_id")
 
 
 class Pattern(perturbation.base.Base):
