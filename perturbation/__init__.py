@@ -182,7 +182,10 @@ def __main__(a, b):
                 session=session,
                 id=row[
                     'ObjectNumber'
-                ]
+                ],
+                image_id=row[
+                    'ImageNumber'
+                    ]
             )
 
             obj.image = Image.find_or_create_by(
@@ -191,6 +194,7 @@ def __main__(a, b):
                     'ImageNumber'
                 ]
             )
+
 
             match = Match()
 
