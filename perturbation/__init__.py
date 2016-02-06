@@ -54,7 +54,7 @@ def create():
 @click.command()
 @click.argument('a', nargs=1, type=click.File('rb'))
 @click.argument('b', nargs=1, type=click.File('rb'))
-@do_profile(follow=[])
+#@do_profile(follow=[])
 def __main__(a, b):
     engine = sqlalchemy.create_engine('sqlite:///example.sqlite', creator=create)
 
