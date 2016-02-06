@@ -157,11 +157,14 @@ class Match(perturbation.base.Base):
 
     edges = sqlalchemy.orm.relationship('Edge', backref='matches')
 
+    image_id = sqlalchemy.Column(sqlalchemy.Integer)
+
     intensities = sqlalchemy.orm.relationship('Intensity', backref='matches')
 
     locations = sqlalchemy.orm.relationship('Location', backref='matches')
 
-    object_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
+
+    object_id = sqlalchemy.Column(sqlalchemy.Integer)
     object = sqlalchemy.orm.relationship('Object')
 
     pattern_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('patterns.id'))
@@ -173,6 +176,14 @@ class Match(perturbation.base.Base):
     shape = sqlalchemy.orm.relationship('Shape')
 
     textures = sqlalchemy.orm.relationship('Texture', backref='matches')
+
+    __table_args__ = (
+        sqlalchemy.ForeignKeyConstraint(
+            ['object_id', 'image_id'],
+            ['objects.id', 'objects.image_id']
+        ),
+        {}
+    )
 
 
 class Moment(perturbation.base.Base):
@@ -240,7 +251,7 @@ class Object(perturbation.base.Base):
 
     __tablename__ = 'objects'
 
-    image_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('images.id'))
+    image_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('images.id'), primary_key=True)
     image = sqlalchemy.orm.relationship('Image')
 
     matches = sqlalchemy.orm.relationship('Match', backref='objects')
