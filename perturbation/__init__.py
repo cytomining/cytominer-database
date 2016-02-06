@@ -56,6 +56,8 @@ def create():
 @click.argument('b', nargs=1, type=click.File('rb'))
 #@do_profile(follow=[])
 def __main__(a, b):
+    logging.basicConfig(level=logging.DEBUG)
+
     engine = sqlalchemy.create_engine('sqlite:///example.sqlite', creator=create)
 
     session = sqlalchemy.orm.sessionmaker(bind=engine)
@@ -221,7 +223,6 @@ def __main__(a, b):
             match.center = center
             
             session.add(match)
-
 
             center = Coordinate.find_or_create_by(
                 session=session,
@@ -674,5 +675,4 @@ def __main__(a, b):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
     __main__()
