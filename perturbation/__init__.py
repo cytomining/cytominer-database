@@ -215,6 +215,9 @@ def __main__(a, b):
             
             session.add(match)
 
+            session.commit()
+            continue
+
             center = Coordinate.find_or_create_by(
                 session=session,
                 abscissa=int(
@@ -654,7 +657,7 @@ def __main__(a, b):
 
         session.commit()
 
-    IPython.embed()
+    #IPython.embed()
 
 
 if __name__ == '__main__':
