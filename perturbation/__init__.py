@@ -10,6 +10,33 @@ import sqlalchemy
 import sqlite3
 import sqlalchemy.orm
 
+try:
+    from line_profiler import LineProfiler
+
+    def do_profile(follow=[]):
+        def inner(func):
+            def profiled_func(*args, **kwargs):
+                try:
+                    profiler = LineProfiler()
+                    profiler.add_function(func)
+                    for f in follow:
+                        profiler.add_function(f)
+                    profiler.enable_by_count()
+                    return func(*args, **kwargs)
+                finally:
+                    profiler.print_stats()
+            return profiled_func
+        return inner
+
+except ImportError:
+    def do_profile(follow=[]):
+        "Helpful if you accidentally leave in production!"
+        def inner(func):
+            def nothing(*args, **kwargs):
+                return func(*args, **kwargs)
+            return nothing
+        return inner
+
 
 def create():
     connection = sqlite3.connect('example.sqlite')
@@ -24,6 +51,7 @@ def create():
 @click.command()
 @click.argument('a', nargs=1, type=click.File('rb'))
 @click.argument('b', nargs=1, type=click.File('rb'))
+@do_profile(follow=[])
 def __main__(a, b):
     engine = sqlalchemy.create_engine('sqlite:///example.sqlite', creator=create)
 
