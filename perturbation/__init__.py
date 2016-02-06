@@ -222,8 +222,6 @@ def __main__(a, b):
             
             session.add(match)
 
-            session.commit()
-            continue
 
             center = Coordinate.find_or_create_by(
                 session=session,
@@ -357,14 +355,20 @@ def __main__(a, b):
                     session=session,
                     id=row[
                         'Neighbors_FirstClosestObjectNumber_5'
-                    ]
+                    ],
+                    image_id=row[
+                        'ImageNumber'
+                        ]
                 )
 
                 second_closest = Object.find_or_create_by(
                     session=session,
                     id=row[
                         'Neighbors_SecondClosestObjectNumber_5'
-                    ]
+                    ],
+                    image_id=row[
+                        'ImageNumber'
+                        ]
                 )
 
                 neighborhood.closest = closest
@@ -378,6 +382,11 @@ def __main__(a, b):
             match.pattern = pattern
 
             match.shape = shape
+
+            match.neighborhood = neighborhood
+
+            session.commit()
+            continue
 
             for correlation_column in correlation_columns:
                 dependent, independent = correlation_column
