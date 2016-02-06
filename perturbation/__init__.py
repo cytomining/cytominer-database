@@ -385,9 +385,6 @@ def __main__(a, b):
 
             match.neighborhood = neighborhood
 
-            session.commit()
-            continue
-
             for correlation_column in correlation_columns:
                 dependent, independent = correlation_column
 
@@ -673,7 +670,7 @@ def __main__(a, b):
 
         session.commit()
 
-    #IPython.embed()
+    IPython.embed()
 
 
 if __name__ == '__main__':
