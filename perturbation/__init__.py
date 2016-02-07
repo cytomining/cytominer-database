@@ -56,7 +56,7 @@ def create():
 @click.argument('b', nargs=1, type=click.File('rb'))
 #@do_profile(follow=[])
 def __main__(a, b):
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
     engine = sqlalchemy.create_engine('sqlite:///example.sqlite', creator=create)
 
