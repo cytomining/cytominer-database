@@ -54,7 +54,7 @@ def create():
 @click.command()
 @click.argument('a', nargs=1, type=click.File('rb'))
 @click.argument('b', nargs=1, type=click.File('rb'))
-#@do_profile(follow=[])
+@do_profile(follow=[])
 def __main__(a, b):
     logging.basicConfig(level=logging.INFO)
 
@@ -671,7 +671,7 @@ def __main__(a, b):
 
         session.commit()
 
-    IPython.embed()
+    #IPython.embed()
 
 
 if __name__ == '__main__':
