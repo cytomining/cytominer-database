@@ -242,6 +242,7 @@ def __main__(a, b):
                 )
             )
 
+            #shape = Shape.create_by(
             shape = Shape.find_or_create_by(
                 session=session,
                 area=row[
@@ -297,6 +298,7 @@ def __main__(a, b):
             shape.center = center
 
             for moment in moments:
+                #moment = Moment.create_by(
                 moment = Moment.find_or_create_by(
                     session=session,
                     a=moment[0],
@@ -313,6 +315,7 @@ def __main__(a, b):
 
             try:
                 neighborhood = Neighborhood.find_or_create_by(
+                #neighborhood = Neighborhood.create_by(
                     session=session,
                     angle_between_neighbors_5=row[
                         'Neighbors_AngleBetweenNeighbors_5'
@@ -389,6 +392,7 @@ def __main__(a, b):
             for correlation_column in correlation_columns:
                 dependent, independent = correlation_column
 
+                #correlation = Correlation.create_by(
                 correlation = Correlation.find_or_create_by(
                     session=session,
                     coefficient=row[
@@ -406,6 +410,7 @@ def __main__(a, b):
                 correlation.match = match
 
             for channel in channels:
+                #intensity = Intensity.create_by(
                 intensity = Intensity.find_or_create_by(
                     session=session,
                     first_quartile=row[
@@ -464,6 +469,7 @@ def __main__(a, b):
 
                 intensity.match = match
 
+                #edge = Edge.create_by(
                 edge = Edge.find_or_create_by(
                     session=session,
                     integrated=row[
@@ -548,6 +554,7 @@ def __main__(a, b):
                 location.match = match
 
                 for scale in scales:
+                    #texture = Texture.create_by(
                     texture = Texture.find_or_create_by(
                         session=session,
                         angular_second_moment=row[
@@ -642,6 +649,7 @@ def __main__(a, b):
                     texture.match = match
 
                 for count in counts:
+                    #radial_distribution = RadialDistribution.create_by(
                     radial_distribution = RadialDistribution.find_or_create_by(
                         session=session,
                         bins=count,
