@@ -200,6 +200,8 @@ def __main__(a, b):
 
             match = Match()
 
+            session.add(match)
+
             match.object = obj
 
             center = Coordinate(
@@ -221,8 +223,6 @@ def __main__(a, b):
 
             match.center = center
             
-            session.add(match)
-
             center = Coordinate(
                 abscissa=int(
                     round(
