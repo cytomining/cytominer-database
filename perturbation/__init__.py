@@ -202,8 +202,7 @@ def __main__(a, b):
 
             match.object = obj
 
-            center = Coordinate.find_or_create_by(
-                session=session,
+            center = Coordinate(
                 abscissa=int(
                     round(
                         row[
@@ -224,8 +223,7 @@ def __main__(a, b):
             
             session.add(match)
 
-            center = Coordinate.find_or_create_by(
-                session=session,
+            center = Coordinate(
                 abscissa=int(
                     round(
                         row[
@@ -242,9 +240,7 @@ def __main__(a, b):
                 )
             )
 
-            #shape = Shape.create_by(
-            shape = Shape.find_or_create_by(
-                session=session,
+            shape = Shape(
                 area=row[
                     'AreaShape_Area'
                 ],
@@ -298,9 +294,7 @@ def __main__(a, b):
             shape.center = center
 
             for moment in moments:
-                #moment = Moment.create_by(
-                moment = Moment.find_or_create_by(
-                    session=session,
+                moment = Moment(
                     a=moment[0],
                     b=moment[1],
                     score=row[
@@ -314,9 +308,7 @@ def __main__(a, b):
                 moment.shape = shape
 
             try:
-                neighborhood = Neighborhood.find_or_create_by(
-                #neighborhood = Neighborhood.create_by(
-                    session=session,
+                neighborhood = Neighborhood(
                     angle_between_neighbors_5=row[
                         'Neighbors_AngleBetweenNeighbors_5'
                     ],
@@ -392,9 +384,7 @@ def __main__(a, b):
             for correlation_column in correlation_columns:
                 dependent, independent = correlation_column
 
-                #correlation = Correlation.create_by(
-                correlation = Correlation.find_or_create_by(
-                    session=session,
+                correlation = Correlation(
                     coefficient=row[
                         'Correlation_Correlation_{}_{}'.format(
                             dependent.description,
@@ -407,12 +397,10 @@ def __main__(a, b):
 
                 correlation.independent = independent
 
-                correlation.match = match
+                match.correlations.append(correlation)
 
             for channel in channels:
-                #intensity = Intensity.create_by(
-                intensity = Intensity.find_or_create_by(
-                    session=session,
+                intensity = Intensity(
                     first_quartile=row[
                         'Intensity_LowerQuartileIntensity_{}'.format(
                             channel.description
@@ -467,11 +455,9 @@ def __main__(a, b):
 
                 intensity.channel = channel
 
-                intensity.match = match
+                match.intensities.append(intensity)
 
-                #edge = Edge.create_by(
-                edge = Edge.find_or_create_by(
-                    session=session,
+                edge = Edge(
                     integrated=row[
                         'Intensity_IntegratedIntensityEdge_{}'.format(
                             channel.description
@@ -501,12 +487,10 @@ def __main__(a, b):
 
                 edge.channel = channel
 
-                edge.match = match
+                match.edges.append(edge)
 
-                location = Location.find_or_create_by(
-                    session=session,
-                    center_mass_intensity=Coordinate.find_or_create_by(
-                        session=session,
+                location = Location(
+                    center_mass_intensity=Coordinate(
                         abscissa=int(
                             round(
                                 row[
@@ -526,8 +510,7 @@ def __main__(a, b):
                             )
                         )
                     ),
-                    max_intensity=Coordinate.find_or_create_by(
-                        session=session,
+                    max_intensity=Coordinate(
                         abscissa=int(
                             round(
                                 row[
@@ -551,12 +534,10 @@ def __main__(a, b):
 
                 location.channel = channel
 
-                location.match = match
+                match.locations.append(location)
 
                 for scale in scales:
-                    #texture = Texture.create_by(
-                    texture = Texture.find_or_create_by(
-                        session=session,
+                    texture = Texture(
                         angular_second_moment=row[
                             'Texture_AngularSecondMoment_{}_{}_0'.format(
                                 channel.description,
@@ -646,12 +627,10 @@ def __main__(a, b):
 
                     texture.channel = channel
 
-                    texture.match = match
+                    match.textures.append(texture)
 
                 for count in counts:
-                    #radial_distribution = RadialDistribution.create_by(
-                    radial_distribution = RadialDistribution.find_or_create_by(
-                        session=session,
+                    radial_distribution = RadialDistribution(
                         bins=count,
                         frac_at_d=row[
                             'RadialDistribution_FracAtD_{}_{}of4'.format(
@@ -675,7 +654,7 @@ def __main__(a, b):
 
                     radial_distribution.channel = channel
 
-                    radial_distribution.match = match
+                    match.radial_distributions.append(radial_distribution)
 
         session.commit()
 
