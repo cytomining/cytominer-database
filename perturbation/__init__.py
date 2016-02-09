@@ -180,22 +180,41 @@ def __main__(a, b):
         data = pandas.read_csv('test/data/{}.csv'.format(pattern.description))
 
         for index, row in data.iterrows():
-            obj = Object.find_or_create_by(
-                session=session,
-                id=row[
+            obj_key = {
+                'id':row[
                     'ObjectNumber'
                 ],
-                image_id=row[
+                'image_id':row[
                     'ImageNumber'
                     ]
-            )
+            }
+            # obj = Object.find_or_create_by(
+            #     session=session,
+            #     id=row[
+            #         'ObjectNumber'
+            #     ],
+            #     image_id=row[
+            #         'ImageNumber'
+            #         ]
+            # )
+            try:
+                obj = session.query(Object).filter_by(**obj_key).one()
+            except sqlalchemy.orm.exc.NoResultFound:
+                obj = Object(**obj_key)
 
-            obj.image = Image.find_or_create_by(
-                session=session,
-                id=row[
-                    'ImageNumber'
-                ]
-            )
+                try:
+                    session.add(obj)
+                except sqlalchemy.exc.IntegrityError:
+                    session.rollback()
+                    obj = session.query(Object).filter_by(**obj_key).one()
+
+                obj.image = Image.find_or_create_by(
+                    session=session,
+                    id=row[
+                        'ImageNumber'
+                    ]
+                )
+
 
 
             match = Match()
