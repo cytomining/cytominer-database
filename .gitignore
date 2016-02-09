@@ -1,5 +1,6 @@
 *.egg-info
 *.pyc
+*.sqlite
 .idea
 __pycache__
 build
