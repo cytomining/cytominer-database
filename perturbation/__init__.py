@@ -4,7 +4,7 @@ import os
 import IPython
 import pandas
 import perturbation.base
-from perturbation.model import *
+from perturbation.models import *
 from perturbation.sqlite3 import *
 import sqlalchemy
 import sqlite3
