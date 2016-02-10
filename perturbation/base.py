@@ -17,6 +17,9 @@ class Base(object):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
 
+    def __init__(self, **kargs):
+        self.__init__(kargs)
+
     @classmethod
     def all(cls, session):
         """
