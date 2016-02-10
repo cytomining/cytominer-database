@@ -42,8 +42,8 @@ setuptools.setup(
                 ]
         ),
         install_requires=[
+            'celery',
             'click',
-#            'odo',
             'pandas',
             'pytest',
             'sqlalchemy'

@@ -157,11 +157,16 @@ class Match(perturbation.base.Base):
 
     edges = sqlalchemy.orm.relationship('Edge', backref='matches')
 
+    image_id = sqlalchemy.Column(sqlalchemy.Integer)
+
     intensities = sqlalchemy.orm.relationship('Intensity', backref='matches')
 
     locations = sqlalchemy.orm.relationship('Location', backref='matches')
 
-    object_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
+    neighborhood_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('neighborhoods.id'))
+    neighborhood = sqlalchemy.orm.relationship('Neighborhood')
+
+    object_id = sqlalchemy.Column(sqlalchemy.Integer)
     object = sqlalchemy.orm.relationship('Object')
 
     pattern_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('patterns.id'))
@@ -173,6 +178,14 @@ class Match(perturbation.base.Base):
     shape = sqlalchemy.orm.relationship('Shape')
 
     textures = sqlalchemy.orm.relationship('Texture', backref='matches')
+
+    __table_args__ = (
+        sqlalchemy.ForeignKeyConstraint(
+            ['object_id', 'image_id'],
+            ['objects.id', 'objects.image_id']
+        ),
+        {}
+    )
 
 
 class Moment(perturbation.base.Base):
@@ -199,14 +212,16 @@ class Neighborhood(perturbation.base.Base):
 
     __tablename__ = 'neighborhoods'
 
-    closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
-    closest = sqlalchemy.orm.relationship('Object', foreign_keys=[closest_id])
+    image_id = sqlalchemy.Column(sqlalchemy.Integer)
 
-    object_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
-    object = sqlalchemy.orm.relationship('Object', foreign_keys=[object_id])
+    closest_id = sqlalchemy.Column(sqlalchemy.Integer)
+    closest = sqlalchemy.orm.relationship('Object', foreign_keys=[closest_id, image_id])
 
-    second_closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
-    second_closest = sqlalchemy.orm.relationship('Object', foreign_keys=[second_closest_id])
+    object_id = sqlalchemy.Column(sqlalchemy.Integer)
+    object = sqlalchemy.orm.relationship('Object', foreign_keys=[object_id, image_id])
+
+    second_closest_id = sqlalchemy.Column(sqlalchemy.Integer)
+    second_closest = sqlalchemy.orm.relationship('Object', foreign_keys=[second_closest_id, image_id])
 
     angle_between_neighbors_5 = sqlalchemy.Column(sqlalchemy.Float)
 
@@ -217,6 +232,8 @@ class Neighborhood(perturbation.base.Base):
     first_closest_distance_adjacent = sqlalchemy.Column(sqlalchemy.Float)
 
     first_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
+
+    match = sqlalchemy.orm.relationship('Match', backref='neighborhoods', uselist=False)
 
     number_of_neighbors_5 = sqlalchemy.Column(sqlalchemy.Integer)
 
@@ -232,6 +249,21 @@ class Neighborhood(perturbation.base.Base):
 
     second_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
 
+    __table_args__ = (
+        sqlalchemy.ForeignKeyConstraint(
+            ['closest_id', 'image_id'],
+            ['objects.id', 'objects.image_id']
+        ),
+        sqlalchemy.ForeignKeyConstraint(
+            ['object_id', 'image_id'],
+            ['objects.id', 'objects.image_id']
+        ),
+        sqlalchemy.ForeignKeyConstraint(
+            ['second_closest_id', 'image_id'],
+            ['objects.id', 'objects.image_id']
+        ),
+        {}
+    )
 
 class Object(perturbation.base.Base):
     """
@@ -240,12 +272,10 @@ class Object(perturbation.base.Base):
 
     __tablename__ = 'objects'
 
-    image_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('images.id'))
+    image_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('images.id'), primary_key=True)
     image = sqlalchemy.orm.relationship('Image')
 
     matches = sqlalchemy.orm.relationship('Match', backref='objects')
-
-    neighborhood = sqlalchemy.orm.relationship('Neighborhood', foreign_keys="Neighborhood.object_id")
 
 
 class Pattern(perturbation.base.Base):

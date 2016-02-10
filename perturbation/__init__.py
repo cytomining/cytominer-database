@@ -9,6 +9,36 @@ from perturbation.sqlite3 import *
 import sqlalchemy
 import sqlite3
 import sqlalchemy.orm
+import logging
+
+logger = logging.getLogger(__name__)
+
+try:
+    from line_profiler import LineProfiler
+
+    def do_profile(follow=[]):
+        def inner(func):
+            def profiled_func(*args, **kwargs):
+                try:
+                    profiler = LineProfiler()
+                    profiler.add_function(func)
+                    for f in follow:
+                        profiler.add_function(f)
+                    profiler.enable_by_count()
+                    return func(*args, **kwargs)
+                finally:
+                    profiler.print_stats()
+            return profiled_func
+        return inner
+
+except ImportError:
+    def do_profile(follow=[]):
+        "Helpful if you accidentally leave in production!"
+        def inner(func):
+            def nothing(*args, **kwargs):
+                return func(*args, **kwargs)
+            return nothing
+        return inner
 
 
 def create():
@@ -24,7 +54,10 @@ def create():
 @click.command()
 @click.argument('a', nargs=1, type=click.File('rb'))
 @click.argument('b', nargs=1, type=click.File('rb'))
+@do_profile(follow=[])
 def __main__(a, b):
+    logging.basicConfig(level=logging.INFO)
+
     engine = sqlalchemy.create_engine('sqlite:///example.sqlite', creator=create)
 
     session = sqlalchemy.orm.sessionmaker(bind=engine)
@@ -151,7 +184,10 @@ def __main__(a, b):
                 session=session,
                 id=row[
                     'ObjectNumber'
-                ]
+                ],
+                image_id=row[
+                    'ImageNumber'
+                    ]
             )
 
             obj.image = Image.find_or_create_by(
@@ -161,12 +197,14 @@ def __main__(a, b):
                 ]
             )
 
+
             match = Match()
+
+            session.add(match)
 
             match.object = obj
 
-            center = Coordinate.find_or_create_by(
-                session=session,
+            center = Coordinate(
                 abscissa=int(
                     round(
                         row[
@@ -185,10 +223,7 @@ def __main__(a, b):
 
             match.center = center
             
-            session.add(match)
-
-            center = Coordinate.find_or_create_by(
-                session=session,
+            center = Coordinate(
                 abscissa=int(
                     round(
                         row[
@@ -205,8 +240,7 @@ def __main__(a, b):
                 )
             )
 
-            shape = Shape.find_or_create_by(
-                session=session,
+            shape = Shape(
                 area=row[
                     'AreaShape_Area'
                 ],
@@ -260,8 +294,7 @@ def __main__(a, b):
             shape.center = center
 
             for moment in moments:
-                moment = Moment.find_or_create_by(
-                    session=session,
+                moment = Moment(
                     a=moment[0],
                     b=moment[1],
                     score=row[
@@ -275,8 +308,7 @@ def __main__(a, b):
                 moment.shape = shape
 
             try:
-                neighborhood = Neighborhood.find_or_create_by(
-                    session=session,
+                neighborhood = Neighborhood(
                     angle_between_neighbors_5=row[
                         'Neighbors_AngleBetweenNeighbors_5'
                     ],
@@ -319,14 +351,20 @@ def __main__(a, b):
                     session=session,
                     id=row[
                         'Neighbors_FirstClosestObjectNumber_5'
-                    ]
+                    ],
+                    image_id=row[
+                        'ImageNumber'
+                        ]
                 )
 
                 second_closest = Object.find_or_create_by(
                     session=session,
                     id=row[
                         'Neighbors_SecondClosestObjectNumber_5'
-                    ]
+                    ],
+                    image_id=row[
+                        'ImageNumber'
+                        ]
                 )
 
                 neighborhood.closest = closest
@@ -335,17 +373,18 @@ def __main__(a, b):
 
                 neighborhood.second_closest = second_closest
             except KeyError:
-                pass
+                logger.debug(KeyError)
 
             match.pattern = pattern
 
             match.shape = shape
 
+            match.neighborhood = neighborhood
+
             for correlation_column in correlation_columns:
                 dependent, independent = correlation_column
 
-                correlation = Correlation.find_or_create_by(
-                    session=session,
+                correlation = Correlation(
                     coefficient=row[
                         'Correlation_Correlation_{}_{}'.format(
                             dependent.description,
@@ -358,11 +397,10 @@ def __main__(a, b):
 
                 correlation.independent = independent
 
-                correlation.match = match
+                match.correlations.append(correlation)
 
             for channel in channels:
-                intensity = Intensity.find_or_create_by(
-                    session=session,
+                intensity = Intensity(
                     first_quartile=row[
                         'Intensity_LowerQuartileIntensity_{}'.format(
                             channel.description
@@ -417,10 +455,9 @@ def __main__(a, b):
 
                 intensity.channel = channel
 
-                intensity.match = match
+                match.intensities.append(intensity)
 
-                edge = Edge.find_or_create_by(
-                    session=session,
+                edge = Edge(
                     integrated=row[
                         'Intensity_IntegratedIntensityEdge_{}'.format(
                             channel.description
@@ -450,12 +487,10 @@ def __main__(a, b):
 
                 edge.channel = channel
 
-                edge.match = match
+                match.edges.append(edge)
 
-                location = Location.find_or_create_by(
-                    session=session,
-                    center_mass_intensity=Coordinate.find_or_create_by(
-                        session=session,
+                location = Location(
+                    center_mass_intensity=Coordinate(
                         abscissa=int(
                             round(
                                 row[
@@ -475,8 +510,7 @@ def __main__(a, b):
                             )
                         )
                     ),
-                    max_intensity=Coordinate.find_or_create_by(
-                        session=session,
+                    max_intensity=Coordinate(
                         abscissa=int(
                             round(
                                 row[
@@ -500,11 +534,10 @@ def __main__(a, b):
 
                 location.channel = channel
 
-                location.match = match
+                match.locations.append(location)
 
                 for scale in scales:
-                    texture = Texture.find_or_create_by(
-                        session=session,
+                    texture = Texture(
                         angular_second_moment=row[
                             'Texture_AngularSecondMoment_{}_{}_0'.format(
                                 channel.description,
@@ -594,11 +627,10 @@ def __main__(a, b):
 
                     texture.channel = channel
 
-                    texture.match = match
+                    match.textures.append(texture)
 
                 for count in counts:
-                    radial_distribution = RadialDistribution.find_or_create_by(
-                        session=session,
+                    radial_distribution = RadialDistribution(
                         bins=count,
                         frac_at_d=row[
                             'RadialDistribution_FracAtD_{}_{}of4'.format(
@@ -622,11 +654,11 @@ def __main__(a, b):
 
                     radial_distribution.channel = channel
 
-                    radial_distribution.match = match
+                    match.radial_distributions.append(radial_distribution)
 
         session.commit()
 
-    IPython.embed()
+    #IPython.embed()
 
 
 if __name__ == '__main__':

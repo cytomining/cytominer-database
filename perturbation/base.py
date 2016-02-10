@@ -98,6 +98,33 @@ class Base(object):
                 return session.query(cls).filter_by(**kwargs).one()
 
     @classmethod
+    def create_by(cls, session, create_method='', create_method_kwargs=None, **kwargs):
+        """
+
+        :param session:
+        :param create_method:
+        :param create_method_kwargs:
+
+        :return:
+
+        """
+
+        kwargs.update(create_method_kwargs or {})
+
+        created = getattr(cls, create_method, cls)(**kwargs)
+
+        try:
+            session.add(created)
+
+            session.flush()
+
+            return created
+        except sqlalchemy.exc.IntegrityError:
+            session.rollback()
+
+            return session.query(cls).filter_by(**kwargs).one()
+
+    @classmethod
     def first(cls, session):
         """
 
