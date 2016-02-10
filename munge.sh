@@ -6,7 +6,7 @@ mkdir -p $PATTERNDIR
 
 function join { local IFS="$1"; shift; echo "$*"; }
 
-patterns=$(head -n 1 ${DATADIR}/object.csv | tr ',' '\n' | uniq | tail -n +2)
+patterns=$(head -n 1 ${DATADIR}/object.csv | tr ',' '\n' | sort | tr -d '\r' | uniq | grep -v Image)
 
 csvcut -c 1 -x ${DATADIR}/object.csv | tail -n +2 > ${DATADIR}/patterns/images.csv
 
