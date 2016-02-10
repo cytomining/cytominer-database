@@ -41,8 +41,8 @@ except ImportError:
         return inner
 
 
-def create():
-    connection = sqlite3.connect('example.sqlite')
+def create(backend_file_path):
+    connection = sqlite3.connect(backend_file_path)
 
     connection.create_aggregate('standard_deviation', 1, StandardDeviation)
 
@@ -53,11 +53,14 @@ def create():
 
 @click.command()
 @click.argument('input_dir', type=click.Path(exists=True))
+@click.argument('backend_file', type=click.Path(exists=False))
+@click.option('--debug_mode/--no-debug_mode', default=False)
 @do_profile(follow=[])
-def __main__(input_dir):
-    logging.basicConfig(level=logging.INFO)
+def __main__(input_dir, backend_file, debug_mode):
+    logging.basicConfig(level=logging.INFO if not debug_mode else logging.DEBUG)
 
-    engine = sqlalchemy.create_engine('sqlite:///example.sqlite', creator=create)
+    engine = sqlalchemy.create_engine('sqlite:///{}'.format(os.path.realpath(backend_file)),
+                                      creator=lambda: create(os.path.realpath(backend_file)) )
 
     session = sqlalchemy.orm.sessionmaker(bind=engine)
 
@@ -175,10 +178,16 @@ def __main__(input_dir):
 
     session.commit()
 
+    if (debug_mode):
+        logger.debug("Debug mode: only read csvs but dont populate db.")
+
     for pattern in patterns:
         data = pandas.read_csv(os.path.join(input_dir, '{}.csv').format(pattern.description))
 
         for index, row in data.iterrows():
+            if (debug_mode):
+                continue
+
             obj = Object.find_or_create_by(
                 session=session,
                 id=row[
