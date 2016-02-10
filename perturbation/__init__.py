@@ -6,7 +6,6 @@ import pandas
 import perturbation.base
 from perturbation.models import *
 from perturbation.sqlite3 import *
-import progressbar
 import sqlalchemy
 import sqlite3
 import sqlalchemy.orm
