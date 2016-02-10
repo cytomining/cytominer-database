@@ -386,14 +386,15 @@ def __main__(input_dir, backend_file, debug_mode):
                     neighborhood.object = obj
 
                     neighborhood.second_closest = second_closest
-                except KeyError:
+
+                    match.neighborhood = neighborhood
+
+                except KeyError as e:
                     logger.debug(KeyError)
 
                 match.pattern = pattern
 
                 match.shape = shape
-
-                match.neighborhood = neighborhood
 
                 for correlation_column in correlation_columns:
                     dependent, independent = correlation_column
