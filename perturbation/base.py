@@ -114,18 +114,12 @@ class Base(object):
 
         kwargs.update(create_method_kwargs or {})
 
-        created = getattr(cls, create_method, cls)(**kwargs)
-
         try:
-            session.add(created)
+            session.add(getattr(cls, create_method, cls)(**kwargs))
 
             session.flush()
-
-            return created
         except sqlalchemy.exc.IntegrityError:
             session.rollback()
-
-            return session.query(cls).filter_by(**kwargs).one()
 
     @classmethod
     def first(cls, session):
