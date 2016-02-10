@@ -89,7 +89,7 @@ class Base(object):
             try:
                 session.add(created)
 
-                #session.flush()
+                session.flush()
 
                 return created
             except sqlalchemy.exc.IntegrityError:
