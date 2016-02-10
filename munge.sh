@@ -1,21 +1,22 @@
 #!/bin/sh
+DATADIR=test/data
 
 function join { local IFS="$1"; shift; echo "$*"; }
 
-patterns=$(head -n 1 object.csv | tr ',' '\n' | uniq | tail -n +2)
+patterns=$(head -n 1 ${DATADIR}/object.csv | tr ',' '\n' | uniq | tail -n +2)
 
-csvcut -c 1 -x object.csv | tail -n +2 > test/data/patterns/images.csv
+csvcut -c 1 -x ${DATADIR}/object.csv | tail -n +2 > ${DATADIR}/patterns/images.csv
 
-csvcut -c 2 -x object.csv | tail -n +2 > test/data/patterns/objects.csv
+csvcut -c 2 -x ${DATADIR}/object.csv | tail -n +2 > ${DATADIR}/patterns/objects.csv
 
-csvjoin patterns/images.csv patterns/objects.csv  > test/data/patterns/images_objects.csv
+csvjoin ${DATADIR}/patterns/images.csv ${DATADIR}/patterns/objects.csv  > ${DATADIR}/patterns/images_objects.csv
 
 for pattern in ${patterns}; do
-  indices=$(csvcut -n object.csv | grep -i $pattern | cut -d ':' -f1)
+  indices=$(csvcut -n ${DATADIR}/object.csv | grep -i $pattern | cut -d ':' -f1)
 
-  joined=$(join , ${indices[@]}) 
+  joined=$(join , ${indices[@]})
 
-  csvcut -c ${joined} -C 2 -x object.csv | tail -n +2 > test/data/patterns/${pattern}.csv
+  csvcut -c ${joined} -C 2 -x ${DATADIR}/object.csv | tail -n +2 > ${DATADIR}/patterns/${pattern}.csv
 
-  csvjoin test/data/patterns/images_objects.csv test/data/patterns/${pattern}.csv > test/data/${pattern}.csv
+  csvjoin ${DATADIR}/patterns/images_objects.csv ${DATADIR}/patterns/${pattern}.csv > ${DATADIR}/${pattern}.csv
 done
