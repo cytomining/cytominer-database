@@ -57,7 +57,8 @@ def create(backend_file_path):
 @click.option('--debug_mode/--no-debug_mode', default=False)
 #@do_profile(follow=[])
 def __main__(input_dir, backend_file, debug_mode):
-    logging.basicConfig(level=logging.INFO if not debug_mode else logging.DEBUG)
+    logging.basicConfig(format='%(asctime)s %(message)s',
+                        level=logging.INFO if not debug_mode else logging.DEBUG)
 
     engine = sqlalchemy.create_engine('sqlite:///{}'.format(os.path.realpath(backend_file)),
                                       creator=lambda: create(os.path.realpath(backend_file)) )
