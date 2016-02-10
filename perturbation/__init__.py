@@ -52,10 +52,9 @@ def create():
 
 
 @click.command()
-@click.argument('a', nargs=1, type=click.File('rb'))
-@click.argument('b', nargs=1, type=click.File('rb'))
+@click.argument('input_dir', type=click.Path(exists=True))
 @do_profile(follow=[])
-def __main__(a, b):
+def __main__(input_dir):
     logging.basicConfig(level=logging.INFO)
 
     engine = sqlalchemy.create_engine('sqlite:///example.sqlite', creator=create)
@@ -66,7 +65,7 @@ def __main__(a, b):
 
     perturbation.base.Base.metadata.create_all(engine)
 
-    for chunk in pandas.read_csv('test/data/image.csv', chunksize=4):
+    for chunk in pandas.read_csv(os.path.join(input_dir, 'image.csv'), chunksize=4):
         for index, row in chunk.iterrows():
             well = Well.find_or_create_by(
                 session=session,
@@ -95,8 +94,8 @@ def __main__(a, b):
 
     filenames = []
 
-    for filename in glob.glob('test/data/*.csv'):
-        if filename not in ['test/data/image.csv', 'test/data/object.csv']:
+    for filename in glob.glob(os.path.join(input_dir, '*.csv')):
+        if filename not in [os.path.join(input_dir, 'image.csv'), os.path.join(input_dir, 'object.csv')]:
             filenames.append(os.path.basename(filename))
 
     pattern_descriptions = []
@@ -111,7 +110,7 @@ def __main__(a, b):
 
         patterns.append(pattern)
 
-    data = pandas.read_csv('test/data/cell.csv')
+    data = pandas.read_csv(os.path.join(input_dir, 'Cells.csv'))
 
     columns = data.columns
 
@@ -177,7 +176,7 @@ def __main__(a, b):
     session.commit()
 
     for pattern in patterns:
-        data = pandas.read_csv('test/data/{}.csv'.format(pattern.description))
+        data = pandas.read_csv(os.path.join(input_dir, '{}.csv').format(pattern.description))
 
         for index, row in data.iterrows():
             obj = Object.find_or_create_by(
