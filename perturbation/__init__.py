@@ -185,12 +185,14 @@ def __main__(input_dir, backend_file, debug_mode):
     for pattern in patterns:
         data = pandas.read_csv(os.path.join(input_dir, '{}.csv').format(pattern.description))
 
-        with click.progressbar(length=data.shape[0], label="Processing "+pattern.description) as bar:
+        with click.progressbar(length=data.shape[0],
+                               label="Processing "+pattern.description,
+                               show_eta=True) as bar:
 
             for index, row in data.iterrows():
                 #logging.debug("{}.{}".format(pattern.description, index))
 
-                bar.update(index)
+                bar.update(1)
 
                 obj = Object.find_or_create_by(
                     session=session,
