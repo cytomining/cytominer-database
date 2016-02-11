@@ -196,12 +196,12 @@ def __main__(input_dir, backend_file, debug_mode):
 
                 obj = Object.find_or_create_by(
                     session=session,
-                    id=row[
-                        'ObjectNumber'
-                    ],
                     image_id=row[
                         'ImageNumber'
-                        ]
+                    ],
+                    description=row[
+                        'ObjectNumber'
+                    ]
                 )
 
                 obj.image = Image.find_or_create_by(
@@ -366,7 +366,7 @@ def __main__(input_dir, backend_file, debug_mode):
 
                     closest = Object.find_or_create_by(
                         session=session,
-                        id=row[
+                        description=row[
                             'Neighbors_FirstClosestObjectNumber_5'
                         ],
                         image_id=row[
@@ -376,7 +376,7 @@ def __main__(input_dir, backend_file, debug_mode):
 
                     second_closest = Object.find_or_create_by(
                         session=session,
-                        id=row[
+                        description=row[
                             'Neighbors_SecondClosestObjectNumber_5'
                         ],
                         image_id=row[
