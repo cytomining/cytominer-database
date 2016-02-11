@@ -202,8 +202,6 @@ class Neighborhood(perturbation.base.Base):
 
     __tablename__ = 'neighborhoods'
 
-    image_id = sqlalchemy.Column(sqlalchemy.Integer)
-
     closest_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('objects.id'))
     closest = sqlalchemy.orm.relationship('Object', foreign_keys=[closest_id])
 
@@ -247,7 +245,7 @@ class Object(perturbation.base.Base):
 
     __tablename__ = 'objects'
 
-    image_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('images.id'), primary_key=True)
+    image_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('images.id'))
     image = sqlalchemy.orm.relationship('Image')
 
     matches = sqlalchemy.orm.relationship('Match')
