@@ -240,27 +240,26 @@ def __main__(input_dir, backend_file, debug_mode):
 
                 match.center = center
 
-                center = Coordinate(
-                    abscissa=int(
-                        round(
-                            row[
-                                'AreaShape_Center_X'
-                            ]
-                        )
-                    ),
-                    ordinate=int(
-                        round(
-                            row[
-                                'AreaShape_Center_Y'
-                            ]
-                        )
-                    )
-                )
-
                 shape = Shape(
                     area=row[
                         'AreaShape_Area'
                     ],
+                    center=Coordinate(
+                        abscissa=int(
+                            round(
+                                row[
+                                    'AreaShape_Center_X'
+                                ]
+                            )
+                        ),
+                        ordinate=int(
+                            round(
+                                row[
+                                    'AreaShape_Center_Y'
+                                ]
+                            )
+                        )
+                    ),
                     compactness=row[
                         'AreaShape_Compactness'
                     ],
@@ -297,6 +296,18 @@ def __main__(input_dir, backend_file, debug_mode):
                     minor_axis_length=row[
                         'AreaShape_MinorAxisLength'
                     ],
+                    moments=[
+                        Moment(
+                            a=moment[0],
+                            b=moment[1],
+                            score=row[
+                                'AreaShape_Zernike_{}_{}'.format(
+                                    moment[0],
+                                    moment[1]
+                                )
+                            ]
+                        ) for moment in moments
+                    ],
                     orientation=row[
                         'AreaShape_Orientation'
                     ],
@@ -310,20 +321,6 @@ def __main__(input_dir, backend_file, debug_mode):
 
                 shape.center = center
 
-                for moment in moments:
-                    moment = Moment(
-                        a=moment[0],
-                        b=moment[1],
-                        score=row[
-                            'AreaShape_Zernike_{}_{}'.format(
-                                moment[0],
-                                moment[1]
-                            )
-                        ]
-                    )
-
-                    moment.shape = shape
-
                 try:
                     neighborhood = Neighborhood(
                         angle_between_neighbors_5=row[
@@ -332,6 +329,15 @@ def __main__(input_dir, backend_file, debug_mode):
                         angle_between_neighbors_adjacent=row[
                             'Neighbors_AngleBetweenNeighbors_Adjacent'
                         ],
+                        closest=Object.find_or_create_by(
+                            session=session,
+                            image_id=row[
+                                'ImageNumber'
+                            ],
+                            description=row[
+                                'Neighbors_FirstClosestObjectNumber_5'
+                            ]
+                        ),
                         first_closest_distance_5=row[
                             'Neighbors_FirstClosestDistance_5'
                         ],
@@ -353,6 +359,15 @@ def __main__(input_dir, backend_file, debug_mode):
                         percent_touching_adjacent=row[
                             'Neighbors_PercentTouching_Adjacent'
                         ],
+                        second_closest=Object.find_or_create_by(
+                            session=session,
+                            image_id=row[
+                                'ImageNumber'
+                            ],
+                            description=row[
+                                'Neighbors_SecondClosestObjectNumber_5'
+                            ]
+                        ),
                         second_closest_distance_5=row[
                             'Neighbors_SecondClosestDistance_5'
                         ],
@@ -364,31 +379,7 @@ def __main__(input_dir, backend_file, debug_mode):
                         ]
                     )
 
-                    closest = Object.find_or_create_by(
-                        session=session,
-                        description=row[
-                            'Neighbors_FirstClosestObjectNumber_5'
-                        ],
-                        image_id=row[
-                            'ImageNumber'
-                            ]
-                    )
-
-                    second_closest = Object.find_or_create_by(
-                        session=session,
-                        description=row[
-                            'Neighbors_SecondClosestObjectNumber_5'
-                        ],
-                        image_id=row[
-                            'ImageNumber'
-                            ]
-                    )
-
-                    neighborhood.closest = closest
-
                     neighborhood.object = obj
-
-                    neighborhood.second_closest = second_closest
 
                     match.neighborhood = neighborhood
 
