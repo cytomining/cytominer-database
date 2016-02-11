@@ -298,39 +298,41 @@ def create_match(channels, columns, find_moment_columns, pattern, record, object
             ]
         )
 
-        for channel in channels:
-            for count in counts:
-                radial_distribution = RadialDistribution(
-                    # bins=count,
-                    # channel=channel,
-                    # frac_at_d=record['RadialDistribution_FracAtD_{}_{}of4'.format(channel.description, count)],
-                    # mean_frac=record['RadialDistribution_MeanFrac_{}_{}of4'.format(channel.description, count)],
-                    # radial_cv=record['RadialDistribution_RadialCV_{}_{}of4'.format(channel.description, count)]
-                )
+        return match
 
-                # match.radial_distributions.append(radial_distribution)
-
-            for scale in scales:
-                texture = Texture(
-                    # angular_second_moment=record['Texture_AngularSecondMoment_{}_{}_0'.format(channel.description, scale)],
-                    # channel=channel,
-                    # contrast=record['Texture_Contrast_{}_{}_0'.format(channel.description, scale)],
-                    # correlation=record['Texture_Correlation_{}_{}_0'.format(channel.description, scale)],
-                    # difference_entropy=record['Texture_DifferenceEntropy_{}_{}_0'.format(channel.description, scale)],
-                    # difference_variance=record['Texture_DifferenceVariance_{}_{}_0'.format(channel.description, scale)],
-                    # entropy=record['Texture_Entropy_{}_{}_0'.format(channel.description, scale)],
-                    # gabor=record['Texture_Gabor_{}_{}'.format(channel.description, scale)],
-                    # info_meas_1=record['Texture_InfoMeas1_{}_{}_0'.format(channel.description, scale)],
-                    # info_meas_2=record['Texture_InfoMeas2_{}_{}_0'.format(channel.description, scale)],
-                    # inverse_difference_moment=record['Texture_InverseDifferenceMoment_{}_{}_0'.format(channel.description, scale)],
-                    # scale=scale,
-                    # sum_average=record['Texture_SumAverage_{}_{}_0'.format(channel.description, scale)],
-                    # sum_entropy=record['Texture_SumEntropy_{}_{}_0'.format(channel.description, scale)],
-                    # sum_variance=record['Texture_SumVariance_{}_{}_0'.format(channel.description, scale)],
-                    # variance=record['Texture_Variance_{}_{}_0'.format(channel.description, scale)]
-                )
-
-                # match.textures.append(texture)
+        # for channel in channels:
+        #     for count in counts:
+        #         radial_distribution = RadialDistribution(
+        #             # bins=count,
+        #             # channel=channel,
+        #             # frac_at_d=record['RadialDistribution_FracAtD_{}_{}of4'.format(channel.description, count)],
+        #             # mean_frac=record['RadialDistribution_MeanFrac_{}_{}of4'.format(channel.description, count)],
+        #             # radial_cv=record['RadialDistribution_RadialCV_{}_{}of4'.format(channel.description, count)]
+        #         )
+        #
+        #         # match.radial_distributions.append(radial_distribution)
+        #
+        #     for scale in scales:
+        #         texture = Texture(
+        #             # angular_second_moment=record['Texture_AngularSecondMoment_{}_{}_0'.format(channel.description, scale)],
+        #             # channel=channel,
+        #             # contrast=record['Texture_Contrast_{}_{}_0'.format(channel.description, scale)],
+        #             # correlation=record['Texture_Correlation_{}_{}_0'.format(channel.description, scale)],
+        #             # difference_entropy=record['Texture_DifferenceEntropy_{}_{}_0'.format(channel.description, scale)],
+        #             # difference_variance=record['Texture_DifferenceVariance_{}_{}_0'.format(channel.description, scale)],
+        #             # entropy=record['Texture_Entropy_{}_{}_0'.format(channel.description, scale)],
+        #             # gabor=record['Texture_Gabor_{}_{}'.format(channel.description, scale)],
+        #             # info_meas_1=record['Texture_InfoMeas1_{}_{}_0'.format(channel.description, scale)],
+        #             # info_meas_2=record['Texture_InfoMeas2_{}_{}_0'.format(channel.description, scale)],
+        #             # inverse_difference_moment=record['Texture_InverseDifferenceMoment_{}_{}_0'.format(channel.description, scale)],
+        #             # scale=scale,
+        #             # sum_average=record['Texture_SumAverage_{}_{}_0'.format(channel.description, scale)],
+        #             # sum_entropy=record['Texture_SumEntropy_{}_{}_0'.format(channel.description, scale)],
+        #             # sum_variance=record['Texture_SumVariance_{}_{}_0'.format(channel.description, scale)],
+        #             # variance=record['Texture_Variance_{}_{}_0'.format(channel.description, scale)]
+        #         )
+        #
+        #         # match.textures.append(texture)
 
         # for correlation_column in correlation_columns:
         #     dependent, independent = correlation_column
