@@ -42,7 +42,6 @@ setuptools.setup(
                 ]
         ),
         install_requires=[
-            'celery',
             'click',
             'csvkit',
             'pandas',
