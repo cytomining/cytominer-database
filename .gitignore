@@ -6,3 +6,6 @@ __pycache__
 build
 dist
 .cache
+test/data/Cells.csv
+test/data/Cytoplasm.csv
+test/data/Nuclei.csv
