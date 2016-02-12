@@ -9,10 +9,11 @@ import perturbation.models
 import pytest
 import sqlalchemy
 import sqlalchemy.orm
+import subprocess
 
 
 @pytest.fixture
-def session(output='test/data/test.sqlite'):
+def session(output='/tmp/test.sqlite'):
     try:
         os.remove(output)
     except OSError:
@@ -28,6 +29,8 @@ def session(output='test/data/test.sqlite'):
 
 
 def test_seed(session):
-    perturbation.database.seed('test/data/', 'test/data/test.sqlite')
+    # subprocess.run(['./munge.sh', 'test/data/'])
+
+    perturbation.database.seed('test/data/', '/tmp/test.sqlite')
 
     assert len(session.query(perturbation.models.Match).all()) == 60
