@@ -3,6 +3,8 @@ addons:
         packages:
             - python-numpy
             - python-pandas
+cache:
+    - pip
 install:
     - pip install -e .
 language:
