@@ -7,6 +7,8 @@ import sqlalchemy.exc
 import sqlalchemy.ext.declarative
 import sqlalchemy.orm
 import sqlalchemy.orm.exc
+import perturbation.UUID
+import uuid
 
 
 @sqlalchemy.ext.declarative.as_declarative()
@@ -15,7 +17,7 @@ class Base(object):
 
     """
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    id = sqlalchemy.Column(perturbation.UUID.UUID, default=uuid.uuid4, primary_key=True)
 
     def __init__(self, **kargs):
         self.__init__(kargs)
