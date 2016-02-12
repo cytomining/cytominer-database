@@ -1,5 +1,6 @@
 import click
 import glob
+import IPython
 import os
 import pandas
 import perturbation.base
@@ -186,11 +187,12 @@ def seed(input, output, verbose=False):
 
                 image = Image.find_by(
                     session=session,
-                    description=row['ImageNumber']
+                    description=int(row['ImageNumber'])
                 )
 
                 object = Object.find_or_create_by(
                     description=row['ObjectNumber'],
+                    image_id = image.id,
                     session=session
                 )
 
