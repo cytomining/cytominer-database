@@ -87,7 +87,7 @@ class Image(perturbation.base.Base):
     objects = sqlalchemy.orm.relationship('Object')
 
     well_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('wells.id'))
-    well = sqlalchemy.orm.relationship('Well')
+    well = sqlalchemy.orm.relationship('Well', back_populates='images', uselist=False)
 
     description = sqlalchemy.Column(sqlalchemy.String)
 
@@ -400,7 +400,7 @@ class Well(perturbation.base.Base):
 
     __tablename__ = 'wells'
 
-    images = sqlalchemy.orm.relationship('Image', backref='wells')
+    images = sqlalchemy.orm.relationship('Image')
 
     plate_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('plates.id'))
     plate = sqlalchemy.orm.relationship('Plate')

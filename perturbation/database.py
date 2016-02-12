@@ -57,7 +57,7 @@ def create(backend_file_path):
 
 
 # @do_profile(follow=[])
-def seed(input, output, verbose):
+def seed(input, output, verbose=False):
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO if not verbose else logging.DEBUG)
 
     engine = sqlalchemy.create_engine('sqlite:///{}'.format(os.path.realpath(output)), creator=lambda: create(os.path.realpath(output)))
@@ -174,8 +174,8 @@ def seed(input, output, verbose):
 
     session.commit()
 
-    if (verbose):
-        logger.debug("Debug mode: only read csvs but dont populate db.")
+    if verbose:
+        logger.debug("Debug mode: only read csvs but don't populate db.")
 
     for pattern in patterns:
         data = pandas.read_csv(os.path.join(input, '{}.csv').format(pattern.description))
@@ -188,10 +188,6 @@ def seed(input, output, verbose):
                     session=session,
                     description=row['ImageNumber']
                 )
-
-                import IPython
-
-                IPython.embed()
 
                 object = Object.find_or_create_by(
                     description=row['ObjectNumber'],
