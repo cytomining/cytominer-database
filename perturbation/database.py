@@ -254,7 +254,7 @@ def seed(input, output, verbose=False):
                             session=session,
                             image=Image.find_by(
                                 session=session,
-                                description=row['ImageNumber']
+                                description=int(row['ImageNumber'])
                             ),
                             description=row['Neighbors_FirstClosestObjectNumber_5']
                         ),
@@ -269,7 +269,7 @@ def seed(input, output, verbose=False):
                             session=session,
                             image=Image.find_by(
                                 session=session,
-                                description=row['ImageNumber']
+                                description=int(row['ImageNumber'])
                             ),
                             description=row['Neighbors_SecondClosestObjectNumber_5']
                         ),
