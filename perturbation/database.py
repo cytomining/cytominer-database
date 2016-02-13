@@ -178,9 +178,6 @@ def seed(input, output, verbose=False):
 
     session.commit()
 
-    if verbose:
-        logger.debug("Debug mode: only read csvs but don't populate db.")
-
     for pattern in patterns:
         data = pandas.read_csv(os.path.join(input, '{}.csv').format(pattern.description))
 
