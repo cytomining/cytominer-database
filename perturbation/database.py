@@ -1,4 +1,5 @@
 import click
+import collections
 import glob
 import IPython
 import os
@@ -61,7 +62,8 @@ def create(backend_file_path):
 def seed(input, output, verbose=False):
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO if not verbose else logging.DEBUG)
 
-    engine = sqlalchemy.create_engine('sqlite:///{}'.format(os.path.realpath(output)), creator=lambda: create(os.path.realpath(output)))
+    engine = sqlalchemy.create_engine('sqlite:///{}'.format(os.path.realpath(output)),
+                                      creator=lambda: create(os.path.realpath(output)))
 
     session = sqlalchemy.orm.sessionmaker(bind=engine)
 
@@ -110,6 +112,7 @@ def seed(input, output, verbose=False):
 
         patterns.append(pattern)
 
+    # TODO: Read only the header, and read all the patterns because some columns are present in one and not the other
     data = pandas.read_csv(os.path.join(input, 'Cells.csv'))
 
     columns = data.columns
@@ -185,14 +188,16 @@ def seed(input, output, verbose=False):
             for index, row in data.iterrows():
                 bar.update(1)
 
+                row = collections.defaultdict(lambda: None, row)
+
                 image = Image.find_by(
                     session=session,
                     description=int(row['ImageNumber'])
                 )
 
                 object = Object.find_or_create_by(
-                    description=row['ObjectNumber'],
-                    image_id = image.id,
+                    description=int(row['ObjectNumber']),
+                    image_id=image.id,
                     session=session
                 )
 
@@ -246,43 +251,40 @@ def seed(input, output, verbose=False):
 
                 shape.center = center
 
-                try:
-                    neighborhood = Neighborhood(
-                        angle_between_neighbors_5=row['Neighbors_AngleBetweenNeighbors_5'],
-                        angle_between_neighbors_adjacent=row['Neighbors_AngleBetweenNeighbors_Adjacent'],
-                        closest=Object.find_or_create_by(
+                neighborhood = Neighborhood(
+                    angle_between_neighbors_5=row['Neighbors_AngleBetweenNeighbors_5'],
+                    angle_between_neighbors_adjacent=row['Neighbors_AngleBetweenNeighbors_Adjacent'],
+                    closest=Object.find_or_create_by(
+                        session=session,
+                        image=Image.find_by(
                             session=session,
-                            image=Image.find_by(
-                                session=session,
-                                description=int(row['ImageNumber'])
-                            ),
-                            description=row['Neighbors_FirstClosestObjectNumber_5']
+                            description=int(row['ImageNumber'])
                         ),
-                        first_closest_distance_5=row['Neighbors_FirstClosestDistance_5'],
-                        first_closest_distance_adjacent=row['Neighbors_FirstClosestDistance_Adjacent'],
-                        first_closest_object_number_adjacent=row['Neighbors_FirstClosestObjectNumber_Adjacent'],
-                        number_of_neighbors_5=row['Neighbors_NumberOfNeighbors_5'],
-                        number_of_neighbors_adjacent=row['Neighbors_NumberOfNeighbors_Adjacent'],
-                        percent_touching_5=row['Neighbors_PercentTouching_5'],
-                        percent_touching_adjacent=row['Neighbors_PercentTouching_Adjacent'],
-                        second_closest=Object.find_or_create_by(
+                        description=row['Neighbors_FirstClosestObjectNumber_5']
+                    ),
+                    first_closest_distance_5=row['Neighbors_FirstClosestDistance_5'],
+                    first_closest_distance_adjacent=row['Neighbors_FirstClosestDistance_Adjacent'],
+                    first_closest_object_number_adjacent=row['Neighbors_FirstClosestObjectNumber_Adjacent'],
+                    number_of_neighbors_5=row['Neighbors_NumberOfNeighbors_5'],
+                    number_of_neighbors_adjacent=row['Neighbors_NumberOfNeighbors_Adjacent'],
+                    percent_touching_5=row['Neighbors_PercentTouching_5'],
+                    percent_touching_adjacent=row['Neighbors_PercentTouching_Adjacent'],
+                    second_closest=Object.find_or_create_by(
+                        session=session,
+                        image=Image.find_by(
                             session=session,
-                            image=Image.find_by(
-                                session=session,
-                                description=int(row['ImageNumber'])
-                            ),
-                            description=row['Neighbors_SecondClosestObjectNumber_5']
+                            description=int(row['ImageNumber'])
                         ),
-                        second_closest_distance_5=row['Neighbors_SecondClosestDistance_5'],
-                        second_closest_distance_adjacent=row['Neighbors_SecondClosestDistance_Adjacent'],
-                        second_closest_object_number_adjacent=row['Neighbors_SecondClosestObjectNumber_Adjacent']
-                    )
+                        description=row['Neighbors_SecondClosestObjectNumber_5']
+                    ),
+                    second_closest_distance_5=row['Neighbors_SecondClosestDistance_5'],
+                    second_closest_distance_adjacent=row['Neighbors_SecondClosestDistance_Adjacent'],
+                    second_closest_object_number_adjacent=row['Neighbors_SecondClosestObjectNumber_Adjacent']
+                )
 
-                    neighborhood.object = object
+                neighborhood.object = object
 
-                    match.neighborhood = neighborhood
-                except KeyError:
-                    logger.debug(KeyError)
+                match.neighborhood = neighborhood
 
                 match.pattern = pattern
 
