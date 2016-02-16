@@ -576,6 +576,7 @@ def seed(input, output, verbose=False):
 
                 session.add_all(intensities)
                 session.add_all(edges)
+                session.add_all(locations)
                 session.add_all(textures)
                 session.add_all(radial_distributions)
 
