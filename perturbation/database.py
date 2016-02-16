@@ -70,6 +70,8 @@ def seed(input, output, verbose=False):
 
     perturbation.base.Base.metadata.create_all(engine)
 
+    images = []
+
     for chunk in pandas.read_csv(os.path.join(input, 'image.csv'), chunksize=4):
         for index, row in chunk.iterrows():
             well = Well.find_or_create_by(
@@ -89,7 +91,39 @@ def seed(input, output, verbose=False):
                 description=row['ImageNumber']
             )
 
+            images.append(image)
+
             well.images.append(image)
+
+    def find_image_by(image_description):
+        for image in images:
+            if image.description == image_description:
+                return image
+
+    objects = []
+
+    def find_object_by(image_id, object_description):
+        for object in objects:
+            if str(object_description) == object_description:
+                return object
+            else:
+                Object.find_or_create_by(session=session, description=object_description, image_id=image_id)
+
+
+    # TODO: Read only the header, and read all the patterns because some columns are present in one and not the other
+    data = pandas.read_csv(os.path.join(input, 'Cells.csv'))
+
+    object_numbers = data[['ImageNumber', 'ObjectNumber']].drop_duplicates()
+
+    for index, object_number in object_numbers.iterrows():
+        object = Object(
+            image=find_image_by(object_number['ImageNumber']),
+            description=str(object_number['ObjectNumber'])
+        )
+
+        objects.append(object)
+
+    session.add_all(objects)
 
     session.commit()
 
@@ -111,8 +145,6 @@ def seed(input, output, verbose=False):
 
         patterns.append(pattern)
 
-    # TODO: Read only the header, and read all the patterns because some columns are present in one and not the other
-    data = pandas.read_csv(os.path.join(input, 'Cells.csv'))
 
     columns = data.columns
 
@@ -186,15 +218,11 @@ def seed(input, output, verbose=False):
 
                 row = collections.defaultdict(lambda: None, row)
 
-                image = Image.find_by(
-                    session=session,
-                    description=int(row['ImageNumber'])
-                )
+                image = find_image_by(str(int(row['ImageNumber'])))
 
-                object = Object.find_or_create_by(
-                    description=int(row['ObjectNumber']),
+                object = find_object_by(
                     image_id=image.id,
-                    session=session
+                    object_description=str(int(row['ObjectNumber']))
                 )
 
                 match = Match()
@@ -250,14 +278,7 @@ def seed(input, output, verbose=False):
                 neighborhood = Neighborhood(
                     angle_between_neighbors_5=row['Neighbors_AngleBetweenNeighbors_5'],
                     angle_between_neighbors_adjacent=row['Neighbors_AngleBetweenNeighbors_Adjacent'],
-                    closest=Object.find_or_create_by(
-                        session=session,
-                        image=Image.find_by(
-                            session=session,
-                            description=int(row['ImageNumber'])
-                        ),
-                        description=row['Neighbors_FirstClosestObjectNumber_5']
-                    ),
+
                     first_closest_distance_5=row['Neighbors_FirstClosestDistance_5'],
                     first_closest_distance_adjacent=row['Neighbors_FirstClosestDistance_Adjacent'],
                     first_closest_object_number_adjacent=row['Neighbors_FirstClosestObjectNumber_Adjacent'],
@@ -265,18 +286,22 @@ def seed(input, output, verbose=False):
                     number_of_neighbors_adjacent=row['Neighbors_NumberOfNeighbors_Adjacent'],
                     percent_touching_5=row['Neighbors_PercentTouching_5'],
                     percent_touching_adjacent=row['Neighbors_PercentTouching_Adjacent'],
-                    second_closest=Object.find_or_create_by(
-                        session=session,
-                        image=Image.find_by(
-                            session=session,
-                            description=int(row['ImageNumber'])
-                        ),
-                        description=row['Neighbors_SecondClosestObjectNumber_5']
-                    ),
                     second_closest_distance_5=row['Neighbors_SecondClosestDistance_5'],
                     second_closest_distance_adjacent=row['Neighbors_SecondClosestDistance_Adjacent'],
                     second_closest_object_number_adjacent=row['Neighbors_SecondClosestObjectNumber_Adjacent']
                 )
+
+                if row['Neighbors_FirstClosestObjectNumber_5']:
+                    neighborhood.closest=find_object_by(
+                        image_id=image.id,
+                        object_description=str(int(row['Neighbors_FirstClosestObjectNumber_5']))
+                    )
+
+                if row['Neighbors_SecondClosestObjectNumber_5']:
+                    neighborhood.second_closest=find_object_by(
+                        image_id=image.id,
+                        object_description=str(int(row['Neighbors_SecondClosestObjectNumber_5']))
+                    )
 
                 neighborhood.object = object
 
@@ -300,7 +325,7 @@ def seed(input, output, verbose=False):
                         ],
                         dependent_id=dependent.id,
                         independent_id=independent.id,
-                        match_id=match.id
+                        match=match
                     )
 
                     correlations.append(correlation)
@@ -309,13 +334,23 @@ def seed(input, output, verbose=False):
 
                 intensities = []
 
+                append_intensity = intensities.append
+
                 edges = []
+
+                append_edge = edges.append
 
                 locations = []
 
+                append_location = locations.append
+
                 textures = []
 
+                append_texture = textures.append
+
                 radial_distributions = []
+
+                append_radial_distribution = radial_distributions.append
 
                 for channel in channels:
                     intensity = Intensity(
@@ -335,7 +370,7 @@ def seed(input, output, verbose=False):
                                 channel.description
                             )
                         ],
-                        match_id=match.id,
+                        match=match,
                         maximum=row[
                             'Intensity_MaxIntensity_{}'.format(
                                 channel.description
@@ -373,7 +408,7 @@ def seed(input, output, verbose=False):
                         ]
                     )
 
-                    intensities.append(intensity)
+                    append_intensity(intensity)
 
                     edge = Edge(
                         channel_id=channel.id,
@@ -382,7 +417,7 @@ def seed(input, output, verbose=False):
                                 channel.description
                             )
                         ],
-                        match_id=match.id,
+                        match=match,
                         maximum=row[
                             'Intensity_MaxIntensityEdge_{}'.format(
                                 channel.description
@@ -405,7 +440,7 @@ def seed(input, output, verbose=False):
                         ]
                     )
 
-                    edges.append(edge)
+                    append_edge(edge)
 
                     location = Location(
                         center_mass_intensity=Coordinate(
@@ -429,7 +464,7 @@ def seed(input, output, verbose=False):
                             )
                         ),
                         channel_id=channel.id,
-                        match_id=match.id,
+                        match=match,
                         max_intensity=Coordinate(
                             abscissa=int(
                                 round(
@@ -452,7 +487,7 @@ def seed(input, output, verbose=False):
                         )
                     )
 
-                    locations.append(location)
+                    append_location(location)
 
                     for scale in scales:
                         texture = Texture(
@@ -487,7 +522,7 @@ def seed(input, output, verbose=False):
                                     scale
                                 )
                             ],
-                            match_id=match.id,
+                            match=match,
                             scale=scale,
                             entropy=row[
                                 'Texture_Entropy_{}_{}_0'.format(
@@ -545,7 +580,7 @@ def seed(input, output, verbose=False):
                             ]
                         )
 
-                        textures.append(texture)
+                        append_texture(texture)
 
                     for count in counts:
                         radial_distribution = RadialDistribution(
@@ -557,7 +592,7 @@ def seed(input, output, verbose=False):
                                     count
                                 )
                             ],
-                            match_id=match.id,
+                            match=match,
                             mean_frac=row[
                                 'RadialDistribution_MeanFrac_{}_{}of4'.format(
                                     channel.description,
@@ -572,7 +607,7 @@ def seed(input, output, verbose=False):
                             ]
                         )
 
-                        radial_distributions.append(radial_distribution)
+                        append_radial_distribution(radial_distribution)
 
                 session.add_all(intensities)
                 session.add_all(edges)
