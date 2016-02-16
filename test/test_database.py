@@ -29,7 +29,7 @@ def session(output='/tmp/test.sqlite'):
 
 
 def test_seed(session):
-    # subprocess.run(['./munge.sh', 'test/data/'])
+    subprocess.run(['./munge.sh', 'test/data/'])
 
     perturbation.database.seed('test/data/', '/tmp/test.sqlite')
 
