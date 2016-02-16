@@ -33,4 +33,47 @@ def test_seed(session):
 
     perturbation.database.seed('test/data/', '/tmp/test.sqlite')
 
-    assert len(session.query(perturbation.models.Match).all()) == 60
+    n_plates = 1
+    n_channels = 3
+    n_patterns = 3
+    n_wells = 2
+    n_images = 4
+    n_objects = 20
+    n_bins_raddist = 4
+    n_scales_texture = 3
+    n_moments_coefs = 30
+
+    n_matches = n_objects * n_patterns
+    n_edges = n_objects * n_patterns * n_channels
+    n_intensities = n_objects * n_patterns * n_channels
+    n_textures = n_objects * n_patterns * n_channels * n_scales_texture
+    n_radial_distributions = n_objects * n_patterns * n_channels * n_bins_raddist
+    n_locations = n_objects * n_patterns * n_channels
+    n_shapes = n_objects * n_patterns
+    n_coordinates = (n_objects * n_patterns) + (n_objects * n_patterns * n_channels * 2)
+    n_moments = n_objects * n_patterns * n_moments_coefs
+    n_neighborhoods = n_objects * n_patterns
+    n_correlations = n_objects * n_patterns * 5
+
+    assert len(session.query(perturbation.models.Pattern).all()) == n_patterns
+    assert len(session.query(perturbation.models.Plate).all()) == n_plates
+    assert len(session.query(perturbation.models.Channel).all()) == n_channels
+    assert len(session.query(perturbation.models.Well).all()) == n_wells
+    assert len(session.query(perturbation.models.Image).all()) == n_images
+    assert len(session.query(perturbation.models.Match).all()) == n_matches
+    assert len(session.query(perturbation.models.Edge).all()) == n_edges
+    assert len(session.query(perturbation.models.Intensity).all()) == n_intensities
+    assert len(session.query(perturbation.models.Texture).all()) == n_textures
+    assert len(session.query(perturbation.models.RadialDistribution).all()) == n_radial_distributions
+    assert len(session.query(perturbation.models.Shape).all()) == n_shapes
+    assert len(session.query(perturbation.models.Location).all()) == n_locations
+    assert len(session.query(perturbation.models.Coordinate).all()) == n_coordinates
+    assert len(session.query(perturbation.models.Moment).all()) == n_moments
+    assert len(session.query(perturbation.models.Neighborhood).all()) == n_neighborhoods
+    assert len(session.query(perturbation.models.Correlation).all()) == n_correlations
+
+    correlations = session.query(perturbation.models.Correlation)
+
+    assert correlations.filter(perturbation.models.Correlation.match is not None).all() == []
+
+
