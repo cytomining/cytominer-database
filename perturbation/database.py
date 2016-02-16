@@ -1,7 +1,6 @@
 import click
 import collections
 import glob
-import IPython
 import os
 import pandas
 import perturbation.base
