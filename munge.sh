@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 DATADIR=$1
 PATTERNDIR=$DATADIR/patterns
 
