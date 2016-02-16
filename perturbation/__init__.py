@@ -34,7 +34,7 @@ def __main__(input, output, verbose):
 
     """
 
-    subprocess.run(['./munge.sh', input])
+    subprocess.run(['sh', './munge.sh', input])
 
     perturbation.database.seed(input=input, output=output, verbose=verbose)
 
