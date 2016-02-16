@@ -4,7 +4,9 @@ PATTERNDIR=$DATADIR/patterns
 
 mkdir -p $PATTERNDIR
 
-function join { local IFS="$1"; shift; echo "$*"; }
+join() {
+    local IFS="$1"; shift; echo "$*";
+}
 
 patterns=$(head -n 1 ${DATADIR}/object.csv | tr ',' '\n' | sort | tr -d '\r' | uniq | grep -v Image)
 
