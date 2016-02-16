@@ -57,7 +57,7 @@ def create(backend_file_path):
     return connection
 
 
-@do_profile(follow=[])
+#@do_profile(follow=[])
 def seed(input, output, verbose=False):
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO if not verbose else logging.DEBUG)
 
@@ -304,17 +304,22 @@ def seed(input, output, verbose=False):
                     )
 
                     correlations.append(correlation)
-                    
-                    # correlation.dependent = dependent
-                    #
-                    # correlation.independent = independent
-                    #
-                    # match.correlations.append(correlation)
 
                 session.add_all(correlations)
 
+                intensities = []
+
+                edges = []
+
+                locations = []
+
+                textures = []
+
+                radial_distributions = []
+
                 for channel in channels:
                     intensity = Intensity(
+                        channel_id=channel.id,
                         first_quartile=row[
                             'Intensity_LowerQuartileIntensity_{}'.format(
                                 channel.description
@@ -330,6 +335,7 @@ def seed(input, output, verbose=False):
                                 channel.description
                             )
                         ],
+                        match_id=match.id,
                         maximum=row[
                             'Intensity_MaxIntensity_{}'.format(
                                 channel.description
@@ -367,16 +373,16 @@ def seed(input, output, verbose=False):
                         ]
                     )
 
-                    intensity.channel = channel
-
-                    match.intensities.append(intensity)
+                    intensities.append(intensity)
 
                     edge = Edge(
+                        channel_id=channel.id,
                         integrated=row[
                             'Intensity_IntegratedIntensityEdge_{}'.format(
                                 channel.description
                             )
                         ],
+                        match_id=match.id,
                         maximum=row[
                             'Intensity_MaxIntensityEdge_{}'.format(
                                 channel.description
@@ -399,9 +405,7 @@ def seed(input, output, verbose=False):
                         ]
                     )
 
-                    edge.channel = channel
-
-                    match.edges.append(edge)
+                    edges.append(edge)
 
                     location = Location(
                         center_mass_intensity=Coordinate(
@@ -424,6 +428,8 @@ def seed(input, output, verbose=False):
                                 )
                             )
                         ),
+                        channel_id=channel.id,
+                        match_id=match.id,
                         max_intensity=Coordinate(
                             abscissa=int(
                                 round(
@@ -446,9 +452,7 @@ def seed(input, output, verbose=False):
                         )
                     )
 
-                    location.channel = channel
-
-                    match.locations.append(location)
+                    locations.append(location)
 
                     for scale in scales:
                         texture = Texture(
@@ -458,6 +462,7 @@ def seed(input, output, verbose=False):
                                     scale
                                 )
                             ],
+                            channel_id=channel.id,
                             contrast=row[
                                 'Texture_Contrast_{}_{}_0'.format(
                                     channel.description,
@@ -482,6 +487,7 @@ def seed(input, output, verbose=False):
                                     scale
                                 )
                             ],
+                            match_id=match.id,
                             scale=scale,
                             entropy=row[
                                 'Texture_Entropy_{}_{}_0'.format(
@@ -539,19 +545,19 @@ def seed(input, output, verbose=False):
                             ]
                         )
 
-                        texture.channel = channel
-
-                        match.textures.append(texture)
+                        textures.append(texture)
 
                     for count in counts:
                         radial_distribution = RadialDistribution(
                             bins=count,
+                            channel_id=channel.id,
                             frac_at_d=row[
                                 'RadialDistribution_FracAtD_{}_{}of4'.format(
                                     channel.description,
                                     count
                                 )
                             ],
+                            match_id=match.id,
                             mean_frac=row[
                                 'RadialDistribution_MeanFrac_{}_{}of4'.format(
                                     channel.description,
@@ -566,8 +572,11 @@ def seed(input, output, verbose=False):
                             ]
                         )
 
-                        radial_distribution.channel = channel
+                        radial_distributions.append(radial_distribution)
 
-                        match.radial_distributions.append(radial_distribution)
+                session.add_all(intensities)
+                session.add_all(edges)
+                session.add_all(textures)
+                session.add_all(radial_distributions)
 
         session.commit()
