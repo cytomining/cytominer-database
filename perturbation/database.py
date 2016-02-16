@@ -57,7 +57,7 @@ def create(backend_file_path):
     return connection
 
 
-# @do_profile(follow=[])
+@do_profile(follow=[])
 def seed(input, output, verbose=False):
     logging.basicConfig(format='%(asctime)s %(message)s', level=logging.INFO if not verbose else logging.DEBUG)
 
@@ -286,6 +286,8 @@ def seed(input, output, verbose=False):
 
                 match.shape = shape
 
+                correlations = []
+
                 for correlation_column in correlation_columns:
                     dependent, independent = correlation_column
 
@@ -295,14 +297,21 @@ def seed(input, output, verbose=False):
                                 dependent.description,
                                 independent.description
                             )
-                        ]
+                        ],
+                        dependent_id=dependent.id,
+                        independent_id=independent.id,
+                        match_id=match.id
                     )
 
-                    correlation.dependent = dependent
+                    correlations.append(correlation)
+                    
+                    # correlation.dependent = dependent
+                    #
+                    # correlation.independent = independent
+                    #
+                    # match.correlations.append(correlation)
 
-                    correlation.independent = independent
-
-                    match.correlations.append(correlation)
+                session.add_all(correlations)
 
                 for channel in channels:
                     intensity = Intensity(
