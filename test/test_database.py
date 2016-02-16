@@ -74,6 +74,6 @@ def test_seed(session):
 
     correlations = session.query(perturbation.models.Correlation)
 
-    assert correlations.filter(perturbation.models.Correlation.match is not None).all() == []
+    assert correlations.filter(perturbation.models.Correlation.match is None).all() == []
 
 
