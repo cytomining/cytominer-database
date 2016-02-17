@@ -89,7 +89,7 @@ class Image(perturbation.base.Base):
     well_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('wells.id'))
     well = sqlalchemy.orm.relationship('Well', back_populates='images', uselist=False)
 
-    description = sqlalchemy.Column(sqlalchemy.String)
+    description = sqlalchemy.Column(sqlalchemy.Integer)
 
 
 class Intensity(perturbation.base.Base):

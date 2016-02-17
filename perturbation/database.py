@@ -30,57 +30,7 @@ def create(backend_file_path):
     return connection
 
 def seed(input, output, verbose=False):
-    if verbose:
-        logging.basicConfig(filename='log/perturbation')
-
-        logger = logging.getLogger('perturbation')
-
-        logger.setLevel(logging.DEBUG)
-
-        logger = logging.getLogger(__name__)
-
-        @sqlalchemy.event.listens_for(sqlalchemy.engine.Engine, 'before_cursor_execute')
-        def before_cursor_execute(connection, cursor, statement, parameters, context, executemany):
-            connection.info.setdefault('query_start_time', []).append(time.time())
-
-        @sqlalchemy.event.listens_for(sqlalchemy.engine.Engine, 'after_cursor_execute')
-        def after_cursor_execute(connection, cursor, statement, parameters, context, executemany):
-            logger.debug('query %s', ' '.join(statement.replace('\n', '').split()))
-
-            logger.debug('time %f', time.time() - connection.info['query_start_time'].pop(-1))
-
-    @contextlib.contextmanager
-    def profile():
-        summary = cProfile.Profile()
-
-        summary.enable()
-
-        yield
-
-        summary.disable()
-
-        string = io.StringIO()
-
-        processes = pstats.Stats(summary, stream=string).sort_stats('cumulative')
-
-        processes.print_stats()
-
-        processes.print_callers()
-
-        print(string.getvalue())
-
-    if verbose:
-        engine = sqlalchemy.create_engine(
-            'sqlite:///{}'.format(os.path.realpath(output)),
-            creator=lambda: create(os.path.realpath(output)),
-            echo=True
-        )
-    else:
-        engine = sqlalchemy.create_engine(
-            'sqlite:///{}'.format(os.path.realpath(output)),
-            creator=lambda: create(os.path.realpath(output)),
-            echo=False
-        )
+    engine = sqlalchemy.create_engine('sqlite:///{}'.format(os.path.realpath(output)), creator=lambda: create(os.path.realpath(output)))
 
     session = sqlalchemy.orm.sessionmaker(bind=engine)
 
@@ -88,45 +38,56 @@ def seed(input, output, verbose=False):
 
     perturbation.base.Base.metadata.create_all(engine)
 
-    images = []
+    image_dictionaries = []
+    object_dictionaries = []
+    plate_dictionaries = []
+    well_dictionaries = []
 
-    for chunk in pandas.read_csv(os.path.join(input, 'image.csv'), chunksize=4):
-        for index, row in chunk.iterrows():
-            well = Well.find_or_create_by(
-                session=session,
-                description=row['Metadata_Well']
-            )
+    data = pandas.read_csv(os.path.join(input, 'image.csv'))
 
-            plate = Plate.find_or_create_by(
-                session=session,
-                barcode=row['Metadata_Barcode']
-            )
+    barcodes = data['Metadata_Barcode'].unique()
 
-            plate.wells.append(well)
+    for barcode in barcodes:
+        plate_dictionary = {
+            'barcode': str(int(barcode)),
+            'id': uuid.uuid4()
+        }
 
-            image = Image.find_or_create_by(
-                session=session,
-                description=row['ImageNumber']
-            )
+        plate_dictionaries.append(plate_dictionary)
 
-            images.append(image)
+        well_descriptions = data[data['Metadata_Barcode'] == barcode]['Metadata_Well'].unique()
 
-            well.images.append(image)
+        for well_description in well_descriptions:
+            well_dictionary = {
+                'description': well_description,
+                'id': uuid.uuid4(),
+                'plate_id': plate_dictionary['id']
+            }
 
-    def find_image_by(image_description):
-        for image in images:
-            if image.description == image_description:
-                return image
+            well_dictionaries.append(well_dictionary)
 
-    objects = []
+            image_descriptions = data[(data['Metadata_Barcode'] == barcode) & (data['Metadata_Well'] == well_description)]['ImageNumber'].unique()
+
+            for image_description in image_descriptions:
+                image_dictionary = {
+                    'description': int(image_description),
+                    'id': uuid.uuid4(),
+                    'well_id': well_dictionary['id']
+                }
+
+                image_dictionaries.append(image_dictionary)
+
+    def find_image_by(description):
+        for dictionary in image_dictionaries:
+            if dictionary['description'] == description:
+                return dictionary
 
     def find_object_by(image_id, object_description):
-        for object in objects:
+        for object in object_dictionaries:
             if str(object_description) == object_description:
                 return object
             else:
                 Object.find_or_create_by(session=session, description=object_description, image_id=image_id)
-
 
     # TODO: Read only the header, and read all the patterns because some columns are present in one and not the other
     data = pandas.read_csv(os.path.join(input, 'Cells.csv'))
@@ -135,13 +96,13 @@ def seed(input, output, verbose=False):
 
     for index, object_number in object_numbers.iterrows():
         object = Object(
-            image=find_image_by(object_number['ImageNumber']),
+            image_id=find_image_by(object_number['ImageNumber'])['id'],
             description=str(object_number['ObjectNumber'])
         )
 
-        objects.append(object)
+        object_dictionaries.append(object)
 
-    session.add_all(objects)
+    session.add_all(object_dictionaries)
 
     session.commit()
 
@@ -262,10 +223,10 @@ def seed(input, output, verbose=False):
 
                 row = collections.defaultdict(lambda: None, row)
 
-                image = find_image_by(str(int(row['ImageNumber'])))
+                image = find_image_by(row['ImageNumber'])
 
                 object = find_object_by(
-                    image_id=image.id,
+                    image_id=image['id'],
                     object_description=str(int(row['ObjectNumber']))
                 )
 
@@ -429,26 +390,26 @@ def seed(input, output, verbose=False):
                     location_dictionaries.append(location)
 
                     for scale in scales:
-                        texture_dictionary = dict(
-                            angular_second_moment=row['Texture_AngularSecondMoment_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            channel_id=channel_dictionary['id'],
-                            contrast=row['Texture_Contrast_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            correlation=row['Texture_Correlation_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            difference_entropy=row['Texture_DifferenceEntropy_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            difference_variance=row['Texture_DifferenceVariance_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            id=uuid.uuid4(),
-                            match_id=match['id'],
-                            scale=scale,
-                            entropy=row['Texture_Entropy_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            gabor=row['Texture_Gabor_{}_{}'.format(channel_dictionary['description'], scale)],
-                            info_meas_1=row['Texture_InfoMeas1_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            info_meas_2=row['Texture_InfoMeas2_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            inverse_difference_moment=row['Texture_InverseDifferenceMoment_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            sum_average=row['Texture_SumAverage_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            sum_entropy=row['Texture_SumEntropy_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            sum_variance=row['Texture_SumVariance_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            variance=row['Texture_Variance_{}_{}_0'.format(channel_dictionary['description'], scale)]
-                        )
+                        texture_dictionary = {
+                            'angular_second_moment': row['Texture_AngularSecondMoment_{}_{}_0'.format(channel_dictionary['description'], scale)],
+                            'channel_id': channel_dictionary['id'],
+                            'contrast': row['Texture_Contrast_{}_{}_0'.format(channel_dictionary['description'], scale)],
+                            'correlation': row['Texture_Correlation_{}_{}_0'.format(channel_dictionary['description'], scale)],
+                            'difference_entropy': row['Texture_DifferenceEntropy_{}_{}_0'.format(channel_dictionary['description'], scale)],
+                            'difference_variance': row['Texture_DifferenceVariance_{}_{}_0'.format(channel_dictionary['description'], scale)],
+                            'id': uuid.uuid4(),
+                            'match_id': match['id'],
+                            'scale': scale,
+                            'entropy': row['Texture_Entropy_{}_{}_0'.format(channel_dictionary['description'], scale)],
+                            'gabor': row['Texture_Gabor_{}_{}'.format(channel_dictionary['description'], scale)],
+                            'info_meas_1': row['Texture_InfoMeas1_{}_{}_0'.format(channel_dictionary['description'], scale)],
+                            'info_meas_2': row['Texture_InfoMeas2_{}_{}_0'.format(channel_dictionary['description'], scale)],
+                            'inverse_difference_moment': row['Texture_InverseDifferenceMoment_{}_{}_0'.format(channel_dictionary['description'], scale)],
+                            'sum_average': row['Texture_SumAverage_{}_{}_0'.format(channel_dictionary['description'], scale)],
+                            'sum_entropy': row['Texture_SumEntropy_{}_{}_0'.format(channel_dictionary['description'], scale)],
+                            'sum_variance': row['Texture_SumVariance_{}_{}_0'.format(channel_dictionary['description'], scale)],
+                            'variance': row['Texture_Variance_{}_{}_0'.format(channel_dictionary['description'], scale)]
+                        }
 
                         texture_dictionaries.append(texture_dictionary)
 
@@ -486,6 +447,11 @@ def seed(input, output, verbose=False):
     )
 
     session.bulk_insert_mappings(
+        Image,
+        image_dictionaries
+    )
+
+    session.bulk_insert_mappings(
         Intensity,
         intensity_dictionaries
     )
@@ -511,6 +477,11 @@ def seed(input, output, verbose=False):
     )
 
     session.bulk_insert_mappings(
+        Plate,
+        plate_dictionaries
+    )
+
+    session.bulk_insert_mappings(
         RadialDistribution,
         radial_distribution_dictionaries
     )
@@ -523,6 +494,11 @@ def seed(input, output, verbose=False):
     session.bulk_insert_mappings(
         Texture,
         texture_dictionaries
+    )
+
+    session.bulk_insert_mappings(
+        Well,
+        well_dictionaries
     )
 
     session.commit()
