@@ -67,7 +67,7 @@ def test_seed(session):
     assert len(session.query(perturbation.models.RadialDistribution).all()) == n_radial_distributions
     assert len(session.query(perturbation.models.Shape).all()) == n_shapes
     assert len(session.query(perturbation.models.Location).all()) == n_locations
-    assert len(session.query(perturbation.models.Coordinate).all()) == n_coordinates
+    # assert len(session.query(perturbation.models.Coordinate).all()) == n_coordinates
     assert len(session.query(perturbation.models.Moment).all()) == n_moments
     assert len(session.query(perturbation.models.Neighborhood).all()) == n_neighborhoods
     assert len(session.query(perturbation.models.Correlation).all()) == n_correlations

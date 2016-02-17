@@ -10,3 +10,4 @@ test/data/Cells.csv
 test/data/Cytoplasm.csv
 test/data/Nuclei.csv
 .DS_Store
+.python-version
