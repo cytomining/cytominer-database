@@ -44,16 +44,16 @@ def test_seed(session):
     n_moments_coefs = 30
 
     n_matches = n_objects * n_patterns
-    n_edges = n_objects * n_patterns * n_channels
-    n_intensities = n_objects * n_patterns * n_channels
-    n_textures = n_objects * n_patterns * n_channels * n_scales_texture
-    n_radial_distributions = n_objects * n_patterns * n_channels * n_bins_raddist
-    n_locations = n_objects * n_patterns * n_channels
-    n_shapes = n_objects * n_patterns
-    n_coordinates = (n_objects * n_patterns) + (n_objects * n_patterns * n_channels * 2)
-    n_moments = n_objects * n_patterns * n_moments_coefs
-    n_neighborhoods = n_objects * n_patterns
-    n_correlations = n_objects * n_patterns * 5
+    n_edges = n_matches * n_channels
+    n_intensities = n_matches * n_channels
+    n_textures = n_matches * n_channels * n_scales_texture
+    n_radial_distributions = n_matches * n_channels * n_bins_raddist
+    n_locations = n_matches * n_channels
+    n_shapes = n_matches
+    n_coordinates = n_matches + n_shapes + (n_matches * n_channels * 2)
+    n_moments = n_shapes * n_moments_coefs
+    n_neighborhoods = n_matches
+    n_correlations = n_matches * 5
 
     assert len(session.query(perturbation.models.Pattern).all()) == n_patterns
     assert len(session.query(perturbation.models.Plate).all()) == n_plates
@@ -67,7 +67,7 @@ def test_seed(session):
     assert len(session.query(perturbation.models.RadialDistribution).all()) == n_radial_distributions
     assert len(session.query(perturbation.models.Shape).all()) == n_shapes
     assert len(session.query(perturbation.models.Location).all()) == n_locations
-    # assert len(session.query(perturbation.models.Coordinate).all()) == n_coordinates
+    assert len(session.query(perturbation.models.Coordinate).all()) == n_coordinates
     assert len(session.query(perturbation.models.Moment).all()) == n_moments
     assert len(session.query(perturbation.models.Neighborhood).all()) == n_neighborhoods
     assert len(session.query(perturbation.models.Correlation).all()) == n_correlations
