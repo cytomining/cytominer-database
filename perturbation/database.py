@@ -2,23 +2,47 @@ from perturbation.models import *
 from perturbation.sqlite3 import *
 import click
 import collections
-import contextlib
-import cProfile
 import glob
-import logging
-import logging
 import os
 import pandas
 import perturbation.base
-import pstats
 import sqlalchemy
 import sqlalchemy.engine
 import sqlalchemy.event
 import sqlalchemy.orm
 import sqlite3
-import time
-import io
 import uuid
+
+
+def find_image_by(dictionaries, description):
+    """
+
+    :param dictionaries:
+    :param description:
+
+    :return:
+
+    """
+
+    for dictionary in dictionaries:
+        if dictionary['description'] == description:
+            return dictionary['id']
+
+
+def find_object_by(description, dictionaries, image_id):
+    """
+
+    :param description:
+    :param dictionaries:
+    :param image_id:
+
+    :return:
+
+    """
+
+    for dictionary in dictionaries:
+        if (dictionary['description'] == description) and (dictionary['image_id'] == image_id):
+            return dictionary['id']
 
 
 def create(backend_file_path):
@@ -41,9 +65,34 @@ def seed(input, output, verbose=False):
 
     perturbation.base.Base.metadata.create_all(engine)
 
+    coordinate_dictionaries = []
+
+    correlation_dictionaries = []
+
+    edge_dictionaries = []
+
     image_dictionaries = []
+
+    intensity_dictionaries = []
+
+    location_dictionaries = []
+
+    match_dictionaries = []
+
+    moment_dictionaries = []
+
+    neighborhood_dictionaries = []
+
     object_dictionaries = []
+
     plate_dictionaries = []
+
+    radial_distribution_dictionaries = []
+
+    shape_dictionaries = []
+
+    texture_dictionaries = []
+
     well_dictionaries = []
 
     data = pandas.read_csv(os.path.join(input, 'image.csv'))
@@ -69,9 +118,9 @@ def seed(input, output, verbose=False):
 
             well_dictionaries.append(well_dictionary)
 
-            image_descriptions = \
-                data[(data['Metadata_Barcode'] == barcode) & (data['Metadata_Well'] == well_description)][
-                    'ImageNumber'].unique()
+            image_descriptions = data[
+                (data['Metadata_Barcode'] == barcode) & (data['Metadata_Well'] == well_description)
+            ]['ImageNumber'].unique()
 
             for image_description in image_descriptions:
                 image_dictionary = {
@@ -82,32 +131,28 @@ def seed(input, output, verbose=False):
 
                 image_dictionaries.append(image_dictionary)
 
-    def find_image_by(description):
-        for dictionary in image_dictionaries:
-            if dictionary['description'] == description:
-                return dictionary
-
-    def find_object_by(image_id, object_description):
-        for object in object_dictionaries:
-            if str(object_description) == object_description:
-                return object
-            else:
-                Object.find_or_create_by(session=session, description=object_description, image_id=image_id)
-
     # TODO: Read only the header, and read all the patterns because some columns are present in one and not the other
     data = pandas.read_csv(os.path.join(input, 'Cells.csv'))
 
     object_numbers = data[['ImageNumber', 'ObjectNumber']].drop_duplicates()
 
     for index, object_number in object_numbers.iterrows():
-        object = Object(
-                image_id=find_image_by(object_number['ImageNumber'])['id'],
-                description=str(object_number['ObjectNumber'])
-        )
+        object_dictionary = {
+            'description': str(
+                object_number[
+                    'ObjectNumber'
+                ]
+            ),
+            'id': uuid.uuid4(),
+            'image_id': find_image_by(
+                description=object_number[
+                    'ImageNumber'
+                ],
+                dictionaries=image_dictionaries
+            )
+        }
 
-        object_dictionaries.append(object)
-
-    session.add_all(object_dictionaries)
+        object_dictionaries.append(object_dictionary)
 
     session.commit()
 
@@ -125,7 +170,10 @@ def seed(input, output, verbose=False):
     patterns = []
 
     for pattern_description in pattern_descriptions:
-        pattern = Pattern.find_or_create_by(session, description=pattern_description)
+        pattern = Pattern.find_or_create_by(
+            session=session,
+            description=pattern_description
+        )
 
         patterns.append(pattern)
 
@@ -194,30 +242,6 @@ def seed(input, output, verbose=False):
         if split_columns[0] == 'AreaShape' and split_columns[1] == 'Zernike':
             moments.append((split_columns[2], split_columns[3]))
 
-    # session.commit()
-
-    coordinate_dictionaries = []
-
-    correlation_dictionaries = []
-
-    edge_dictionaries = []
-
-    intensity_dictionaries = []
-
-    location_dictionaries = []
-
-    match_dictionaries = []
-
-    moment_dictionaries = []
-
-    neighborhood_dictionaries = []
-
-    radial_distribution_dictionaries = []
-
-    shape_dictionaries = []
-
-    texture_dictionaries = []
-
     for pattern in patterns:
         data = pandas.read_csv(os.path.join(input, '{}.csv').format(pattern.description))
 
@@ -227,9 +251,22 @@ def seed(input, output, verbose=False):
 
                 row = collections.defaultdict(lambda: None, row)
 
-                image = find_image_by(row['ImageNumber'])
+                image_id = find_image_by(
+                    description=row[
+                        'ImageNumber'
+                    ],
+                    dictionaries=image_dictionaries
+                )
 
-                object = find_object_by(image_id=image['id'], object_description=str(int(row['ObjectNumber'])))
+                object_id = find_object_by(
+                    description=int(
+                        row[
+                            'ObjectNumber'
+                        ]
+                    ),
+                    image_id=image_id,
+                    dictionaries=object_dictionaries
+                )
 
                 center = {
                     'abscissa': row[
@@ -284,12 +321,18 @@ def seed(input, output, verbose=False):
                 }
 
                 # if row['Neighbors_FirstClosestObjectNumber_5']:
-                #     neighborhood_dictionary['closest_id'] = find_object_by(
-                #         image_id=image.id,
-                #         object_description=str(int(row['Neighbors_FirstClosestObjectNumber_5']))
-                #     ).id
+                #     description = int(row['Neighbors_FirstClosestObjectNumber_5'])
                 #
+                #     closest_id = find_object_by(
+                #         description=description,
+                #         image_id=image['id']
+                #     )
+                #
+                #     neighborhood_dictionary['closest_id'] = closest_id['id']
+
                 # if row['Neighbors_SecondClosestObjectNumber_5']:
+                #     neighborhood_dictionary['second_closest_id'] = uuid.uuid4()
+                #
                 #     neighborhood_dictionary['second_closest_id'] = find_object_by(
                 #         image_id=image.id,
                 #         object_description=str(int(row['Neighbors_SecondClosestObjectNumber_5']))
@@ -392,7 +435,7 @@ def seed(input, output, verbose=False):
                     'neighborhood_id': neighborhood_dictionary[
                         'id'
                     ],
-                    'object_id': object.id,
+                    'object_id': object_id,
                     'pattern_id': pattern.id,
                     'shape_id': shape[
                         'id'
@@ -826,6 +869,11 @@ def seed(input, output, verbose=False):
     session.bulk_insert_mappings(
         Neighborhood,
         neighborhood_dictionaries
+    )
+
+    session.bulk_insert_mappings(
+        Object,
+        object_dictionaries
     )
 
     session.bulk_insert_mappings(
