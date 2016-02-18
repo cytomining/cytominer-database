@@ -20,6 +20,7 @@ import time
 import io
 import uuid
 
+
 def create(backend_file_path):
     connection = sqlite3.connect(backend_file_path)
 
@@ -29,8 +30,10 @@ def create(backend_file_path):
 
     return connection
 
+
 def seed(input, output, verbose=False):
-    engine = sqlalchemy.create_engine('sqlite:///{}'.format(os.path.realpath(output)), creator=lambda: create(os.path.realpath(output)))
+    engine = sqlalchemy.create_engine('sqlite:///{}'.format(os.path.realpath(output)),
+                                      creator=lambda: create(os.path.realpath(output)))
 
     session = sqlalchemy.orm.sessionmaker(bind=engine)
 
@@ -66,7 +69,9 @@ def seed(input, output, verbose=False):
 
             well_dictionaries.append(well_dictionary)
 
-            image_descriptions = data[(data['Metadata_Barcode'] == barcode) & (data['Metadata_Well'] == well_description)]['ImageNumber'].unique()
+            image_descriptions = \
+                data[(data['Metadata_Barcode'] == barcode) & (data['Metadata_Well'] == well_description)][
+                    'ImageNumber'].unique()
 
             for image_description in image_descriptions:
                 image_dictionary = {
@@ -96,8 +101,8 @@ def seed(input, output, verbose=False):
 
     for index, object_number in object_numbers.iterrows():
         object = Object(
-            image_id=find_image_by(object_number['ImageNumber'])['id'],
-            description=str(object_number['ObjectNumber'])
+                image_id=find_image_by(object_number['ImageNumber'])['id'],
+                description=str(object_number['ObjectNumber'])
         )
 
         object_dictionaries.append(object)
@@ -123,7 +128,6 @@ def seed(input, output, verbose=False):
         pattern = Pattern.find_or_create_by(session, description=pattern_description)
 
         patterns.append(pattern)
-
 
     columns = data.columns
 
@@ -225,34 +229,59 @@ def seed(input, output, verbose=False):
 
                 image = find_image_by(row['ImageNumber'])
 
-                object = find_object_by(
-                    image_id=image['id'],
-                    object_description=str(int(row['ObjectNumber']))
-                )
+                object = find_object_by(image_id=image['id'], object_description=str(int(row['ObjectNumber'])))
 
-                center = dict(
-                    abscissa=row['Location_Center_X'],
-                    id=uuid.uuid4(),
-                    ordinate=row['Location_Center_Y']
-                )
+                center = {
+                    'abscissa': row[
+                        'Location_Center_X'
+                    ],
+                    'id': uuid.uuid4(),
+                    'ordinate': row[
+                        'Location_Center_Y'
+                    ]
+                }
 
                 coordinate_dictionaries.append(center)
 
-                neighborhood_dictionary = dict(
-                    angle_between_neighbors_5=row['Neighbors_AngleBetweenNeighbors_5'],
-                    angle_between_neighbors_adjacent=row['Neighbors_AngleBetweenNeighbors_Adjacent'],
-                    first_closest_distance_5=row['Neighbors_FirstClosestDistance_5'],
-                    first_closest_distance_adjacent=row['Neighbors_FirstClosestDistance_Adjacent'],
-                    first_closest_object_number_adjacent=row['Neighbors_FirstClosestObjectNumber_Adjacent'],
-                    id=uuid.uuid4(),
-                    number_of_neighbors_5=row['Neighbors_NumberOfNeighbors_5'],
-                    number_of_neighbors_adjacent=row['Neighbors_NumberOfNeighbors_Adjacent'],
-                    percent_touching_5=row['Neighbors_PercentTouching_5'],
-                    percent_touching_adjacent=row['Neighbors_PercentTouching_Adjacent'],
-                    second_closest_distance_5=row['Neighbors_SecondClosestDistance_5'],
-                    second_closest_distance_adjacent=row['Neighbors_SecondClosestDistance_Adjacent'],
-                    second_closest_object_number_adjacent=row['Neighbors_SecondClosestObjectNumber_Adjacent']
-                )
+                neighborhood_dictionary = {
+                    'angle_between_neighbors_5': row[
+                        'Neighbors_AngleBetweenNeighbors_5'
+                    ],
+                    'angle_between_neighbors_adjacent': row[
+                        'Neighbors_AngleBetweenNeighbors_Adjacent'
+                    ],
+                    'first_closest_distance_5': row[
+                        'Neighbors_FirstClosestDistance_5'
+                    ],
+                    'first_closest_distance_adjacent': row[
+                        'Neighbors_FirstClosestDistance_Adjacent'
+                    ],
+                    'first_closest_object_number_adjacent': row[
+                        'Neighbors_FirstClosestObjectNumber_Adjacent'
+                    ],
+                    'id': uuid.uuid4(),
+                    'number_of_neighbors_5': row[
+                        'Neighbors_NumberOfNeighbors_5'
+                    ],
+                    'number_of_neighbors_adjacent': row[
+                        'Neighbors_NumberOfNeighbors_Adjacent'
+                    ],
+                    'percent_touching_5': row[
+                        'Neighbors_PercentTouching_5'
+                    ],
+                    'percent_touching_adjacent': row[
+                        'Neighbors_PercentTouching_Adjacent'
+                    ],
+                    'second_closest_distance_5': row[
+                        'Neighbors_SecondClosestDistance_5'
+                    ],
+                    'second_closest_distance_adjacent': row[
+                        'Neighbors_SecondClosestDistance_Adjacent'
+                    ],
+                    'second_closest_object_number_adjacent': row[
+                        'Neighbors_SecondClosestObjectNumber_Adjacent'
+                    ]
+                }
 
                 # if row['Neighbors_FirstClosestObjectNumber_5']:
                 #     neighborhood_dictionary['closest_id'] = find_object_by(
@@ -268,161 +297,484 @@ def seed(input, output, verbose=False):
 
                 neighborhood_dictionaries.append(neighborhood_dictionary)
 
-                shape_center = dict(
-                    abscissa=row['AreaShape_Center_X'],
-                    id=uuid.uuid4(),
-                    ordinate=row['AreaShape_Center_Y']
-                )
+                shape_center = {
+                    'abscissa': row[
+                        'AreaShape_Center_X'
+                    ],
+                    'id': uuid.uuid4(),
+                    'ordinate': row[
+                        'AreaShape_Center_Y'
+                    ]
+                }
 
                 coordinate_dictionaries.append(shape_center)
 
-                shape = dict(
-                    area=row['AreaShape_Area'],
-                    center_id=shape_center['id'],
-                    compactness=row['AreaShape_Compactness'],
-                    eccentricity=row['AreaShape_Eccentricity'],
-                    euler_number=row['AreaShape_EulerNumber'],
-                    extent=row['AreaShape_Extent'],
-                    form_factor=row['AreaShape_FormFactor'],
-                    id=uuid.uuid4(),
-                    major_axis_length=row['AreaShape_MajorAxisLength'],
-                    max_feret_diameter=row['AreaShape_MaxFeretDiameter'],
-                    maximum_radius=row['AreaShape_MaximumRadius'],
-                    mean_radius=row['AreaShape_MeanRadius'],
-                    median_radius=row['AreaShape_MedianRadius'],
-                    min_feret_diameter=row['AreaShape_MinFeretDiameter'],
-                    minor_axis_length=row['AreaShape_MinorAxisLength'],
-                    orientation=row['AreaShape_Orientation'],
-                    perimeter=row['AreaShape_Perimeter'],
-                    solidity=row['AreaShape_Solidity']
-                )
+                shape = {
+                    'area': row[
+                        'AreaShape_Area'
+                    ],
+                    'center_id': shape_center[
+                        'id'
+                    ],
+                    'compactness': row[
+                        'AreaShape_Compactness'
+                    ],
+                    'eccentricity': row[
+                        'AreaShape_Eccentricity'
+                    ],
+                    'euler_number': row[
+                        'AreaShape_EulerNumber'
+                    ],
+                    'extent': row[
+                        'AreaShape_Extent'
+                    ],
+                    'form_factor': row[
+                        'AreaShape_FormFactor'
+                    ],
+                    'id': uuid.uuid4(),
+                    'major_axis_length': row[
+                        'AreaShape_MajorAxisLength'
+                    ],
+                    'max_feret_diameter': row[
+                        'AreaShape_MaxFeretDiameter'
+                    ],
+                    'maximum_radius': row[
+                        'AreaShape_MaximumRadius'
+                    ],
+                    'mean_radius': row[
+                        'AreaShape_MeanRadius'
+                    ],
+                    'median_radius': row[
+                        'AreaShape_MedianRadius'
+                    ],
+                    'min_feret_diameter': row[
+                        'AreaShape_MinFeretDiameter'
+                    ],
+                    'minor_axis_length': row[
+                        'AreaShape_MinorAxisLength'
+                    ],
+                    'orientation': row[
+                        'AreaShape_Orientation'
+                    ],
+                    'perimeter': row[
+                        'AreaShape_Perimeter'
+                    ],
+                    'solidity': row[
+                        'AreaShape_Solidity'
+                    ]
+                }
 
                 shape_dictionaries.append(shape)
 
-                for moment in moments:
-                    moment_dictionary = dict(
-                        a=moment[0],
-                        b=moment[1],
-                        id=uuid.uuid4(),
-                        score=row['AreaShape_Zernike_{}_{}'.format(moment[0], moment[1])],
-                        shape_id=shape['id']
-                    )
+                for a, b in moments:
+                    moment_dictionary = {
+                        'a': a,
+                        'b': b,
+                        'id': uuid.uuid4(),
+                        'score': row[
+                            'AreaShape_Zernike_{}_{}'.format(
+                                a,
+                                b
+                            )
+                        ],
+                        'shape_id': shape[
+                            'id'
+                        ]
+                    }
 
                     moment_dictionaries.append(moment_dictionary)
 
-                match = dict(
-                    center_id=center['id'],
-                    id=uuid.uuid4(),
-                    neighborhood_id=neighborhood_dictionary['id'],
-                    object_id=object.id,
-                    pattern_id=pattern.id,
-                    shape_id=shape['id']
-                )
+                match = {
+                    'center_id': center[
+                        'id'
+                    ],
+                    'id': uuid.uuid4(),
+                    'neighborhood_id': neighborhood_dictionary[
+                        'id'
+                    ],
+                    'object_id': object.id,
+                    'pattern_id': pattern.id,
+                    'shape_id': shape[
+                        'id'
+                    ]
+                }
 
                 match_dictionaries.append(match)
 
                 for dependent, independent in correlation_columns:
-                    correlation_dictionary = dict(
-                        coefficient=row['Correlation_Correlation_{}_{}'.format(dependent['description'], independent['description'])],
-                        dependent_id=dependent['id'],
-                        id=uuid.uuid4(),
-                        independent_id=independent['id'],
-                        match_id=match['id']
-                    )
+                    correlation_dictionary = {
+                        'coefficient': row[
+                            'Correlation_Correlation_{}_{}'.format(
+                                dependent[
+                                    'description'
+                                ],
+                                independent[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'dependent_id': dependent[
+                            'id'
+                        ],
+                        'id': uuid.uuid4(),
+                        'independent_id': independent[
+                            'id'
+                        ],
+                        'match_id': match[
+                            'id'
+                        ]
+                    }
 
                     correlation_dictionaries.append(correlation_dictionary)
 
                 for channel_dictionary in channel_dictionaries:
-                    intensity_dictionary = dict(
-                        channel_id=channel_dictionary['id'],
-                        first_quartile=row['Intensity_LowerQuartileIntensity_{}'.format(channel_dictionary['description'])],
-                        id=uuid.uuid4(),
-                        integrated=row['Intensity_IntegratedIntensity_{}'.format(channel_dictionary['description'])],
-                        mass_displacement=row['Intensity_MassDisplacement_{}'.format(channel_dictionary['description'])],
-                        match_id=match['id'],
-                        maximum=row['Intensity_MaxIntensity_{}'.format(channel_dictionary['description'])],
-                        mean=row['Intensity_MeanIntensity_{}'.format(channel_dictionary['description'])],
-                        median=row['Intensity_MedianIntensity_{}'.format(channel_dictionary['description'])],
-                        median_absolute_deviation=row['Intensity_MADIntensity_{}'.format(channel_dictionary['description'])],
-                        minimum=row['Intensity_MinIntensity_{}'.format(channel_dictionary['description'])],
-                        standard_deviation=row['Intensity_StdIntensity_{}'.format(channel_dictionary['description'])],
-                        third_quartile=row['Intensity_UpperQuartileIntensity_{}'.format(channel_dictionary['description'])]
-                    )
+                    intensity_dictionary = {
+                        'channel_id': channel_dictionary[
+                            'id'
+                        ],
+                        'first_quartile': row[
+                            'Intensity_LowerQuartileIntensity_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'id': uuid.uuid4(),
+                        'integrated': row[
+                            'Intensity_IntegratedIntensity_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'mass_displacement': row[
+                            'Intensity_MassDisplacement_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'match_id': match[
+                            'id'
+                        ],
+                        'maximum': row[
+                            'Intensity_MaxIntensity_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'mean': row[
+                            'Intensity_MeanIntensity_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'median': row[
+                            'Intensity_MedianIntensity_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'median_absolute_deviation': row[
+                            'Intensity_MADIntensity_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'minimum': row[
+                            'Intensity_MinIntensity_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'standard_deviation': row[
+                            'Intensity_StdIntensity_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'third_quartile': row[
+                            'Intensity_UpperQuartileIntensity_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ]
+                    }
 
                     intensity_dictionaries.append(intensity_dictionary)
 
-                    edge = dict(
-                        channel_id=channel_dictionary['id'],
-                        id=uuid.uuid4(),
-                        integrated=row['Intensity_IntegratedIntensityEdge_{}'.format(channel_dictionary['description'])],
-                        match_id=match['id'],
-                        maximum=row['Intensity_MaxIntensityEdge_{}'.format(channel_dictionary['description'])],
-                        mean=row['Intensity_MeanIntensityEdge_{}'.format(channel_dictionary['description'])],
-                        minimum=row['Intensity_MinIntensityEdge_{}'.format(channel_dictionary['description'])],
-                        standard_deviation=row['Intensity_StdIntensityEdge_{}'.format(channel_dictionary['description'])]
-                    )
+                    edge = {
+                        'channel_id': channel_dictionary[
+                            'id'
+                        ],
+                        'id': uuid.uuid4(),
+                        'integrated': row[
+                            'Intensity_IntegratedIntensityEdge_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'match_id': match[
+                            'id'
+                        ],
+                        'maximum': row[
+                            'Intensity_MaxIntensityEdge_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'mean': row[
+                            'Intensity_MeanIntensityEdge_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'minimum': row[
+                            'Intensity_MinIntensityEdge_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'standard_deviation': row[
+                            'Intensity_StdIntensityEdge_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ]
+                    }
 
                     edge_dictionaries.append(edge)
 
-                    center_mass_intensity = dict(
-                        abscissa=row['Location_CenterMassIntensity_X_{}'.format(channel_dictionary['description'])],
-                        id=uuid.uuid4(),
-                        ordinate=row['Location_CenterMassIntensity_Y_{}'.format(channel_dictionary['description'])]
-                    )
+                    center_mass_intensity = {
+                        'abscissa': row[
+                            'Location_CenterMassIntensity_X_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'id': uuid.uuid4(),
+                        'ordinate': row[
+                            'Location_CenterMassIntensity_Y_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ]
+                    }
 
                     coordinate_dictionaries.append(center_mass_intensity)
 
-                    max_intensity = dict(
-                        abscissa=row['Location_MaxIntensity_X_{}'.format(channel_dictionary['description'])],
-                        id=uuid.uuid4(),
-                        ordinate=row['Location_MaxIntensity_Y_{}'.format(channel_dictionary['description'])]
-                    )
+                    max_intensity = {
+                        'abscissa': row[
+                            'Location_MaxIntensity_X_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ],
+                        'id': uuid.uuid4(),
+                        'ordinate': row[
+                            'Location_MaxIntensity_Y_{}'.format(
+                                channel_dictionary[
+                                    'description'
+                                ]
+                            )
+                        ]
+                    }
 
                     coordinate_dictionaries.append(max_intensity)
 
                     location = {
-                        'center_mass_intensity_id': center_mass_intensity['id'],
-                        'channel_id': channel_dictionary['id'],
-                        'match_id': match['id'],
-                        'max_intensity_id': max_intensity['id']
+                        'center_mass_intensity_id': center_mass_intensity[
+                            'id'
+                        ],
+                        'channel_id': channel_dictionary[
+                            'id'
+                        ],
+                        'match_id': match[
+                            'id'
+                        ],
+                        'max_intensity_id': max_intensity[
+                            'id'
+                        ]
                     }
 
                     location_dictionaries.append(location)
 
                     for scale in scales:
                         texture_dictionary = {
-                            'angular_second_moment': row['Texture_AngularSecondMoment_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            'channel_id': channel_dictionary['id'],
-                            'contrast': row['Texture_Contrast_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            'correlation': row['Texture_Correlation_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            'difference_entropy': row['Texture_DifferenceEntropy_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            'difference_variance': row['Texture_DifferenceVariance_{}_{}_0'.format(channel_dictionary['description'], scale)],
+                            'angular_second_moment': row[
+                                'Texture_AngularSecondMoment_{}_{}_0'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ],
+                            'channel_id': channel_dictionary[
+                                'id'
+                            ],
+                            'contrast': row[
+                                'Texture_Contrast_{}_{}_0'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ],
+                            'correlation': row[
+                                'Texture_Correlation_{}_{}_0'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ],
+                            'difference_entropy': row[
+                                'Texture_DifferenceEntropy_{}_{}_0'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ],
+                            'difference_variance': row[
+                                'Texture_DifferenceVariance_{}_{}_0'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ],
                             'id': uuid.uuid4(),
-                            'match_id': match['id'],
+                            'match_id': match[
+                                'id'
+                            ],
                             'scale': scale,
-                            'entropy': row['Texture_Entropy_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            'gabor': row['Texture_Gabor_{}_{}'.format(channel_dictionary['description'], scale)],
-                            'info_meas_1': row['Texture_InfoMeas1_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            'info_meas_2': row['Texture_InfoMeas2_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            'inverse_difference_moment': row['Texture_InverseDifferenceMoment_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            'sum_average': row['Texture_SumAverage_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            'sum_entropy': row['Texture_SumEntropy_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            'sum_variance': row['Texture_SumVariance_{}_{}_0'.format(channel_dictionary['description'], scale)],
-                            'variance': row['Texture_Variance_{}_{}_0'.format(channel_dictionary['description'], scale)]
+                            'entropy': row[
+                                'Texture_Entropy_{}_{}_0'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ],
+                            'gabor': row[
+                                'Texture_Gabor_{}_{}'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ],
+                            'info_meas_1': row[
+                                'Texture_InfoMeas1_{}_{}_0'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ],
+                            'info_meas_2': row[
+                                'Texture_InfoMeas2_{}_{}_0'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ],
+                            'inverse_difference_moment': row[
+                                'Texture_InverseDifferenceMoment_{}_{}_0'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ],
+                            'sum_average': row[
+                                'Texture_SumAverage_{}_{}_0'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ],
+                            'sum_entropy': row[
+                                'Texture_SumEntropy_{}_{}_0'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ],
+                            'sum_variance': row[
+                                'Texture_SumVariance_{}_{}_0'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ],
+                            'variance': row[
+                                'Texture_Variance_{}_{}_0'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    scale
+                                )
+                            ]
                         }
 
                         texture_dictionaries.append(texture_dictionary)
 
                     for count in counts:
-                        radial_distribution_dictionary = dict(
-                            bins=count,
-                            channel_id=channel_dictionary['id'],
-                            frac_at_d=row['RadialDistribution_FracAtD_{}_{}of4'.format(channel_dictionary['description'], count)],
-                            id=uuid.uuid4(),
-                            match_id=match['id'],
-                            mean_frac=row['RadialDistribution_MeanFrac_{}_{}of4'.format(channel_dictionary['description'], count)],
-                            radial_cv=row['RadialDistribution_RadialCV_{}_{}of4'.format(channel_dictionary['description'], count)]
-                        )
+                        radial_distribution_dictionary = {
+                            'bins': count,
+                            'channel_id': channel_dictionary[
+                                'id'
+                            ],
+                            'frac_at_d': row[
+                                'RadialDistribution_FracAtD_{}_{}of4'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    count
+                                )
+                            ],
+                            'id': uuid.uuid4(),
+                            'match_id': match[
+                                'id'
+                            ],
+                            'mean_frac': row[
+                                'RadialDistribution_MeanFrac_{}_{}of4'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    count
+                                )
+                            ],
+                            'radial_cv': row[
+                                'RadialDistribution_RadialCV_{}_{}of4'.format(
+                                    channel_dictionary[
+                                        'description'
+                                    ],
+                                    count
+                                )
+                            ]
+                        }
 
                         radial_distribution_dictionaries.append(radial_distribution_dictionary)
 
