@@ -134,7 +134,15 @@ def seed(input, output, verbose=False):
     # TODO: Read only the header, and read all the patterns because some columns are present in one and not the other
     data = pandas.read_csv(os.path.join(input, 'Cells.csv'))
 
-    object_numbers = data[['ImageNumber', 'ObjectNumber']].drop_duplicates()
+    def get_object_numbers(s):
+        return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
+
+    object_numbers = pandas.concat(
+        [get_object_numbers(s) for s in ['ObjectNumber',
+                                         'Neighbors_FirstClosestObjectNumber_5',
+                                         'Neighbors_SecondClosestObjectNumber_5'
+                                         ]]
+    ).drop_duplicates()
 
     for index, object_number in object_numbers.iterrows():
         object_dictionary = {
@@ -259,11 +267,11 @@ def seed(input, output, verbose=False):
                 )
 
                 object_id = find_object_by(
-                    description=int(
+                    description=str(int(
                         row[
                             'ObjectNumber'
                         ]
-                    ),
+                    )),
                     image_id=image_id,
                     dictionaries=object_dictionaries
                 )
@@ -303,6 +311,7 @@ def seed(input, output, verbose=False):
                     'number_of_neighbors_adjacent': row[
                         'Neighbors_NumberOfNeighbors_Adjacent'
                     ],
+                    'object_id': object_id,
                     'percent_touching_5': row[
                         'Neighbors_PercentTouching_5'
                     ],
@@ -320,23 +329,27 @@ def seed(input, output, verbose=False):
                     ]
                 }
 
-                # if row['Neighbors_FirstClosestObjectNumber_5']:
-                #     description = int(row['Neighbors_FirstClosestObjectNumber_5'])
-                #
-                #     closest_id = find_object_by(
-                #         description=description,
-                #         image_id=image['id']
-                #     )
-                #
-                #     neighborhood_dictionary['closest_id'] = closest_id['id']
+                if row['Neighbors_FirstClosestObjectNumber_5']:
+                    description = str(int(row['Neighbors_FirstClosestObjectNumber_5']))
 
-                # if row['Neighbors_SecondClosestObjectNumber_5']:
-                #     neighborhood_dictionary['second_closest_id'] = uuid.uuid4()
-                #
-                #     neighborhood_dictionary['second_closest_id'] = find_object_by(
-                #         image_id=image.id,
-                #         object_description=str(int(row['Neighbors_SecondClosestObjectNumber_5']))
-                #     ).id
+                    closest_id = find_object_by(
+                        description=description,
+                        image_id=image_id,
+                        dictionaries=object_dictionaries
+                    )
+
+                    neighborhood_dictionary['closest_id'] = closest_id
+
+                if row['Neighbors_SecondClosestObjectNumber_5']:
+                    description = str(int(row['Neighbors_SecondClosestObjectNumber_5']))
+
+                    second_closest_id = find_object_by(
+                        description=description,
+                        image_id=image_id,
+                        dictionaries=object_dictionaries
+                    )
+
+                    neighborhood_dictionary['second_closest_id'] = second_closest_id
 
                 neighborhood_dictionaries.append(neighborhood_dictionary)
 
