@@ -29,9 +29,9 @@ def session(output='/tmp/test.sqlite'):
 
 
 def test_seed(session):
-    subprocess.run(['./munge.sh', 'test/data/'])
+    subprocess.run(['./munge.sh', 'test/data/set1'])
 
-    perturbation.database.seed('test/data/', '/tmp/test.sqlite')
+    perturbation.database.seed('test/data/set1', '/tmp/test.sqlite')
 
     n_plates = 1
     n_channels = 3
