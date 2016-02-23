@@ -1,8 +1,8 @@
 from perturbation.models import *
-from perturbation.sqlite3 import *
 import click
 import collections
 import glob
+import hashlib
 import os
 import pandas
 import perturbation.base
@@ -80,10 +80,6 @@ def find_object_by(description, dictionaries, image_id):
 def create(backend_file_path):
     connection = sqlite3.connect(backend_file_path)
 
-    connection.create_aggregate('standard_deviation', 1, StandardDeviation)
-
-    connection.create_function('standard_score', 3, standardize)
-
     return connection
 
 
@@ -132,6 +128,8 @@ def seed(input, output, verbose=False):
 
         data = pandas.read_csv(os.path.join(directory, 'image.csv'))
 
+        digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
+
         barcodes = data['Metadata_Barcode'].unique()
 
         for barcode in barcodes:
@@ -159,7 +157,7 @@ def seed(input, output, verbose=False):
 
                 for image_description in image_descriptions:
                     image_dictionary = {
-                        'description': int(image_description),
+                        'description': '{}_{}'.format(digest, image_description),
                         'id': uuid.uuid4(),
                         'well_id': well_dictionary['id']
                     }
@@ -188,9 +186,11 @@ def seed(input, output, verbose=False):
                 ),
                 'id': uuid.uuid4(),
                 'image_id': find_image_by(
-                    description=object_number[
-                        'ImageNumber'
-                    ],
+                    description='{}_{}'.format(
+                        digest,
+                        object_number[
+                            'ImageNumber'
+                    ]),
                     dictionaries=image_dictionaries
                 )
             }
@@ -296,9 +296,11 @@ def seed(input, output, verbose=False):
                     row = collections.defaultdict(lambda: None, row)
 
                     image_id = find_image_by(
-                        description=row[
-                            'ImageNumber'
-                        ],
+                        description='{}_{}'.format(
+                            digest,
+                            row[
+                                'ImageNumber'
+                        ]),
                         dictionaries=image_dictionaries
                     )
 
