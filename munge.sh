@@ -1,37 +1,50 @@
 #!/bin/bash
-DATADIR=$1
-PATTERNDIR=$DATADIR/patterns
 
-mkdir -p $PATTERNDIR
+stdin=$1
 
 join() {
-    local IFS="$1"; shift; echo "$*";
+    local IFS="$1";
+
+    shift;
+
+    echo "$*";
 }
 
-patterns=$(head -n 1 ${DATADIR}/object.csv | tr ',' '\n' | sort | tr -d '\r' | uniq | grep -v Image)
+task() {
+    sleep 0.5
 
-csvcut -c 1 -x ${DATADIR}/object.csv | tail -n +2 > ${DATADIR}/patterns/images.csv
+    directory=${stdin}${1}
 
-csvcut -c 2 -x ${DATADIR}/object.csv | tail -n +2 > ${DATADIR}/patterns/objects.csv
+    patterns_directory=${directory}/patterns
 
-csvjoin ${DATADIR}/patterns/images.csv ${DATADIR}/patterns/objects.csv  > ${DATADIR}/patterns/images_objects.csv
+    object_csv=${directory}/object.csv
 
-rm  ${DATADIR}/patterns/images.csv
+    images_csv=${patterns_directory}/images.csv
 
-rm ${DATADIR}/patterns/objects.csv
+    objects_csv=${patterns_directory}/objects.csv
 
-for pattern in ${patterns}; do
-  indices=$(csvcut -n ${DATADIR}/object.csv | grep -i $pattern | cut -d ':' -f1)
+    images_objects=${patterns_directory}/images_objects.csv
 
-  joined=$(join , ${indices[@]})
+    mkdir -p ${patterns_directory}
 
-  csvcut -c ${joined} -C 2 -x ${DATADIR}/object.csv | tail -n +2 > ${DATADIR}/patterns/${pattern}.csv
+    csvcut -c 1 -x ${object_csv} | tail -n +2 > ${images_csv}
+    csvcut -c 2 -x ${object_csv} | tail -n +2 > ${objects_csv}
 
-  csvjoin ${DATADIR}/patterns/images_objects.csv ${DATADIR}/patterns/${pattern}.csv > ${DATADIR}/${pattern}.csv
+    csvjoin ${images_csv} ${objects_csv}  > ${images_objects}
 
-  rm ${DATADIR}/patterns/${pattern}.csv
+    for pattern in $(head -n 1 ${directory}/object.csv | tr ',' '\n' | sort | tr -d '\r' | uniq | grep -v Image); do
+        indices=$(csvcut -n ${object_csv} | grep -i ${pattern} | cut -d ':' -f1)
+
+        joined=$(join , ${indices[@]})
+
+        csvcut -c ${joined} -C 2 -x ${object_csv} | tail -n +2 > ${patterns_directory}/${pattern}.csv
+
+        csvjoin ${images_objects} ${patterns_directory}/${pattern}.csv > ${directory}/${pattern}.csv
+    done
+
+    rm -rf ${patterns_directory}
+}
+
+for directory in $(ls ${stdin}); do
+    task ${directory} &
 done
-
-rm ${DATADIR}/patterns/images_objects.csv
-
-rm -rf $PATTERNDIR
