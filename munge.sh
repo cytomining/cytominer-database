@@ -22,6 +22,12 @@ task() {
 
     objects_csv=${patterns_directory}/objects.csv
 
+    if [[ ! -e $objects_csv ]];
+    then
+        echo Skipping directory $directory because objects.csv not found.
+        return
+    fi
+
     images_objects=${patterns_directory}/images_objects.csv
 
     mkdir -p ${patterns_directory}

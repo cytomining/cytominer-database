@@ -154,7 +154,12 @@ def seed(input, output, verbose=False):
 
         well_dictionaries = []
 
-        data = pandas.read_csv(os.path.join(directory, 'image.csv'))
+        try:
+            data = pandas.read_csv(os.path.join(directory, 'image.csv'))
+        except OSError as e:
+            print("Skipping directory {} because image.csv not found.".format(directory))
+            continue
+
 
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
