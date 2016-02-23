@@ -11,7 +11,6 @@ join() {
 }
 
 task() {
-    sleep 5.0
 
     directory=${stdin}/${1}/
 
@@ -46,5 +45,5 @@ task() {
 }
 
 for directory in $(ls ${stdin}); do
-    task ${directory} &
+    task ${directory}
 done
