@@ -6,11 +6,11 @@ __pycache__
 build
 dist
 .cache
-test/data/set_1/Cells.csv
-test/data/set_1/Cytoplasm.csv
-test/data/set_1/Nuclei.csv
-test/data/set_2/Cells.csv
-test/data/set_2/Cytoplasm.csv
-test/data/set_2/Nuclei.csv
+test/data/1/Cells.csv
+test/data/1/Cytoplasm.csv
+test/data/1/Nuclei.csv
+test/data/2/Cells.csv
+test/data/2/Cytoplasm.csv
+test/data/2/Nuclei.csv
 .DS_Store
 .python-version
