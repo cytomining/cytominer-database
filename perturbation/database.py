@@ -93,6 +93,34 @@ def seed(input, output, verbose=False):
 
     perturbation.base.Base.metadata.create_all(engine)
 
+    engine.execute("""
+        CREATE VIEW 'measurements' AS
+          SELECT
+            plates.barcode AS plate_barcode,
+            wells.description AS well_description,
+            images.description AS image_description,
+            objects.description AS object_description,
+            patterns.description AS pattern_description,
+            channels.description AS channel_description,
+            intensities.first_quartile AS Intensity_first_quartile,
+            intensities.integrated AS Intensity_integrated,
+            intensities.maximum AS Intensity_maximum,
+            intensities.mean AS Intensity_mean,
+            intensities.median AS Intensity_median,
+            intensities.median_absolute_deviation AS Intensity_median_absolute_deviation,
+            intensities.minimum AS Intensity_minimum,
+            intensities.standard_deviation AS Intensity_standard_deviation,
+            intensities.third_quartile  AS Intensity_third_quartile
+        FROM plates
+        LEFT JOIN wells ON wells.plate_id = plates.id
+        LEFT JOIN images ON images.well_id = wells.id
+        LEFT JOIN objects ON objects.image_id = images.id
+        LEFT JOIN matches ON matches.object_id = objects.id
+        LEFT JOIN patterns ON matches.pattern_id = patterns.id
+        LEFT JOIN intensities ON intensities.match_id = matches.id
+        LEFT JOIN channels ON intensities.channel_id = channels.id
+    """)
+
     channel_dictionaries = []
 
     for directory in find_directories(input):
