@@ -6,6 +6,7 @@ import click
 import perturbation.database
 import pkg_resources
 import subprocess
+import time
 
 
 def __version__(context, parameter, argument):
@@ -35,6 +36,8 @@ def __main__(input, output, verbose):
     """
 
     subprocess.run(['./munge.sh', input])
+
+    time.sleep(5)
 
     perturbation.database.seed(input=input, output=output, verbose=verbose)
 

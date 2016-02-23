@@ -28,17 +28,24 @@ def session(output='/tmp/test.sqlite'):
     return session()
 
 
+def test_find_directories():
+    assert perturbation.database.find_directories(directory=os.path.abspath('test/data')) == {
+        os.path.relpath('test/data/1'),
+        os.path.relpath('test/data/2')
+    }
+
+
 def test_seed(session):
-    subprocess.run(['./munge.sh', 'test/data/set_1'])
+    subprocess.run(['./munge.sh', 'test/data'])
 
-    perturbation.database.seed('test/data/set_1', '/tmp/test.sqlite')
+    perturbation.database.seed('test/data', '/tmp/test.sqlite')
 
-    n_plates = 1
+    n_plates = 2
     n_channels = 3
     n_patterns = 3
-    n_wells = 2
-    n_images = 4
-    n_objects = 20
+    n_wells = 4
+    n_images = 8
+    n_objects = 40
     n_bins_raddist = 4
     n_scales_texture = 3
     n_moments_coefs = 30

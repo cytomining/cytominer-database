@@ -11,9 +11,9 @@ join() {
 }
 
 task() {
-    sleep 0.5
+    sleep 5.0
 
-    directory=${stdin}${1}
+    directory=${stdin}/${1}/
 
     patterns_directory=${directory}/patterns
 
