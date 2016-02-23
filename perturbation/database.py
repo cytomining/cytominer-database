@@ -157,7 +157,7 @@ def seed(input, output, verbose=False):
 
                 for image_description in image_descriptions:
                     image_dictionary = {
-                        'description': '{}_{}'.format(digest, image_description),
+                        'description': '{}_{}'.format(digest, int(image_description)),
                         'id': uuid.uuid4(),
                         'well_id': well_dictionary['id']
                     }
@@ -188,9 +188,9 @@ def seed(input, output, verbose=False):
                 'image_id': find_image_by(
                     description='{}_{}'.format(
                         digest,
-                        object_number[
+                        int(object_number[
                             'ImageNumber'
-                    ]),
+                    ])),
                     dictionaries=image_dictionaries
                 )
             }
@@ -298,9 +298,9 @@ def seed(input, output, verbose=False):
                     image_id = find_image_by(
                         description='{}_{}'.format(
                             digest,
-                            row[
+                            int(row[
                                 'ImageNumber'
-                        ]),
+                        ])),
                         dictionaries=image_dictionaries
                     )
 
