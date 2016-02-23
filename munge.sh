@@ -22,9 +22,9 @@ task() {
 
     objects_csv=${patterns_directory}/objects.csv
 
-    if [[ ! -e $objects_csv ]];
+    if [[ ! -e $object_csv ]];
     then
-        echo Skipping directory $directory because objects.csv not found.
+        echo Skipping directory $directory because object.csv not found.
         return
     fi
 

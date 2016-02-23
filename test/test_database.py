@@ -31,7 +31,8 @@ def session(output='/tmp/test.sqlite'):
 def test_find_directories():
     assert perturbation.database.find_directories(directory=os.path.abspath('test/data')) == {
         os.path.relpath('test/data/1'),
-        os.path.relpath('test/data/2')
+        os.path.relpath('test/data/2'),
+        os.path.relpath('test/data/empty_dir')
     }
 
 
