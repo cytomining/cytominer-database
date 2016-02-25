@@ -77,6 +77,21 @@ def find_object_by(description, dictionaries, image_id):
             return dictionary['id']
 
 
+def find_plate_by(dictionaries, barcode):
+    """
+
+    :param dictionaries:
+    :param barcode:
+
+    :return:
+
+    """
+
+    for dictionary in dictionaries:
+        if dictionary['barcode'] == barcode:
+            return dictionary
+
+
 def create(backend_file_path):
     connection = sqlite3.connect(backend_file_path)
 
@@ -123,6 +138,8 @@ def seed(input, output, verbose=False):
 
     channel_dictionaries = []
 
+    plate_dictionaries = []
+
     for directory in find_directories(input):
         coordinate_dictionaries = []
 
@@ -144,8 +161,6 @@ def seed(input, output, verbose=False):
 
         object_dictionaries = []
 
-        plate_dictionaries = []
-
         radial_distribution_dictionaries = []
 
         shape_dictionaries = []
@@ -166,12 +181,15 @@ def seed(input, output, verbose=False):
         barcodes = data['Metadata_Barcode'].unique()
 
         for barcode in barcodes:
-            plate_dictionary = {
-                'barcode': str(int(barcode)),
-                'id': uuid.uuid4()
-            }
+            plate_dictionary = find_plate_by(plate_dictionaries, str(int(barcode)))
 
-            plate_dictionaries.append(plate_dictionary)
+            if not plate_dictionary:
+                plate_dictionary = {
+                    'barcode': str(int(barcode)),
+                    'id': uuid.uuid4()
+                }
+
+                plate_dictionaries.append(plate_dictionary)
 
             well_descriptions = data[data['Metadata_Barcode'] == barcode]['Metadata_Well'].unique()
 
@@ -956,11 +974,6 @@ def seed(input, output, verbose=False):
         )
 
         session.bulk_insert_mappings(
-            Plate,
-            plate_dictionaries
-        )
-
-        session.bulk_insert_mappings(
             RadialDistribution,
             radial_distribution_dictionaries
         )
@@ -985,6 +998,11 @@ def seed(input, output, verbose=False):
     session.bulk_insert_mappings(
         Channel,
         channel_dictionaries
+    )
+
+    session.bulk_insert_mappings(
+        Plate,
+        plate_dictionaries
     )
 
     session.commit()

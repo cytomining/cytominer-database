@@ -51,5 +51,10 @@ task() {
 }
 
 for directory in $(ls ${stdin}); do
-    task ${directory}
+    if ${TRAVIS};
+    then
+        task ${directory}
+    else
+        task ${directory} &
+    fi
 done

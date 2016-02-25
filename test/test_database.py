@@ -41,7 +41,7 @@ def test_seed(session):
 
     perturbation.database.seed('test/data', '/tmp/test.sqlite')
 
-    n_plates = 2
+    n_plates = 1
     n_channels = 3
     n_patterns = 3
     n_wells = 4
