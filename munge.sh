@@ -58,3 +58,5 @@ for directory in $(ls ${stdin}); do
         task ${directory} &
     fi
 done
+
+wait
