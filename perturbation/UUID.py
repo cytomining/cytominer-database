@@ -12,28 +12,9 @@ class UUID(sqlalchemy.types.TypeDecorator):
 
     """
 
-    def python_type(self):
-        """
+    impl = sqlalchemy.types.BINARY(16)
 
-        :return:
-
-        """
-
-        pass
-
-    def process_literal_param(self, value, dialect):
-        """
-
-        :param value:
-        :param dialect:
-
-        :return:
-
-        """
-
-        pass
-
-    impl = sqlalchemy.types.CHAR
+    python_type = uuid.UUID
 
     def load_dialect_impl(self, dialect):
         """
@@ -47,7 +28,7 @@ class UUID(sqlalchemy.types.TypeDecorator):
         if dialect.name == 'postgresql':
             return dialect.type_descriptor(sqlalchemy.dialects.postgresql.UUID())
         else:
-            return dialect.type_descriptor(sqlalchemy.types.CHAR(32))
+            return dialect.type_descriptor(sqlalchemy.types.BINARY(16))
 
     def process_bind_param(self, value, dialect):
         """
@@ -65,9 +46,12 @@ class UUID(sqlalchemy.types.TypeDecorator):
             return str(value)
         else:
             if not isinstance(value, uuid.UUID):
-                return "%.32x" % int(uuid.UUID(value))
-            else:
-                return "%.32x" % int(value)
+                try:
+                    value = uuid.UUID(value)
+                except(TypeError, ValueError):
+                    value = uuid.UUID(bytes=value)
+
+            return value.bytes
 
     def process_result_value(self, value, dialect):
         """
@@ -82,4 +66,4 @@ class UUID(sqlalchemy.types.TypeDecorator):
         if value is None:
             return value
         else:
-            return uuid.UUID(value)
+            return uuid.UUID(bytes=value)

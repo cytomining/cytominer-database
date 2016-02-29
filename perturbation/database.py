@@ -175,7 +175,6 @@ def seed(input, output, verbose=False):
             print("Skipping directory {} because image.csv not found.".format(directory))
             continue
 
-
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
         barcodes = data['Metadata_Barcode'].unique()
