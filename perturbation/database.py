@@ -5,11 +5,6 @@ import glob
 import hashlib
 import os
 import pandas
-import perturbation.base
-import sqlalchemy
-import sqlalchemy.engine
-import sqlalchemy.event
-import sqlalchemy.orm
 import sqlite3
 import uuid
 
@@ -25,7 +20,9 @@ def find_directories(directory):
 
     directories = []
 
-    for filename in glob.glob(os.path.join(directory, '*')):
+    filenames = glob.glob(os.path.join(directory, '*'))
+
+    for filename in filenames:
         directories.append(os.path.relpath(filename))
 
     return set(directories)
@@ -92,15 +89,8 @@ def find_plate_by(dictionaries, barcode):
             return dictionary
 
 
-def create(backend_file_path):
-    connection = sqlite3.connect(backend_file_path)
-
-    return connection
-
-
 def seed(input, output, verbose=False):
-    engine = sqlalchemy.create_engine('sqlite:///{}'.format(os.path.realpath(output)),
-                                      creator=lambda: create(os.path.realpath(output)))
+    engine = sqlalchemy.create_engine('sqlite:///{}'.format(os.path.realpath(output)))
 
     session = sqlalchemy.orm.sessionmaker(bind=engine)
 
@@ -111,29 +101,29 @@ def seed(input, output, verbose=False):
     engine.execute("""
         CREATE VIEW 'measurements' AS
           SELECT
-            plates.barcode AS plate_barcode,
-            wells.description AS well_description,
-            images.description AS image_description,
-            objects.description AS object_description,
-            patterns.description AS pattern_description,
-            channels.description AS channel_description,
-            intensities.first_quartile AS Intensity_first_quartile,
-            intensities.integrated AS Intensity_integrated,
-            intensities.maximum AS Intensity_maximum,
-            intensities.mean AS Intensity_mean,
-            intensities.median AS Intensity_median,
-            intensities.median_absolute_deviation AS Intensity_median_absolute_deviation,
-            intensities.minimum AS Intensity_minimum,
-            intensities.standard_deviation AS Intensity_standard_deviation,
-            intensities.third_quartile  AS Intensity_third_quartile
+            channels.description                    AS channel_description,
+            images.description                      AS image_description,
+            intensities.first_quartile              AS intensity_first_quartile,
+            intensities.integrated                  AS intensity_integrated,
+            intensities.maximum                     AS intensity_maximum,
+            intensities.mean                        AS intensity_mean,
+            intensities.median                      AS intensity_median,
+            intensities.median_absolute_deviation   AS intensity_median_absolute_deviation,
+            intensities.minimum                     AS intensity_minimum,
+            intensities.standard_deviation          AS intensity_standard_deviation,
+            intensities.third_quartile              AS intensity_third_quartile,
+            objects.description                     AS object_description,
+            patterns.description                    AS pattern_description,
+            plates.barcode                          AS plate_barcode,
+            wells.description                       AS well_description
         FROM plates
-        LEFT JOIN wells ON wells.plate_id = plates.id
-        LEFT JOIN images ON images.well_id = wells.id
-        LEFT JOIN objects ON objects.image_id = images.id
-        LEFT JOIN matches ON matches.object_id = objects.id
-        LEFT JOIN patterns ON matches.pattern_id = patterns.id
-        LEFT JOIN intensities ON intensities.match_id = matches.id
-        LEFT JOIN channels ON intensities.channel_id = channels.id
+        LEFT JOIN channels      ON intensities.channel_id   = channels.id
+        LEFT JOIN images        ON images.well_id           = wells.id
+        LEFT JOIN intensities   ON intensities.match_id     = matches.id
+        LEFT JOIN matches       ON matches.object_id        = objects.id
+        LEFT JOIN objects       ON objects.image_id         = images.id
+        LEFT JOIN patterns      ON matches.pattern_id       = patterns.id
+        LEFT JOIN wells         ON wells.plate_id           = plates.id
     """)
 
     channel_dictionaries = []
