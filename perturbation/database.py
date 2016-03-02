@@ -5,7 +5,7 @@ import glob
 import hashlib
 import os
 import pandas
-import sqlite3
+import sqlalchemy.orm
 import uuid
 
 
@@ -161,7 +161,7 @@ def seed(input, output, verbose=False):
 
         try:
             data = pandas.read_csv(os.path.join(directory, 'image.csv'))
-        except OSError as e:
+        except OSError:
             print("Skipping directory {} because image.csv not found.".format(directory))
             continue
 
@@ -193,7 +193,7 @@ def seed(input, output, verbose=False):
 
                 image_descriptions = data[
                     (data['Metadata_Barcode'] == barcode) & (data['Metadata_Well'] == well_description)
-                ]['ImageNumber'].unique()
+                    ]['ImageNumber'].unique()
 
                 for image_description in image_descriptions:
                     image_dictionary = {
@@ -204,7 +204,7 @@ def seed(input, output, verbose=False):
 
                     image_dictionaries.append(image_dictionary)
 
-        # TODO: Read only the header, and read all the patterns because some columns are present in one and not the other
+        # TODO: Read only the header, and read all the patterns because some columns are present in only one pattern
         data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
 
         def get_object_numbers(s):
@@ -229,8 +229,8 @@ def seed(input, output, verbose=False):
                     description='{}_{}'.format(
                         digest,
                         int(object_number[
-                            'ImageNumber'
-                    ])),
+                                'ImageNumber'
+                            ])),
                     dictionaries=image_dictionaries
                 )
             }
@@ -329,7 +329,8 @@ def seed(input, output, verbose=False):
         for pattern in patterns:
             data = pandas.read_csv(os.path.join(directory, '{}.csv').format(pattern.description))
 
-            with click.progressbar(length=data.shape[0], label="Processing " + pattern.description, show_eta=True) as bar:
+            with click.progressbar(length=data.shape[0], label="Processing " + pattern.description,
+                                   show_eta=True) as bar:
                 for index, row in data.iterrows():
                     bar.update(1)
 
@@ -339,8 +340,8 @@ def seed(input, output, verbose=False):
                         description='{}_{}'.format(
                             digest,
                             int(row[
-                                'ImageNumber'
-                        ])),
+                                    'ImageNumber'
+                                ])),
                         dictionaries=image_dictionaries
                     )
 
