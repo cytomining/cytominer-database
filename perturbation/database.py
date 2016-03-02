@@ -288,6 +288,8 @@ def seed(input, output, verbose=False):
         for column in columns:
             split_columns = column.split('_')
 
+            a = None
+            b = None
             if split_columns[0] == 'Correlation':
                 for channel_dictionary in channel_dictionaries:
                     if channel_dictionary['description'] == split_columns[2]:
