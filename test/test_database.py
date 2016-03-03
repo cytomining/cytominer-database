@@ -37,7 +37,7 @@ def test_find_directories():
 
 
 def test_seed(session):
-    subprocess.run(['./munge.sh', 'test/data'])
+    subprocess.call(['./munge.sh', 'test/data'])
 
     perturbation.database.seed('test/data', '/tmp/test.sqlite')
 

@@ -35,7 +35,7 @@ def __main__(input, output, verbose):
 
     """
 
-    subprocess.run(['./munge.sh', input])
+    subprocess.call(['./munge.sh', input])
 
     time.sleep(5)
 
