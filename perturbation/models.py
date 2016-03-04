@@ -174,6 +174,23 @@ class Match(perturbation.base.Base):
     textures = sqlalchemy.orm.relationship('Texture', backref='matches')
 
 
+class Metadata(perturbation.base.Base):
+    """
+
+    """
+
+    __tablename__ = 'metadata'
+
+    image_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('images.id'))
+    image = sqlalchemy.orm.relationship('Image')
+
+    is_cell_clump = sqlalchemy.Column(sqlalchemy.Boolean)
+
+    is_debris = sqlalchemy.Column(sqlalchemy.Boolean)
+
+    is_low_intensity = sqlalchemy.Column(sqlalchemy.Boolean)
+
+
 class Moment(perturbation.base.Base):
     """
 
