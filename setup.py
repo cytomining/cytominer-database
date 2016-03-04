@@ -46,7 +46,8 @@ setuptools.setup(
             'csvkit',
             'pandas',
             'pytest',
-            'sqlalchemy'
+            'sqlalchemy',
+            'sqlparse'
         ],
         entry_points={
             'console_scripts': [

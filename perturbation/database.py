@@ -89,7 +89,7 @@ def find_plate_by(dictionaries, barcode):
             return dictionary
 
 
-def seed(input, output, verbose=False):
+def seed(input, output, sqlfile, verbose=False):
     engine = sqlalchemy.create_engine('sqlite:///{}'.format(os.path.realpath(output)))
 
     session = sqlalchemy.orm.sessionmaker(bind=engine)
@@ -98,33 +98,10 @@ def seed(input, output, verbose=False):
 
     perturbation.base.Base.metadata.create_all(engine)
 
-    engine.execute("""
-        CREATE VIEW 'measurements' AS
-          SELECT
-            channels.description                    AS channel_description,
-            images.description                      AS image_description,
-            intensities.first_quartile              AS intensity_first_quartile,
-            intensities.integrated                  AS intensity_integrated,
-            intensities.maximum                     AS intensity_maximum,
-            intensities.mean                        AS intensity_mean,
-            intensities.median                      AS intensity_median,
-            intensities.median_absolute_deviation   AS intensity_median_absolute_deviation,
-            intensities.minimum                     AS intensity_minimum,
-            intensities.standard_deviation          AS intensity_standard_deviation,
-            intensities.third_quartile              AS intensity_third_quartile,
-            objects.description                     AS object_description,
-            patterns.description                    AS pattern_description,
-            plates.barcode                          AS plate_barcode,
-            wells.description                       AS well_description
-        FROM plates
-        LEFT JOIN channels      ON intensities.channel_id   = channels.id
-        LEFT JOIN images        ON images.well_id           = wells.id
-        LEFT JOIN intensities   ON intensities.match_id     = matches.id
-        LEFT JOIN matches       ON matches.object_id        = objects.id
-        LEFT JOIN objects       ON objects.image_id         = images.id
-        LEFT JOIN patterns      ON matches.pattern_id       = patterns.id
-        LEFT JOIN wells         ON wells.plate_id           = plates.id
-    """)
+    with open(sqlfile) as f:
+        import sqlparse
+        for s in sqlparse.split(f.read()):
+            engine.execute(s)
 
     channel_dictionaries = []
 
