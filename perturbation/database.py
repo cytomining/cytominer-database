@@ -120,6 +120,8 @@ def seed(input, output, sqlfile, verbose=False):
 
         location_dictionaries = []
 
+        metadata_dictionaries = []
+
         match_dictionaries = []
 
         moment_dictionaries = []
@@ -183,6 +185,19 @@ def seed(input, output, sqlfile, verbose=False):
                     }
 
                     image_dictionaries.append(image_dictionary)
+
+                    metadata_dictionary = {
+                        'id': uuid.uuid4(),
+                        'image_id': image_dictionary['id'],
+                        'is_cell_clump': int(data.loc[data['ImageNumber'] == image_description,
+                                                      'Metadata_isCellClump']),
+                        'is_debris': int(data.loc[data['ImageNumber'] == image_description,
+                                                  'Metadata_isDebris']),
+                        'is_low_intensity': int(data.loc[data['ImageNumber'] == image_description,
+                                                         'Metadata_isLowIntensity'])
+                    }
+
+                    metadata_dictionaries.append(metadata_dictionary)
 
         # TODO: Read only the header, and read all the patterns because some columns are present in only one pattern
         data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
@@ -1000,6 +1015,13 @@ def seed(input, output, sqlfile, verbose=False):
         )
 
         match_dictionaries.clear()
+
+        session.bulk_insert_mappings(
+            Metadata,
+            metadata_dictionaries
+        )
+
+        metadata_dictionaries.clear()
 
         session.bulk_insert_mappings(
             Moment,

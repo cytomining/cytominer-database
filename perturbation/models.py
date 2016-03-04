@@ -184,11 +184,11 @@ class Metadata(perturbation.base.Base):
     image_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('images.id'))
     image = sqlalchemy.orm.relationship('Image')
 
-    is_cell_clump = sqlalchemy.Column(sqlalchemy.Boolean)
+    is_cell_clump = sqlalchemy.Column(sqlalchemy.Integer)
 
-    is_debris = sqlalchemy.Column(sqlalchemy.Boolean)
+    is_debris = sqlalchemy.Column(sqlalchemy.Integer)
 
-    is_low_intensity = sqlalchemy.Column(sqlalchemy.Boolean)
+    is_low_intensity = sqlalchemy.Column(sqlalchemy.Integer)
 
 
 class Moment(perturbation.base.Base):

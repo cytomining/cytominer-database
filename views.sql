@@ -4,6 +4,9 @@ SELECT
 	plates.description                      AS plate_description,
 	wells.description                       AS well_description,
 	images.description                      AS image_description,
+	metadata.is_cell_clump                  AS metadata_is_cell_clump,
+	metadata.is_debris                      AS metadata_is_debris,
+	metadata.is_low_intensity               AS metadata_is_low_intensity,
 	objects.description                     AS object_description,
 	patterns.description                    AS pattern_description,
 	channels1.description                   AS channel1_description,
@@ -12,6 +15,7 @@ SELECT
 FROM plates
 INNER JOIN wells                 ON wells.plate_id              = plates.id
 INNER JOIN images                ON images.well_id              = wells.id
+INNER JOIN metadata              ON metadata.image_id           = images.id
 INNER JOIN objects               ON objects.image_id            = images.id
 INNER JOIN matches               ON matches.object_id           = objects.id
 INNER JOIN patterns              ON matches.pattern_id          = patterns.id
@@ -26,6 +30,9 @@ CREATE VIEW 'view_edges' AS
 	plates.description                      AS plate_description,
 	wells.description                       AS well_description,
 	images.description                      AS image_description,
+	metadata.is_cell_clump                  AS metadata_is_cell_clump,
+	metadata.is_debris                      AS metadata_is_debris,
+	metadata.is_low_intensity               AS metadata_is_low_intensity,
 	objects.description                     AS object_description,
 	patterns.description                    AS pattern_description,
 	channels.description                    AS channel_description,
@@ -37,6 +44,7 @@ CREATE VIEW 'view_edges' AS
 FROM plates
 INNER JOIN wells         ON wells.plate_id           = plates.id
 INNER JOIN images        ON images.well_id           = wells.id
+INNER JOIN metadata      ON metadata.image_id        = images.id
 INNER JOIN objects       ON objects.image_id         = images.id
 INNER JOIN matches       ON matches.object_id        = objects.id
 INNER JOIN patterns      ON matches.pattern_id       = patterns.id
@@ -50,6 +58,9 @@ SELECT
 	plates.description                      AS plate_description,
 	wells.description                       AS well_description,
 	images.description                      AS image_description,
+	metadata.is_cell_clump                  AS metadata_is_cell_clump,
+	metadata.is_debris                      AS metadata_is_debris,
+	metadata.is_low_intensity               AS metadata_is_low_intensity,
 	objects.description                     AS object_description,
 	patterns.description                    AS pattern_description,
 	channels.description                    AS channel_description,
@@ -65,6 +76,7 @@ SELECT
 FROM plates
 INNER JOIN wells         ON wells.plate_id           = plates.id
 INNER JOIN images        ON images.well_id           = wells.id
+INNER JOIN metadata      ON metadata.image_id        = images.id
 INNER JOIN objects       ON objects.image_id         = images.id
 INNER JOIN matches       ON matches.object_id        = objects.id
 INNER JOIN patterns      ON matches.pattern_id       = patterns.id
@@ -78,6 +90,9 @@ SELECT
 	plates.description                      AS plate_description,
 	wells.description                       AS well_description,
 	images.description                      AS image_description,
+	metadata.is_cell_clump                  AS metadata_is_cell_clump,
+	metadata.is_debris                      AS metadata_is_debris,
+	metadata.is_low_intensity               AS metadata_is_low_intensity,
 	objects.description                     AS object_description,
 	patterns.description                    AS pattern_description,
 	channels.description                    AS channel_description,
@@ -88,6 +103,7 @@ SELECT
 FROM plates
 INNER JOIN wells                                ON wells.plate_id                     = plates.id
 INNER JOIN images                               ON images.well_id                     = wells.id
+INNER JOIN metadata                             ON metadata.image_id                  = images.id
 INNER JOIN objects                              ON objects.image_id                   = images.id
 INNER JOIN matches                              ON matches.object_id                  = objects.id
 INNER JOIN patterns                             ON matches.pattern_id                 = patterns.id
@@ -103,6 +119,9 @@ SELECT
 	plates.description          AS plate_description,
 	wells.description           AS well_description,
 	images.description          AS image_description,
+	metadata.is_cell_clump      AS metadata_is_cell_clump,
+	metadata.is_debris          AS metadata_is_debris,
+	metadata.is_low_intensity   AS metadata_is_low_intensity,
 	objects.description         AS object_description,
 	patterns.description        AS pattern_description,
 	moments.a                   AS moments_a,
@@ -111,6 +130,7 @@ SELECT
 FROM plates
 INNER JOIN wells                 ON wells.plate_id      = plates.id
 INNER JOIN images                ON images.well_id      = wells.id
+INNER JOIN metadata              ON metadata.image_id   = images.id
 INNER JOIN objects               ON objects.image_id    = images.id
 INNER JOIN matches               ON matches.object_id   = objects.id
 INNER JOIN patterns              ON matches.pattern_id  = patterns.id
@@ -124,6 +144,9 @@ SELECT
 	plates.description                                   AS plate_description,
 	wells.description                                    AS well_description,
 	images.description                                   AS image_description,
+	metadata.is_cell_clump                               AS metadata_is_cell_clump,
+	metadata.is_debris                                   AS metadata_is_debris,
+	metadata.is_low_intensity                            AS metadata_is_low_intensity,
 	objects.description                                  AS object_description,
 	patterns.description                                 AS pattern_description,
   neighborhoods.angle_between_neighbors_5              AS neighborhoods_angle_between_neighbors_5,
@@ -141,6 +164,7 @@ SELECT
 FROM plates
 INNER JOIN wells          ON wells.plate_id            = plates.id
 INNER JOIN images         ON images.well_id            = wells.id
+INNER JOIN metadata      ON metadata.image_id        = images.id
 INNER JOIN objects        ON objects.image_id          = images.id
 INNER JOIN matches        ON matches.object_id         = objects.id
 INNER JOIN patterns       ON matches.pattern_id        = patterns.id
@@ -153,6 +177,9 @@ SELECT
 	plates.description                      AS plate_description,
 	wells.description                       AS well_description,
 	images.description                      AS image_description,
+	metadata.is_cell_clump                  AS metadata_is_cell_clump,
+	metadata.is_debris                      AS metadata_is_debris,
+	metadata.is_low_intensity               AS metadata_is_low_intensity,
 	objects.description                     AS object_description,
 	patterns.description                    AS pattern_description,
 	channels.description                    AS channel_description,
@@ -163,6 +190,7 @@ SELECT
 FROM plates
 INNER JOIN wells                 ON wells.plate_id                   = plates.id
 INNER JOIN images                ON images.well_id                   = wells.id
+INNER JOIN metadata              ON metadata.image_id                = images.id
 INNER JOIN objects               ON objects.image_id                 = images.id
 INNER JOIN matches               ON matches.object_id                = objects.id
 INNER JOIN patterns              ON matches.pattern_id               = patterns.id
@@ -176,6 +204,9 @@ SELECT
 	plates.description          AS plate_description,
 	wells.description           AS well_description,
 	images.description          AS image_description,
+	metadata.is_cell_clump      AS metadata_is_cell_clump,
+	metadata.is_debris          AS metadata_is_debris,
+	metadata.is_low_intensity   AS metadata_is_low_intensity,
 	objects.description         AS object_description,
 	patterns.description        AS pattern_description,
   center.abscissa             AS center_x,
@@ -199,6 +230,7 @@ SELECT
 FROM plates
 INNER JOIN wells                 ON wells.plate_id      = plates.id
 INNER JOIN images                ON images.well_id      = wells.id
+INNER JOIN metadata              ON metadata.image_id   = images.id
 INNER JOIN objects               ON objects.image_id    = images.id
 INNER JOIN matches               ON matches.object_id   = objects.id
 INNER JOIN patterns              ON matches.pattern_id  = patterns.id
@@ -212,6 +244,9 @@ SELECT
 	plates.description                      AS plate_description,
 	wells.description                       AS well_description,
 	images.description                      AS image_description,
+	metadata.is_cell_clump                  AS metadata_is_cell_clump,
+	metadata.is_debris                      AS metadata_is_debris,
+	metadata.is_low_intensity               AS metadata_is_low_intensity,
 	objects.description                     AS object_description,
 	patterns.description                    AS pattern_description,
 	channels.description                    AS channel_description,
@@ -233,6 +268,7 @@ SELECT
 FROM plates                                         
 INNER JOIN wells     ON wells.plate_id       = plates.id
 INNER JOIN images    ON images.well_id       = wells.id
+INNER JOIN metadata  ON metadata.image_id    = images.id
 INNER JOIN objects   ON objects.image_id     = images.id
 INNER JOIN matches   ON matches.object_id    = objects.id
 INNER JOIN patterns  ON matches.pattern_id   = patterns.id
