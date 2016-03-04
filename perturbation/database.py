@@ -627,50 +627,95 @@ def seed(input, output, sqlfile, verbose=False):
 
                         intensity_dictionaries.append(intensity_dictionary)
 
-                        edge = {
-                            'channel_id': channel_dictionary[
+                        edge = (
+                            channel_dictionary[
                                 'id'
                             ],
-                            'id': uuid.uuid4(),
-                            'integrated': row[
+                            uuid.uuid4(),
+                            row[
                                 'Intensity_IntegratedIntensityEdge_{}'.format(
                                     channel_dictionary[
                                         'description'
                                     ]
                                 )
                             ],
-                            'match_id': match[
+                            match[
                                 'id'
                             ],
-                            'maximum': row[
+                            row[
                                 'Intensity_MaxIntensityEdge_{}'.format(
                                     channel_dictionary[
                                         'description'
                                     ]
                                 )
                             ],
-                            'mean': row[
+                            row[
                                 'Intensity_MeanIntensityEdge_{}'.format(
                                     channel_dictionary[
                                         'description'
                                     ]
                                 )
                             ],
-                            'minimum': row[
+                            row[
                                 'Intensity_MinIntensityEdge_{}'.format(
                                     channel_dictionary[
                                         'description'
                                     ]
                                 )
                             ],
-                            'standard_deviation': row[
+                            row[
                                 'Intensity_StdIntensityEdge_{}'.format(
                                     channel_dictionary[
                                         'description'
                                     ]
                                 )
                             ]
-                        }
+                        )
+
+                        # edge = {
+                        #     'channel_id': channel_dictionary[
+                        #         'id'
+                        #     ],
+                        #     'id': uuid.uuid4(),
+                        #     'integrated': row[
+                        #         'Intensity_IntegratedIntensityEdge_{}'.format(
+                        #             channel_dictionary[
+                        #                 'description'
+                        #             ]
+                        #         )
+                        #     ],
+                        #     'match_id': match[
+                        #         'id'
+                        #     ],
+                        #     'maximum': row[
+                        #         'Intensity_MaxIntensityEdge_{}'.format(
+                        #             channel_dictionary[
+                        #                 'description'
+                        #             ]
+                        #         )
+                        #     ],
+                        #     'mean': row[
+                        #         'Intensity_MeanIntensityEdge_{}'.format(
+                        #             channel_dictionary[
+                        #                 'description'
+                        #             ]
+                        #         )
+                        #     ],
+                        #     'minimum': row[
+                        #         'Intensity_MinIntensityEdge_{}'.format(
+                        #             channel_dictionary[
+                        #                 'description'
+                        #             ]
+                        #         )
+                        #     ],
+                        #     'standard_deviation': row[
+                        #         'Intensity_StdIntensityEdge_{}'.format(
+                        #             channel_dictionary[
+                        #                 'description'
+                        #             ]
+                        #         )
+                        #     ]
+                        # }
 
                         edge_dictionaries.append(edge)
 
@@ -911,7 +956,19 @@ def seed(input, output, sqlfile, verbose=False):
 
         session.bulk_insert_mappings(
             Edge,
-            edge_dictionaries
+            [
+                {
+                'channel_id': channel_id,
+                'id': id,
+                'integrated': integrated,
+                'match_id': match_id,
+                'maximum': maximum,
+                'mean': mean,
+                'minimum': minimum,
+                'standard_deviation': standard_deviation
+                }
+                for channel_id, id, integrated, match_id, maximum, mean, minimum, standard_deviation in edge_dictionaries
+            ]
         )
 
         edge_dictionaries.clear()
