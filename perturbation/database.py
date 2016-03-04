@@ -146,6 +146,9 @@ def seed(input, output, sqlfile, verbose=False):
 
         plate_descriptions = data['Metadata_Barcode'].unique()
 
+        #import IPython
+        #IPython.embed()
+
         for plate_description in plate_descriptions:
             plate_dictionary = find_plate_by(plate_dictionaries, str(int(plate_description)))
 
@@ -897,70 +900,98 @@ def seed(input, output, sqlfile, verbose=False):
             coordinate_dictionaries
         )
 
+        coordinate_dictionaries.clear()
+
         session.bulk_insert_mappings(
             Correlation,
             correlation_dictionaries
         )
+
+        correlation_dictionaries.clear()
 
         session.bulk_insert_mappings(
             Edge,
             edge_dictionaries
         )
 
+        edge_dictionaries.clear()
+
         session.bulk_insert_mappings(
             Image,
             image_dictionaries
         )
+
+        image_dictionaries.clear()
 
         session.bulk_insert_mappings(
             Intensity,
             intensity_dictionaries
         )
 
+        intensity_dictionaries.clear()
+
         session.bulk_insert_mappings(
             Location,
             location_dictionaries
         )
+
+        location_dictionaries.clear()
 
         session.bulk_insert_mappings(
             Match,
             match_dictionaries
         )
 
+        match_dictionaries.clear()
+
         session.bulk_insert_mappings(
             Moment,
             moment_dictionaries
         )
+
+        moment_dictionaries.clear()
 
         session.bulk_insert_mappings(
             Neighborhood,
             neighborhood_dictionaries
         )
 
+        neighborhood_dictionaries.clear()
+
         session.bulk_insert_mappings(
             Object,
             object_dictionaries
         )
+
+        object_dictionaries.clear()
 
         session.bulk_insert_mappings(
             RadialDistribution,
             radial_distribution_dictionaries
         )
 
+        radial_distribution_dictionaries.clear()
+
         session.bulk_insert_mappings(
             Shape,
             shape_dictionaries
         )
+
+        shape_dictionaries.clear()
 
         session.bulk_insert_mappings(
             Texture,
             texture_dictionaries
         )
 
+        texture_dictionaries.clear()
+
         session.bulk_insert_mappings(
             Well,
             well_dictionaries
         )
+
+        well_dictionaries.clear()
 
         session.commit()
 
