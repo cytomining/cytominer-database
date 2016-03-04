@@ -74,18 +74,18 @@ def find_object_by(description, dictionaries, image_id):
             return dictionary['id']
 
 
-def find_plate_by(dictionaries, barcode):
+def find_plate_by(dictionaries, description):
     """
 
     :param dictionaries:
-    :param barcode:
+    :param description:
 
     :return:
 
     """
 
     for dictionary in dictionaries:
-        if dictionary['barcode'] == barcode:
+        if dictionary['description'] == description:
             return dictionary
 
 
@@ -144,20 +144,20 @@ def seed(input, output, sqlfile, verbose=False):
 
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
-        barcodes = data['Metadata_Barcode'].unique()
+        plate_descriptions = data['Metadata_Barcode'].unique()
 
-        for barcode in barcodes:
-            plate_dictionary = find_plate_by(plate_dictionaries, str(int(barcode)))
+        for plate_description in plate_descriptions:
+            plate_dictionary = find_plate_by(plate_dictionaries, str(int(plate_description)))
 
             if not plate_dictionary:
                 plate_dictionary = {
-                    'barcode': str(int(barcode)),
+                    'description': str(int(plate_description)),
                     'id': uuid.uuid4()
                 }
 
                 plate_dictionaries.append(plate_dictionary)
 
-            well_descriptions = data[data['Metadata_Barcode'] == barcode]['Metadata_Well'].unique()
+            well_descriptions = data[data['Metadata_Barcode'] == plate_description]['Metadata_Well'].unique()
 
             for well_description in well_descriptions:
                 well_dictionary = {
@@ -169,7 +169,7 @@ def seed(input, output, sqlfile, verbose=False):
                 well_dictionaries.append(well_dictionary)
 
                 image_descriptions = data[
-                    (data['Metadata_Barcode'] == barcode) & (data['Metadata_Well'] == well_description)
+                    (data['Metadata_Barcode'] == plate_description) & (data['Metadata_Well'] == well_description)
                     ]['ImageNumber'].unique()
 
                 for image_description in image_descriptions:

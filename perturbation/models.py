@@ -287,7 +287,7 @@ class Plate(perturbation.base.Base):
 
     wells = sqlalchemy.orm.relationship('Well')
 
-    barcode = sqlalchemy.Column(sqlalchemy.String)
+    description = sqlalchemy.Column(sqlalchemy.String)
 
 
 class RadialDistribution(perturbation.base.Base):
