@@ -124,8 +124,8 @@ SELECT
   metadata.is_cell_clump    AS q_cell_clump,
   metadata.is_debris        AS q_debris,
   metadata.is_low_intensity AS q_low_intensity,
-	moments.a                 AS m_moments_a,
-	moments.b                 AS m_moments_b,
+	moments.a                 AS p_moments_a,
+	moments.b                 AS p_moments_b,
 	moments.score             AS m_moments_score
 FROM plates
 INNER JOIN wells    ON wells.plate_id     = plates.id
@@ -183,7 +183,7 @@ SELECT
   metadata.is_cell_clump         AS q_cell_clump,
   metadata.is_debris             AS q_debris,
   metadata.is_low_intensity      AS q_low_intensity,
-  radial_distributions.bins      AS m_radial_distributions_bins,
+  radial_distributions.bins      AS p_radial_distributions_bins,
   radial_distributions.frac_at_d AS m_radial_distributions_frac_at_d,
   radial_distributions.mean_frac AS m_radial_distributions_mean_frac,
   radial_distributions.radial_cv AS m_radial_distributions_radial_cv
@@ -250,7 +250,7 @@ SELECT
   metadata.is_cell_clump             AS q_cell_clump,
   metadata.is_debris                 AS q_debris,
   metadata.is_low_intensity          AS q_low_intensity,
-  textures.scale                     AS m_textures_scale,
+  textures.scale                     AS p_textures_scale,
   textures.angular_second_moment     AS m_textures_angular_second_moment,           
   textures.contrast                  AS m_textures_contrast,
   textures.correlation               AS m_textures_correlation,           
