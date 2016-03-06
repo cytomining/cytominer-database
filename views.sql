@@ -1,16 +1,16 @@
 DROP VIEW IF EXISTS 'view_correlations';
 CREATE VIEW 'view_correlations' AS
 SELECT
-	plates.description        AS plate_description,
-	wells.description         AS well_description,
-	images.description        AS image_description,
-	metadata.is_cell_clump    AS metadata_is_cell_clump,
-	metadata.is_debris        AS metadata_is_debris,
-	metadata.is_low_intensity AS metadata_is_low_intensity,
-	objects.description       AS object_description,
-	patterns.description      AS pattern_description,
-	channels1.description     AS channel1_description,
-	channels2.description     AS channel2_description,
+  plates.description        AS g_plate,
+  wells.description         AS g_well,
+  images.description        AS g_image,
+  objects.description       AS g_object,
+  patterns.description      AS g_pattern,
+  channels1.description     AS g_channel1,
+  channels2.description     AS g_channel2,
+  metadata.is_cell_clump    AS q_cell_clump,
+  metadata.is_debris        AS q_debris,
+  metadata.is_low_intensity AS q_low_intensity,
   correlations.coefficient  AS m_correlations_coefficient
 FROM plates
 INNER JOIN wells                 ON wells.plate_id              = plates.id
