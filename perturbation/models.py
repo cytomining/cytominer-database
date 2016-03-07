@@ -3,6 +3,7 @@
 """
 
 import perturbation.base
+import sqlalchemy
 import sqlalchemy.orm.exc
 
 
