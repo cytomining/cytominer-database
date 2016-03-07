@@ -34,6 +34,8 @@ class Correlation(perturbation.base.Base):
 
     __tablename__ = 'correlations'
 
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+
     dependent_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('channels.id'))
     dependent = sqlalchemy.orm.relationship('Channel', foreign_keys=[dependent_id])
 
@@ -92,6 +94,8 @@ class Intensity(perturbation.base.Base):
 
     __tablename__ = 'intensities'
 
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+
     channel_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('channels.id'))
     channel = sqlalchemy.orm.relationship('Channel')
 
@@ -125,6 +129,8 @@ class Location(perturbation.base.Base):
     """
 
     __tablename__ = 'locations'
+
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
 
     center_mass_intensity_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('coordinates.id'))
     center_mass_intensity = sqlalchemy.orm.relationship('Coordinate', foreign_keys=[center_mass_intensity_id])
@@ -197,6 +203,8 @@ class Moment(perturbation.base.Base):
     """
 
     __tablename__ = 'moments'
+
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
 
     shape_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('shapes.id'))
     shape = sqlalchemy.orm.relationship('Shape')
@@ -297,6 +305,8 @@ class RadialDistribution(perturbation.base.Base):
 
     __tablename__ = 'radial_distributions'
 
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+
     bins = sqlalchemy.Column(sqlalchemy.Integer)
 
     channel_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('channels.id'))
@@ -365,6 +375,8 @@ class Texture(perturbation.base.Base):
     """
 
     __tablename__ = 'textures'
+
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
 
     channel_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('channels.id'))
     channel = sqlalchemy.orm.relationship('Channel')

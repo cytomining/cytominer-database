@@ -107,7 +107,20 @@ def seed(input, output, sqlfile, verbose=False):
 
     plate_dictionaries = []
 
+    correlation_offset = 0
+
+    intensity_offset = 0
+
+    location_offset = 0
+
+    moment_offset = 0
+
+    texture_offset = 0
+
+    radial_distribution_offset = 0
+
     for directory in find_directories(input):
+
         coordinate_dictionaries = []
 
         correlation_dictionaries = []
@@ -502,7 +515,6 @@ def seed(input, output, sqlfile, verbose=False):
                         moment_dictionary = {
                             'a': a,
                             'b': b,
-                            'id': uuid.uuid4(),
                             'score': row[
                                 'AreaShape_Zernike_{}_{}'.format(
                                     a,
@@ -548,7 +560,6 @@ def seed(input, output, sqlfile, verbose=False):
                             'dependent_id': dependent[
                                 'id'
                             ],
-                            'id': uuid.uuid4(),
                             'independent_id': independent[
                                 'id'
                             ],
@@ -571,7 +582,6 @@ def seed(input, output, sqlfile, verbose=False):
                                     ]
                                 )
                             ],
-                            'id': uuid.uuid4(),
                             'integrated': row[
                                 'Intensity_IntegratedIntensity_{}'.format(
                                     channel_dictionary[
@@ -836,7 +846,6 @@ def seed(input, output, sqlfile, verbose=False):
                                         scale
                                     )
                                 ],
-                                'id': uuid.uuid4(),
                                 'match_id': match[
                                     'id'
                                 ],
@@ -931,7 +940,6 @@ def seed(input, output, sqlfile, verbose=False):
                                         count
                                     )
                                 ],
-                                'id': uuid.uuid4(),
                                 'match_id': match[
                                     'id'
                                 ],
@@ -961,6 +969,11 @@ def seed(input, output, sqlfile, verbose=False):
         )
 
         coordinate_dictionaries.clear()
+
+        for index, correlation_dictionary in enumerate(correlation_dictionaries):
+            correlation_dictionary.update({'id': index + correlation_offset})
+
+        correlation_offset += len(correlation_dictionaries)
 
         session.bulk_insert_mappings(
             Correlation,
@@ -995,12 +1008,22 @@ def seed(input, output, sqlfile, verbose=False):
 
         image_dictionaries.clear()
 
+        for index, intensity_dictionary in enumerate(intensity_dictionaries):
+            intensity_dictionary.update({'id': index + intensity_offset})
+
+        intensity_offset += len(intensity_dictionaries)
+
         session.bulk_insert_mappings(
             Intensity,
             intensity_dictionaries
         )
 
         intensity_dictionaries.clear()
+
+        for index, location_dictionary in enumerate(location_dictionaries):
+            location_dictionary.update({'id': index + location_offset})
+
+        location_offset += len(location_dictionaries)
 
         session.bulk_insert_mappings(
             Location,
@@ -1023,6 +1046,11 @@ def seed(input, output, sqlfile, verbose=False):
 
         metadata_dictionaries.clear()
 
+        for index, moment_dictionary in enumerate(moment_dictionaries):
+            moment_dictionary.update({'id': index + moment_offset})
+
+        moment_offset += len(moment_dictionaries)
+
         session.bulk_insert_mappings(
             Moment,
             moment_dictionaries
@@ -1044,6 +1072,11 @@ def seed(input, output, sqlfile, verbose=False):
 
         object_dictionaries.clear()
 
+        for index, radial_distribution_dictionary in enumerate(radial_distribution_dictionaries):
+            radial_distribution_dictionary.update({'id': index + radial_distribution_offset})
+
+        radial_distribution_offset += len(radial_distribution_dictionaries)
+
         session.bulk_insert_mappings(
             RadialDistribution,
             radial_distribution_dictionaries
@@ -1057,6 +1090,11 @@ def seed(input, output, sqlfile, verbose=False):
         )
 
         shape_dictionaries.clear()
+
+        for index, texture_dictionary in enumerate(texture_dictionaries):
+            texture_dictionary.update({'id': index + texture_offset})
+
+        texture_offset += len(texture_dictionaries)
 
         session.bulk_insert_mappings(
             Texture,
