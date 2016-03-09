@@ -181,21 +181,21 @@ class Match(perturbation.base.Base):
     textures = sqlalchemy.orm.relationship('Texture', backref='matches')
 
 
-class Metadata(perturbation.base.Base):
+class Quality(perturbation.base.Base):
     """
 
     """
 
-    __tablename__ = 'metadata'
+    __tablename__ = 'quality'
 
     image_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('images.id'), index=True)
     image = sqlalchemy.orm.relationship('Image')
 
-    is_cell_clump = sqlalchemy.Column(sqlalchemy.Integer)
+    count_cell_clump = sqlalchemy.Column(sqlalchemy.Integer)
 
-    is_debris = sqlalchemy.Column(sqlalchemy.Integer)
+    count_debris = sqlalchemy.Column(sqlalchemy.Integer)
 
-    is_low_intensity = sqlalchemy.Column(sqlalchemy.Integer)
+    count_low_intensity = sqlalchemy.Column(sqlalchemy.Integer)
 
 
 class Moment(perturbation.base.Base):

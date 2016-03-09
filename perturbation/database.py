@@ -133,7 +133,7 @@ def seed(input, output, sqlfile, verbose=False):
 
         location_dictionaries = []
 
-        metadata_dictionaries = []
+        quality_dictionaries = []
 
         match_dictionaries = []
 
@@ -199,18 +199,18 @@ def seed(input, output, sqlfile, verbose=False):
 
                     image_dictionaries.append(image_dictionary)
 
-                    metadata_dictionary = {
+                    quality_dictionary = {
                         'id': uuid.uuid4(),
                         'image_id': image_dictionary['id'],
-                        'is_cell_clump': int(data.loc[data['ImageNumber'] == image_description,
+                        'count_cell_clump': int(data.loc[data['ImageNumber'] == image_description,
                                                       'Metadata_isCellClump']),
-                        'is_debris': int(data.loc[data['ImageNumber'] == image_description,
+                        'count_debris': int(data.loc[data['ImageNumber'] == image_description,
                                                   'Metadata_isDebris']),
-                        'is_low_intensity': int(data.loc[data['ImageNumber'] == image_description,
+                        'count_low_intensity': int(data.loc[data['ImageNumber'] == image_description,
                                                          'Metadata_isLowIntensity'])
                     }
 
-                    metadata_dictionaries.append(metadata_dictionary)
+                    quality_dictionaries.append(quality_dictionary)
 
         # TODO: Read only the header, and read all the patterns because some columns are present in only one pattern
         data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
@@ -1040,11 +1040,11 @@ def seed(input, output, sqlfile, verbose=False):
         match_dictionaries.clear()
 
         session.bulk_insert_mappings(
-            Metadata,
-            metadata_dictionaries
+            Quality,
+            quality_dictionaries
         )
 
-        metadata_dictionaries.clear()
+        quality_dictionaries.clear()
 
         for index, moment_dictionary in enumerate(moment_dictionaries):
             moment_dictionary.update({'id': index + moment_offset})
