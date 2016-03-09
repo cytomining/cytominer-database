@@ -100,7 +100,7 @@ def seed(input, output, sqlfile, verbose=False):
 
     perturbation.base.Base.metadata.create_all(engine)
 
-    logger.debug("Parsing SQL file")
+    logger.debug('Parsing SQL file')
     with open(sqlfile) as f:
         import sqlparse
         for s in sqlparse.split(f.read()):
@@ -127,10 +127,10 @@ def seed(input, output, sqlfile, verbose=False):
         try:
             data = pandas.read_csv(os.path.join(directory, 'image.csv'))
         except OSError:
-            # print("Skipping directory {} because image.csv not found.".format(directory))
+            # print('Skipping directory {} because image.csv not found.'.format(directory))
             continue
 
-        logger.debug("Parsing {}".format(directory))
+        logger.debug('Parsing {}'.format(directory))
 
         coordinate_dictionaries = []
 
@@ -169,7 +169,7 @@ def seed(input, output, sqlfile, verbose=False):
         #import IPython
         #IPython.embed()
 
-        logger.debug("Parse plates, wells, images, quality")
+        logger.debug('\tParse plates, wells, images, quality')
 
         for plate_description in plate_descriptions:
             plate_dictionary = find_plate_by(plate_dictionaries, str(int(plate_description)))
@@ -219,7 +219,7 @@ def seed(input, output, sqlfile, verbose=False):
 
                     quality_dictionaries.append(quality_dictionary)
 
-        logger.debug("Parse objects")
+        logger.debug('\tParse objects')
 
         # TODO: Read all the patterns because some columns are present in only one pattern
         data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
@@ -256,7 +256,7 @@ def seed(input, output, sqlfile, verbose=False):
 
         session.commit()
 
-        logger.debug("Parse feature parameters")
+        logger.debug('\tParse feature parameters')
 
         filenames = []
 
@@ -348,7 +348,7 @@ def seed(input, output, sqlfile, verbose=False):
                 moments.append((split_columns[2], split_columns[3]))
 
         for pattern in patterns:
-            logger.debug("Parse {}".format(pattern.description))
+            logger.debug('\tParse {}'.format(pattern.description))
 
             data = pandas.read_csv(os.path.join(directory, '{}.csv').format(pattern.description))
 
@@ -976,8 +976,9 @@ def seed(input, output, sqlfile, verbose=False):
 
                             radial_distribution_dictionaries.append(radial_distribution_dictionary)
 
+        logger.debug('\tBulk inserts')
 
-        logger.debug("Bulk inserts")
+        logger.debug('\tBulk insert Coordinate')
 
         session.bulk_insert_mappings(
             Coordinate,
@@ -985,6 +986,8 @@ def seed(input, output, sqlfile, verbose=False):
         )
 
         coordinate_dictionaries.clear()
+
+        logger.debug('\tBulk insert Correlation')
 
         for index, correlation_dictionary in enumerate(correlation_dictionaries):
             correlation_dictionary.update({'id': index + correlation_offset})
@@ -997,6 +1000,8 @@ def seed(input, output, sqlfile, verbose=False):
         )
 
         correlation_dictionaries.clear()
+
+        logger.debug('\tBulk insert Edge')
 
         session.bulk_insert_mappings(
             Edge,
@@ -1017,12 +1022,16 @@ def seed(input, output, sqlfile, verbose=False):
 
         edge_dictionaries.clear()
 
+        logger.debug('\tBulk insert Image')
+
         session.bulk_insert_mappings(
             Image,
             image_dictionaries
         )
 
         image_dictionaries.clear()
+
+        logger.debug('\tBulk insert Intensity')
 
         for index, intensity_dictionary in enumerate(intensity_dictionaries):
             intensity_dictionary.update({'id': index + intensity_offset})
@@ -1036,6 +1045,8 @@ def seed(input, output, sqlfile, verbose=False):
 
         intensity_dictionaries.clear()
 
+        logger.debug('\tBulk insert Location')
+
         for index, location_dictionary in enumerate(location_dictionaries):
             location_dictionary.update({'id': index + location_offset})
 
@@ -1048,6 +1059,8 @@ def seed(input, output, sqlfile, verbose=False):
 
         location_dictionaries.clear()
 
+        logger.debug('\tBulk insert Match')
+
         session.bulk_insert_mappings(
             Match,
             match_dictionaries
@@ -1055,12 +1068,16 @@ def seed(input, output, sqlfile, verbose=False):
 
         match_dictionaries.clear()
 
+        logger.debug('\tBulk insert Quality')
+
         session.bulk_insert_mappings(
             Quality,
             quality_dictionaries
         )
 
         quality_dictionaries.clear()
+
+        logger.debug('\tBulk insert Moment')
 
         for index, moment_dictionary in enumerate(moment_dictionaries):
             moment_dictionary.update({'id': index + moment_offset})
@@ -1074,6 +1091,8 @@ def seed(input, output, sqlfile, verbose=False):
 
         moment_dictionaries.clear()
 
+        logger.debug('\tBulk insert Neighborhood')
+
         session.bulk_insert_mappings(
             Neighborhood,
             neighborhood_dictionaries
@@ -1081,12 +1100,16 @@ def seed(input, output, sqlfile, verbose=False):
 
         neighborhood_dictionaries.clear()
 
+        logger.debug('\tBulk insert Object')
+
         session.bulk_insert_mappings(
             Object,
             object_dictionaries
         )
 
         object_dictionaries.clear()
+
+        logger.debug('\tBulk insert RadialDistribution')
 
         for index, radial_distribution_dictionary in enumerate(radial_distribution_dictionaries):
             radial_distribution_dictionary.update({'id': index + radial_distribution_offset})
@@ -1100,12 +1123,16 @@ def seed(input, output, sqlfile, verbose=False):
 
         radial_distribution_dictionaries.clear()
 
+        logger.debug('\tBulk insert Shape')
+
         session.bulk_insert_mappings(
             Shape,
             shape_dictionaries
         )
 
         shape_dictionaries.clear()
+
+        logger.debug('\tBulk insert Texture')
 
         for index, texture_dictionary in enumerate(texture_dictionaries):
             texture_dictionary.update({'id': index + texture_offset})
@@ -1119,6 +1146,8 @@ def seed(input, output, sqlfile, verbose=False):
 
         texture_dictionaries.clear()
 
+        logger.debug('\tBulk insert Well')
+
         session.bulk_insert_mappings(
             Well,
             well_dictionaries
@@ -1126,20 +1155,24 @@ def seed(input, output, sqlfile, verbose=False):
 
         well_dictionaries.clear()
 
-        logger.debug("Commit {}".format(directory))
+        logger.debug('\tCommit {}'.format(directory))
 
         session.commit()
+
+    logger.debug('\tBulk insert Channel')
 
     session.bulk_insert_mappings(
         Channel,
         channel_dictionaries
     )
 
+    logger.debug('\tBulk insert Plate')
+
     session.bulk_insert_mappings(
         Plate,
         plate_dictionaries
     )
 
-    logger.debug("Commit plate, channel")
+    logger.debug('Commit plate, channel')
 
     session.commit()
