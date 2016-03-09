@@ -508,22 +508,11 @@ def save_coordinates(coordinates):
 
     __save__(perturbation.models.Coordinate, coordinates)
 
-    coordinates.clear()
-
 
 def save_correlations(offset, correlations):
     logger.debug('\tBulk insert Correlation')
 
-    for index, correlation in enumerate(correlations):
-        identifier = index + offset
-
-        correlation._replace(id=identifier)
-
-    offset += len(correlations)
-
-    __save__(perturbation.models.Correlation, correlations)
-
-    correlations.clear()
+    __save__(perturbation.models.Correlation, correlations, offset)
 
 
 def save_edges(edges):
@@ -531,15 +520,11 @@ def save_edges(edges):
 
     __save__(perturbation.models.Edge, edges)
 
-    edges.clear()
-
 
 def save_channels(channels):
     logger.debug('\tBulk insert Channel')
 
     __save__(perturbation.models.Channel, channels)
-
-    channels.clear()
 
 
 def save_plates(plates):
@@ -547,41 +532,23 @@ def save_plates(plates):
 
     __save__(perturbation.models.Plate, plates)
 
-    plates.clear()
-
 
 def save_images(images):
     logger.debug('\tBulk insert Image')
 
     __save__(perturbation.models.Image, images)
 
-    images.clear()
-
 
 def save_intensities(intensities, offset):
     logger.debug('\tBulk insert Intensity')
 
-    for index, intensity_dictionary in enumerate(intensities):
-        intensity_dictionary._replace(id=index + offset)
-
-    offset += len(intensities)
-
-    __save__(perturbation.models.Intensity, intensities)
-
-    intensities.clear()
+    __save__(perturbation.models.Intensity, intensities, offset)
 
 
 def save_locations(offset, locations):
     logger.debug('\tBulk insert Location')
 
-    for index, location_dictionary in enumerate(locations):
-        location_dictionary._replace(id=index + offset)
-
-    offset += len(locations)
-
-    __save__(perturbation.models.Location, locations)
-
-    locations.clear()
+    __save__(perturbation.models.Location, locations, offset)
 
 
 def save_matches(matches):
@@ -589,15 +556,11 @@ def save_matches(matches):
 
     __save__(perturbation.models.Match, matches)
 
-    matches.clear()
-
 
 def save_qualities(qualities):
     logger.debug('\tBulk insert Quality')
 
     __save__(perturbation.models.Quality, qualities)
-
-    qualities.clear()
 
 
 def save_wells(wells):
@@ -605,20 +568,11 @@ def save_wells(wells):
 
     __save__(perturbation.models.Well, wells)
 
-    wells.clear()
-
 
 def save_textures(offset, textures):
     logger.debug('\tBulk insert Texture')
 
-    for index, texture_dictionary in enumerate(textures):
-        texture_dictionary._replace(id=index + offset)
-
-    offset += len(textures)
-
-    __save__(perturbation.models.Texture, textures)
-
-    textures.clear()
+    __save__(perturbation.models.Texture, textures, offset)
 
 
 def save_objects(objects):
@@ -626,28 +580,17 @@ def save_objects(objects):
 
     __save__(perturbation.models.Object, objects)
 
-    objects.clear()
-
 
 def save_neighborhoods(neighborhoods):
     logger.debug('\tBulk insert Neighborhood')
 
     __save__(perturbation.models.Neighborhood, neighborhoods)
 
-    neighborhoods.clear()
-
 
 def save_moments(offset, moments, moments_group):
     logger.debug('\tBulk insert Moment')
 
-    for index, moment_dictionary in enumerate(moments_group):
-        moment_dictionary._replace(id=index + offset)
-
-    offset += len(moments_group)
-
-    __save__(perturbation.models.Moment, moments_group)
-
-    moments.clear()
+    __save__(perturbation.models.Moment, moments_group, offset)
 
 
 def save_shapes(shapes):
@@ -655,26 +598,25 @@ def save_shapes(shapes):
 
     __save__(perturbation.models.Shape, shapes)
 
-    shapes.clear()
-
 
 def save_radial_distributions(offset, radial_distributions):
     logger.debug('\tBulk insert RadialDistribution')
 
-    for index, radial_distribution_dictionary in enumerate(radial_distributions):
-        radial_distribution_dictionary._replace(id=index + offset)
-
-    offset += len(radial_distributions)
-
-    __save__(perturbation.models.RadialDistribution, radial_distributions)
-
-    radial_distributions.clear()
+    __save__(perturbation.models.RadialDistribution, radial_distributions, offset)
 
 
-def __save__(table, records):
+def __save__(table, records, offset=None):
     def __create_mappings__(items):
         return [item._asdict() for item in items]
+
+    if offset:
+        for index, record in enumerate(records):
+            record._replace(id=index + offset)
+
+            offset += len(records)
 
     perturbation.database.scoped_session.bulk_insert_mappings(table, __create_mappings__(records))
 
     perturbation.database.scoped_session.commit()
+
+    records.clear()
