@@ -57,13 +57,61 @@ find_object_by = perturbation.migration.models.find_object_by
 
 find_plate_by = perturbation.migration.models.find_plate_by
 
+
 logger = logging.getLogger(__name__)
+
 
 Base = perturbation.base.Base
 
 Session = sqlalchemy.orm.sessionmaker()
 
+engine = None
+
 scoped_session = sqlalchemy.orm.scoped_session(Session)
+
+
+correlation_offset = 0
+
+intensity_offset = 0
+
+location_offset = 0
+
+moment_offset = 0
+
+texture_offset = 0
+
+radial_distribution_offset = 0
+
+
+channels = []
+
+coordinates = []
+
+correlations = []
+
+edges = []
+
+images = []
+
+intensities = []
+
+locations = []
+
+qualities = []
+
+matches = []
+
+neighborhoods = []
+
+plates = []
+
+radial_distributions = []
+
+shapes = []
+
+textures = []
+
+wells = []
 
 
 def find_directories(directory):
@@ -94,34 +142,23 @@ def setup(database):
 def seed(input, output, sqlfile, verbose=False):
     setup(output)
 
+    create_views(sqlfile)
+
+    seed_plate(input)
+
+
+def create_views(sqlfile):
     logger.debug('Parsing SQL file')
 
     with open(sqlfile) as f:
         import sqlparse
+
         for s in sqlparse.split(f.read()):
             engine.execute(s)
 
-    channels = []
 
-    plates = []
-
-    correlation_offset = 0
-
-    intensity_offset = 0
-
-    location_offset = 0
-
-    moment_offset = 0
-
-    texture_offset = 0
-
-    radial_distribution_offset = 0
-
-    seed_plate(channels, correlation_offset, input, intensity_offset, location_offset, moment_offset, plates, radial_distribution_offset, texture_offset)
-
-
-def seed_plate(channels, correlation_offset, input, intensity_offset, location_offset, moment_offset, plates, radial_distribution_offset, texture_offset):
-    for directory in find_directories(input):
+def seed_plate(directories):
+    for directory in find_directories(directories):
         try:
             data = pandas.read_csv(os.path.join(directory, 'image.csv'))
         except OSError:
@@ -129,33 +166,7 @@ def seed_plate(channels, correlation_offset, input, intensity_offset, location_o
 
         logger.debug('Parsing {}'.format(os.path.basename(directory)))
 
-        coordinates = []
-
-        correlations = []
-
-        edges = []
-
-        images = []
-
-        intensities = []
-
-        locations = []
-
-        qualities = []
-
-        matches = []
-
         moments_group = []
-
-        neighborhoods = []
-
-        radial_distributions = []
-
-        shapes = []
-
-        textures = []
-
-        wells = []
 
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
@@ -173,15 +184,11 @@ def seed_plate(channels, correlation_offset, input, intensity_offset, location_o
         def get_object_numbers(s):
             return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
 
-        object_numbers = pandas.concat([get_object_numbers(s) for s in
-                                        ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_5',
-                                         'Neighbors_SecondClosestObjectNumber_5']])
+        object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_5', 'Neighbors_SecondClosestObjectNumber_5']])
 
         object_numbers.drop_duplicates()
 
         objects = find_objects(digest, images, object_numbers)
-
-        scoped_session.commit()
 
         logger.debug('\tParse feature parameters')
 
@@ -209,13 +216,11 @@ def seed_plate(channels, correlation_offset, input, intensity_offset, location_o
 
         create_patterns(channels, coordinates, correlation_columns, correlation_offset, correlations, counts, digest, directory, edges, images, intensities, intensity_offset, location_offset, locations, matches, moment_offset, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distribution_offset, radial_distributions, scales, shapes, texture_offset, textures, wells)
 
-    perturbation.migration.models.save_channels(channels, scoped_session)
+    perturbation.migration.models.save_channels(channels)
 
-    perturbation.migration.models.save_plates(plates, scoped_session)
+    perturbation.migration.models.save_plates(plates)
 
     logger.debug('Commit plate, channel')
-
-    scoped_session.commit()
 
 
 def find_objects(digest, images, object_numbers):
@@ -285,25 +290,23 @@ def create_patterns(channels, coordinates, correlation_columns, correlation_offs
 
                 create_channels(channels, coordinates, counts, edges, intensities, locations, match, radial_distributions, row, scales, textures)
 
-    perturbation.migration.models.save_coordinates(coordinates, scoped_session)
-    perturbation.migration.models.save_edges(edges, scoped_session)
-    perturbation.migration.models.save_images(images, scoped_session)
-    perturbation.migration.models.save_matches(matches, scoped_session)
-    perturbation.migration.models.save_neighborhoods(neighborhoods, scoped_session)
-    perturbation.migration.models.save_objects(objects, scoped_session)
-    perturbation.migration.models.save_qualities(qualities, scoped_session)
-    perturbation.migration.models.save_shapes(scoped_session, shapes)
-    perturbation.migration.models.save_textures(scoped_session, texture_offset, textures)
-    perturbation.migration.models.save_wells(scoped_session, wells)
-    perturbation.migration.models.save_correlations(correlation_offset, correlations, scoped_session)
-    perturbation.migration.models.save_intensities(intensities, intensity_offset, scoped_session)
-    perturbation.migration.models.save_locations(location_offset, locations, scoped_session)
-    perturbation.migration.models.save_moments(moment_offset, moments, moments_group, scoped_session)
-    perturbation.migration.models.save_radial_distributions(radial_distribution_offset, radial_distributions, scoped_session)
+    perturbation.migration.models.save_coordinates(coordinates)
+    perturbation.migration.models.save_edges(edges)
+    perturbation.migration.models.save_images(images)
+    perturbation.migration.models.save_matches(matches)
+    perturbation.migration.models.save_neighborhoods(neighborhoods)
+    perturbation.migration.models.save_objects(objects)
+    perturbation.migration.models.save_qualities(qualities)
+    perturbation.migration.models.save_shapes(shapes)
+    perturbation.migration.models.save_textures(texture_offset, textures)
+    perturbation.migration.models.save_wells(wells)
+    perturbation.migration.models.save_correlations(correlation_offset, correlations)
+    perturbation.migration.models.save_intensities(intensities, intensity_offset)
+    perturbation.migration.models.save_locations(location_offset, locations)
+    perturbation.migration.models.save_moments(moment_offset, moments, moments_group)
+    perturbation.migration.models.save_radial_distributions(radial_distribution_offset, radial_distributions)
 
     logger.debug('\tCommit {}'.format(os.path.basename(directory)))
-
-    scoped_session.commit()
 
 
 def find_pattern_descriptions(filenames):

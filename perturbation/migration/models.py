@@ -1,5 +1,6 @@
 import collections
 import logging
+import perturbation.database
 import perturbation.models
 import uuid
 
@@ -502,15 +503,15 @@ def find_plate_by(dictionaries, description):
             return dictionary
 
 
-def save_coordinates(coordinates, session):
+def save_coordinates(coordinates):
     logger.debug('\tBulk insert Coordinate')
 
-    __save__(perturbation.models.Coordinate, coordinates, session)
+    __save__(perturbation.models.Coordinate, coordinates)
 
     coordinates.clear()
 
 
-def save_correlations(offset, correlations, session):
+def save_correlations(offset, correlations):
     logger.debug('\tBulk insert Correlation')
 
     for index, correlation in enumerate(correlations):
@@ -520,44 +521,44 @@ def save_correlations(offset, correlations, session):
 
     offset += len(correlations)
 
-    __save__(perturbation.models.Correlation, correlations, session)
+    __save__(perturbation.models.Correlation, correlations)
 
     correlations.clear()
 
 
-def save_edges(edges, session):
+def save_edges(edges):
     logger.debug('\tBulk insert Edge')
 
-    __save__(perturbation.models.Edge, edges, session)
+    __save__(perturbation.models.Edge, edges)
 
     edges.clear()
 
 
-def save_channels(channels, session):
+def save_channels(channels):
     logger.debug('\tBulk insert Channel')
 
-    __save__(perturbation.models.Channel, channels, session)
+    __save__(perturbation.models.Channel, channels)
 
     channels.clear()
 
 
-def save_plates(plates, session):
+def save_plates(plates):
     logger.debug('\tBulk insert Plate')
 
-    __save__(perturbation.models.Plate, plates, session)
+    __save__(perturbation.models.Plate, plates)
 
     plates.clear()
 
 
-def save_images(images, session):
+def save_images(images):
     logger.debug('\tBulk insert Image')
 
-    __save__(perturbation.models.Image, images, session)
+    __save__(perturbation.models.Image, images)
 
     images.clear()
 
 
-def save_intensities(intensities, offset, session):
+def save_intensities(intensities, offset):
     logger.debug('\tBulk insert Intensity')
 
     for index, intensity_dictionary in enumerate(intensities):
@@ -565,12 +566,12 @@ def save_intensities(intensities, offset, session):
 
     offset += len(intensities)
 
-    __save__(perturbation.models.Intensity, intensities, session)
+    __save__(perturbation.models.Intensity, intensities)
 
     intensities.clear()
 
 
-def save_locations(offset, locations, session):
+def save_locations(offset, locations):
     logger.debug('\tBulk insert Location')
 
     for index, location_dictionary in enumerate(locations):
@@ -578,36 +579,36 @@ def save_locations(offset, locations, session):
 
     offset += len(locations)
 
-    __save__(perturbation.models.Location, locations, session)
+    __save__(perturbation.models.Location, locations)
 
     locations.clear()
 
 
-def save_matches(matches, session):
+def save_matches(matches):
     logger.debug('\tBulk insert Match')
 
-    __save__(perturbation.models.Match, matches, session)
+    __save__(perturbation.models.Match, matches)
 
     matches.clear()
 
 
-def save_qualities(qualities, session):
+def save_qualities(qualities):
     logger.debug('\tBulk insert Quality')
 
-    __save__(perturbation.models.Quality, qualities, session)
+    __save__(perturbation.models.Quality, qualities)
 
     qualities.clear()
 
 
-def save_wells(session, wells):
+def save_wells(wells):
     logger.debug('\tBulk insert Well')
 
-    __save__(perturbation.models.Well, wells, session)
+    __save__(perturbation.models.Well, wells)
 
     wells.clear()
 
 
-def save_textures(session, offset, textures):
+def save_textures(offset, textures):
     logger.debug('\tBulk insert Texture')
 
     for index, texture_dictionary in enumerate(textures):
@@ -615,28 +616,28 @@ def save_textures(session, offset, textures):
 
     offset += len(textures)
 
-    __save__(perturbation.models.Texture, textures, session)
+    __save__(perturbation.models.Texture, textures)
 
     textures.clear()
 
 
-def save_objects(objects, session):
+def save_objects(objects):
     logger.debug('\tBulk insert Object')
 
-    __save__(perturbation.models.Object, objects, session)
+    __save__(perturbation.models.Object, objects)
 
     objects.clear()
 
 
-def save_neighborhoods(neighborhoods, session):
+def save_neighborhoods(neighborhoods):
     logger.debug('\tBulk insert Neighborhood')
 
-    __save__(perturbation.models.Neighborhood, neighborhoods, session)
+    __save__(perturbation.models.Neighborhood, neighborhoods)
 
     neighborhoods.clear()
 
 
-def save_moments(offset, moments, moments_group, session):
+def save_moments(offset, moments, moments_group):
     logger.debug('\tBulk insert Moment')
 
     for index, moment_dictionary in enumerate(moments_group):
@@ -644,20 +645,20 @@ def save_moments(offset, moments, moments_group, session):
 
     offset += len(moments_group)
 
-    __save__(perturbation.models.Moment, moments_group, session)
+    __save__(perturbation.models.Moment, moments_group)
 
     moments.clear()
 
 
-def save_shapes(session, shapes):
+def save_shapes(shapes):
     logger.debug('\tBulk insert Shape')
 
-    __save__(perturbation.models.Shape, shapes, session)
+    __save__(perturbation.models.Shape, shapes)
 
     shapes.clear()
 
 
-def save_radial_distributions(offset, radial_distributions, session):
+def save_radial_distributions(offset, radial_distributions):
     logger.debug('\tBulk insert RadialDistribution')
 
     for index, radial_distribution_dictionary in enumerate(radial_distributions):
@@ -665,13 +666,15 @@ def save_radial_distributions(offset, radial_distributions, session):
 
     offset += len(radial_distributions)
 
-    __save__(perturbation.models.RadialDistribution, radial_distributions, session)
+    __save__(perturbation.models.RadialDistribution, radial_distributions)
 
     radial_distributions.clear()
 
 
-def __save__(table, records, session):
+def __save__(table, records):
     def __create_mappings__(items):
         return [item._asdict() for item in items]
 
-    session.bulk_insert_mappings(table, __create_mappings__(records))
+    perturbation.database.scoped_session.bulk_insert_mappings(table, __create_mappings__(records))
+
+    perturbation.database.scoped_session.commit()
