@@ -54,6 +54,7 @@ def __main__(input, output, sqlfile, verbose, skipmunge):
 
     perturbation.database.seed(input=input, output=output, sqlfile=sqlfile, verbose=verbose)
 
+    logger.debug('Finish')
 
 if __name__ == '__main__':
     __main__()
