@@ -252,6 +252,7 @@ def create_center(row):
         ordinate=row['Location_Center_Y']
     )
 
+
 def create_center_mass_intensity(channel, row):
     return __coordinate__(
         abscissa=row['Location_CenterMassIntensity_X_{}'.format(channel.description)],
