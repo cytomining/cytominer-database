@@ -7,7 +7,9 @@ import os
 import pandas
 import sqlalchemy.orm
 import uuid
+import logging
 
+logger = logging.getLogger(__name__)
 
 def find_directories(directory):
     """
@@ -98,6 +100,7 @@ def seed(input, output, sqlfile, verbose=False):
 
     perturbation.base.Base.metadata.create_all(engine)
 
+    logger.debug("Parsing SQL file")
     with open(sqlfile) as f:
         import sqlparse
         for s in sqlparse.split(f.read()):
@@ -120,6 +123,14 @@ def seed(input, output, sqlfile, verbose=False):
     radial_distribution_offset = 0
 
     for directory in find_directories(input):
+
+        try:
+            data = pandas.read_csv(os.path.join(directory, 'image.csv'))
+        except OSError:
+            # print("Skipping directory {} because image.csv not found.".format(directory))
+            continue
+
+        logger.debug("Parsing {}".format(directory))
 
         coordinate_dictionaries = []
 
@@ -151,18 +162,14 @@ def seed(input, output, sqlfile, verbose=False):
 
         well_dictionaries = []
 
-        try:
-            data = pandas.read_csv(os.path.join(directory, 'image.csv'))
-        except OSError:
-            print("Skipping directory {} because image.csv not found.".format(directory))
-            continue
-
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
         plate_descriptions = data['Metadata_Barcode'].unique()
 
         #import IPython
         #IPython.embed()
+
+        logger.debug("Parse plates, wells, images, quality")
 
         for plate_description in plate_descriptions:
             plate_dictionary = find_plate_by(plate_dictionaries, str(int(plate_description)))
@@ -203,16 +210,18 @@ def seed(input, output, sqlfile, verbose=False):
                         'id': uuid.uuid4(),
                         'image_id': image_dictionary['id'],
                         'count_cell_clump': int(data.loc[data['ImageNumber'] == image_description,
-                                                      'Metadata_isCellClump']),
+                                                         'Metadata_isCellClump']),
                         'count_debris': int(data.loc[data['ImageNumber'] == image_description,
-                                                  'Metadata_isDebris']),
+                                                     'Metadata_isDebris']),
                         'count_low_intensity': int(data.loc[data['ImageNumber'] == image_description,
-                                                         'Metadata_isLowIntensity'])
+                                                            'Metadata_isLowIntensity'])
                     }
 
                     quality_dictionaries.append(quality_dictionary)
 
-        # TODO: Read only the header, and read all the patterns because some columns are present in only one pattern
+        logger.debug("Parse objects")
+
+        # TODO: Read all the patterns because some columns are present in only one pattern
         data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
 
         def get_object_numbers(s):
@@ -246,6 +255,8 @@ def seed(input, output, sqlfile, verbose=False):
             object_dictionaries.append(object_dictionary)
 
         session.commit()
+
+        logger.debug("Parse feature parameters")
 
         filenames = []
 
@@ -337,6 +348,8 @@ def seed(input, output, sqlfile, verbose=False):
                 moments.append((split_columns[2], split_columns[3]))
 
         for pattern in patterns:
+            logger.debug("Parse {}".format(pattern.description))
+
             data = pandas.read_csv(os.path.join(directory, '{}.csv').format(pattern.description))
 
             with click.progressbar(length=data.shape[0], label="Processing " + pattern.description,
@@ -963,6 +976,9 @@ def seed(input, output, sqlfile, verbose=False):
 
                             radial_distribution_dictionaries.append(radial_distribution_dictionary)
 
+
+        logger.debug("Bulk inserts")
+
         session.bulk_insert_mappings(
             Coordinate,
             coordinate_dictionaries
@@ -1110,6 +1126,8 @@ def seed(input, output, sqlfile, verbose=False):
 
         well_dictionaries.clear()
 
+        logger.debug("Commit {}".format(directory))
+
         session.commit()
 
     session.bulk_insert_mappings(
@@ -1121,5 +1139,7 @@ def seed(input, output, sqlfile, verbose=False):
         Plate,
         plate_dictionaries
     )
+
+    logger.debug("Commit plate, channel")
 
     session.commit()

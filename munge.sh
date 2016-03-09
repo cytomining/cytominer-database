@@ -24,7 +24,7 @@ task() {
 
     if [[ ! -e $object_csv ]];
     then
-        echo Skipping directory $directory because object.csv not found.
+        #echo Skipping directory $directory because object.csv not found.
         return
     fi
 
