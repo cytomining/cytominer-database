@@ -238,49 +238,31 @@ __well__ = collections.namedtuple(
 )
 
 
-def create_channel(channel_description, channel_dictionary):
+def create_channel(description, channel_dictionary):
     return __channel__(
-        description=channel_description,
+        description=description,
         id=uuid.uuid4()
     )
 
 
 def create_center(row):
     return __coordinate__(
-        abscissa=row[
-            'Location_Center_X'
-        ],
+        abscissa=row['Location_Center_X'],
         id=uuid.uuid4(),
-        ordinate=row[
-            'Location_Center_Y'
-        ]
+        ordinate=row['Location_Center_Y']
     )
 
-
-def create_center_mass_intensity(channel_dictionary, row):
+def create_center_mass_intensity(channel, row):
     return __coordinate__(
-        abscissa=row[
-            'Location_CenterMassIntensity_X_{}'.format(
-                    channel_dictionary.description
-            )
-        ],
+        abscissa=row['Location_CenterMassIntensity_X_{}'.format(channel.description)],
         id=uuid.uuid4(),
-        ordinate=row[
-            'Location_CenterMassIntensity_Y_{}'.format(
-                    channel_dictionary.description
-            )
-        ]
+        ordinate=row['Location_CenterMassIntensity_Y_{}'.format(channel.description)]
     )
 
 
 def create_correlation(dependent, independent, match, row):
     return __correlation__(
-        coefficient=row[
-            'Correlation_Correlation_{}_{}'.format(
-                dependent.description,
-                independent.description
-            )
-        ],
+        coefficient=row['Correlation_Correlation_{}_{}'.format(dependent.description, independent.description)],
         dependent_id=dependent.id,
         id=None,
         independent_id=independent.id,
@@ -288,101 +270,50 @@ def create_correlation(dependent, independent, match, row):
     )
 
 
-def create_edge(channel_dictionary, match, row):
+def create_edge(channel, match, row):
     return __edge__(
-        channel_id=channel_dictionary.id,
+        channel_id=channel.id,
         id=uuid.uuid4(),
-        integrated=row[
-            'Intensity_IntegratedIntensityEdge_{}'.format(
-                    channel_dictionary.description
-            )
-        ],
+        integrated=row['Intensity_IntegratedIntensityEdge_{}'.format(channel.description)],
         match_id=match.id,
-        maximum=row[
-            'Intensity_MaxIntensityEdge_{}'.format(
-                    channel_dictionary.description
-            )
-        ],
-        mean=row[
-            'Intensity_MeanIntensityEdge_{}'.format(
-                    channel_dictionary.description
-            )
-        ],
-        minimum=row[
-            'Intensity_MinIntensityEdge_{}'.format(
-                    channel_dictionary.description
-            )
-        ],
-        standard_deviation=row[
-            'Intensity_StdIntensityEdge_{}'.format(
-                    channel_dictionary.description
-            )
-        ]
+        maximum=row['Intensity_MaxIntensityEdge_{}'.format(channel.description)],
+        mean=row['Intensity_MeanIntensityEdge_{}'.format(channel.description)],
+        minimum=row['Intensity_MinIntensityEdge_{}'.format(channel.description)],
+        standard_deviation=row['Intensity_StdIntensityEdge_{}'.format(channel.description)]
     )
 
 
-def create_max_intensity(channel_dictionary, row):
+def create_max_intensity(channel, row):
     return __coordinate__(
-            abscissa=row[
-                'Location_MaxIntensity_X_{}'.format(
-                        channel_dictionary.description
-                )
-            ],
-            id=uuid.uuid4(),
-            ordinate=row[
-                'Location_MaxIntensity_Y_{}'.format(
-                        channel_dictionary.description
-                )
-            ]
+        abscissa=row['Location_MaxIntensity_X_{}'.format(channel.description)],
+        id=uuid.uuid4(),
+        ordinate=row['Location_MaxIntensity_Y_{}'.format(channel.description)]
     )
 
 
-def create_image(digest, image_description, well_dictionary):
+def create_image(digest, description, well_dictionary):
     return __image__(
-            description='{}_{}'.format(
-                    digest,
-                    int(image_description)
-            ),
-            id=uuid.uuid4(),
-            well_id=well_dictionary.id
+        description='{}_{}'.format(digest, int(description)),
+        id=uuid.uuid4(),
+        well_id=well_dictionary.id
     )
 
 
 def create_intensity(channel, match, row):
     return __intensity__(
         channel_id=channel.id,
-        first_quartile=row[
-            'Intensity_LowerQuartileIntensity_{}'.format(channel.description)
-        ],
+        first_quartile=row['Intensity_LowerQuartileIntensity_{}'.format(channel.description)],
         id=None,
-        integrated=row[
-            'Intensity_IntegratedIntensity_{}'.format(channel.description)
-        ],
-        mass_displacement=row[
-            'Intensity_MassDisplacement_{}'.format(channel.description)
-        ],
+        integrated=row['Intensity_IntegratedIntensity_{}'.format(channel.description)],
+        mass_displacement=row['Intensity_MassDisplacement_{}'.format(channel.description)],
         match_id=match.id,
-        maximum=row[
-            'Intensity_MaxIntensity_{}'.format(channel.description)
-        ],
-        mean=row[
-            'Intensity_MeanIntensity_{}'.format(channel.description)
-        ],
-        median=row[
-            'Intensity_MedianIntensity_{}'.format(channel.description)
-        ],
-        median_absolute_deviation=row[
-            'Intensity_MADIntensity_{}'.format(channel.description)
-        ],
-        minimum=row[
-            'Intensity_MinIntensity_{}'.format(channel.description)
-        ],
-        standard_deviation=row[
-            'Intensity_StdIntensity_{}'.format(channel.description)
-        ],
-        third_quartile=row[
-            'Intensity_UpperQuartileIntensity_{}'.format(channel.description)
-        ]
+        maximum=row['Intensity_MaxIntensity_{}'.format(channel.description)],
+        mean=row['Intensity_MeanIntensity_{}'.format(channel.description)],
+        median=row['Intensity_MedianIntensity_{}'.format(channel.description)],
+        median_absolute_deviation=row['Intensity_MADIntensity_{}'.format(channel.description)],
+        minimum=row['Intensity_MinIntensity_{}'.format(channel.description)],
+        standard_deviation=row['Intensity_StdIntensity_{}'.format(channel.description)],
+        third_quartile=row['Intensity_UpperQuartileIntensity_{}'.format(channel.description)]
     )
 
 
@@ -412,70 +343,37 @@ def create_moment(a, b, row, shape):
         a=a,
         b=b,
         id=None,
-        score=row[
-            'AreaShape_Zernike_{}_{}'.format(a, b)
-        ],
+        score=row['AreaShape_Zernike_{}_{}'.format(a, b)],
         shape_id=shape.id
     )
 
 
 def create_neighborhood(object_id, row):
     return __neighborhood__(
-        angle_between_neighbors_5=row[
-            'Neighbors_AngleBetweenNeighbors_5'
-        ],
-        angle_between_neighbors_adjacent=row[
-            'Neighbors_AngleBetweenNeighbors_Adjacent'
-        ],
+        angle_between_neighbors_5=row['Neighbors_AngleBetweenNeighbors_5'],
+        angle_between_neighbors_adjacent=row['Neighbors_AngleBetweenNeighbors_Adjacent'],
         closest_id=None,
-        first_closest_distance_5=row[
-            'Neighbors_FirstClosestDistance_5'
-        ],
-        first_closest_distance_adjacent=row[
-            'Neighbors_FirstClosestDistance_Adjacent'
-        ],
-        first_closest_object_number_adjacent=row[
-            'Neighbors_FirstClosestObjectNumber_Adjacent'
-        ],
+        first_closest_distance_5=row['Neighbors_FirstClosestDistance_5'],
+        first_closest_distance_adjacent=row['Neighbors_FirstClosestDistance_Adjacent'],
+        first_closest_object_number_adjacent=row['Neighbors_FirstClosestObjectNumber_Adjacent'],
         id=uuid.uuid4(),
-        number_of_neighbors_5=row[
-            'Neighbors_NumberOfNeighbors_5'
-        ],
-        number_of_neighbors_adjacent=row[
-            'Neighbors_NumberOfNeighbors_Adjacent'
-        ],
+        number_of_neighbors_5=row['Neighbors_NumberOfNeighbors_5'],
+        number_of_neighbors_adjacent=row['Neighbors_NumberOfNeighbors_Adjacent'],
         object_id=object_id,
-        percent_touching_5=row[
-            'Neighbors_PercentTouching_5'
-        ],
-        percent_touching_adjacent=row[
-            'Neighbors_PercentTouching_Adjacent'
-        ],
-        second_closest_distance_5=row[
-            'Neighbors_SecondClosestDistance_5'
-        ],
-        second_closest_distance_adjacent=row[
-            'Neighbors_SecondClosestDistance_Adjacent'
-        ],
+        percent_touching_5=row['Neighbors_PercentTouching_5'],
+        percent_touching_adjacent=row['Neighbors_PercentTouching_Adjacent'],
+        second_closest_distance_5=row['Neighbors_SecondClosestDistance_5'],
+        second_closest_distance_adjacent=row['Neighbors_SecondClosestDistance_Adjacent'],
         second_closest_id=None,
-        second_closest_object_number_adjacent=row[
-            'Neighbors_SecondClosestObjectNumber_Adjacent'
-        ]
+        second_closest_object_number_adjacent=row['Neighbors_SecondClosestObjectNumber_Adjacent']
     )
 
 
-def create_object(digest, image_dictionaries, object_number):
+def create_object(digest, images, description):
     return __object__(
-        description=str(
-                object_number[
-                    'ObjectNumber'
-                ]
-        ),
+        description=str(description['ObjectNumber']),
         id=uuid.uuid4(),
-        image_id=find_image_by(
-            description='{}_{}'.format(digest, int(object_number['ImageNumber'])),
-            dictionaries=image_dictionaries
-        )
+        image_id=find_image_by(description='{}_{}'.format(digest, int(description['ImageNumber'])), dictionaries=images)
     )
 
 
@@ -500,81 +398,34 @@ def create_radial_distribution(channel, count, match, row):
     return __radial_distribution__(
         bins=count,
         channel_id=channel.id,
-        frac_at_d=row[
-            'RadialDistribution_FracAtD_{}_{}of4'.format(
-                channel.description,
-                count
-            )
-        ],
+        frac_at_d=row['RadialDistribution_FracAtD_{}_{}of4'.format(channel.description, count)],
         id=None,
         match_id=match.id,
-        mean_frac=row[
-            'RadialDistribution_MeanFrac_{}_{}of4'.format(
-                channel.description,
-                count
-            )
-        ],
-        radial_cv=row[
-            'RadialDistribution_RadialCV_{}_{}of4'.format(
-                channel.description,
-                count
-            )
-        ]
+        mean_frac=row['RadialDistribution_MeanFrac_{}_{}of4'.format(channel.description, count)],
+        radial_cv=row['RadialDistribution_RadialCV_{}_{}of4'.format(channel.description, count)]
     )
 
 
 def create_shape(row, shape_center):
     return __shape__(
-        area=row[
-            'AreaShape_Area'
-        ],
+        area=row['AreaShape_Area'],
         center_id=shape_center.id,
-        compactness=row[
-            'AreaShape_Compactness'
-        ],
-        eccentricity=row[
-            'AreaShape_Eccentricity'
-        ],
-        euler_number=row[
-            'AreaShape_EulerNumber'
-        ],
-        extent=row[
-            'AreaShape_Extent'
-        ],
-        form_factor=row[
-            'AreaShape_FormFactor'
-        ],
+        compactness=row['AreaShape_Compactness'],
+        eccentricity=row['AreaShape_Eccentricity'],
+        euler_number=row['AreaShape_EulerNumber'],
+        extent=row['AreaShape_Extent'],
+        form_factor=row['AreaShape_FormFactor'],
         id=uuid.uuid4(),
-        major_axis_length=row[
-            'AreaShape_MajorAxisLength'
-        ],
-        max_feret_diameter=row[
-            'AreaShape_MaxFeretDiameter'
-        ],
-        maximum_radius=row[
-            'AreaShape_MaximumRadius'
-        ],
-        mean_radius=row[
-            'AreaShape_MeanRadius'
-        ],
-        median_radius=row[
-            'AreaShape_MedianRadius'
-        ],
-        min_feret_diameter=row[
-            'AreaShape_MinFeretDiameter'
-        ],
-        minor_axis_length=row[
-            'AreaShape_MinorAxisLength'
-        ],
-        orientation=row[
-            'AreaShape_Orientation'
-        ],
-        perimeter=row[
-            'AreaShape_Perimeter'
-        ],
-        solidity=row[
-            'AreaShape_Solidity'
-        ]
+        major_axis_length=row['AreaShape_MajorAxisLength'],
+        max_feret_diameter=row['AreaShape_MaxFeretDiameter'],
+        maximum_radius=row['AreaShape_MaximumRadius'],
+        mean_radius=row['AreaShape_MeanRadius'],
+        median_radius=row['AreaShape_MedianRadius'],
+        min_feret_diameter=row['AreaShape_MinFeretDiameter'],
+        minor_axis_length=row['AreaShape_MinorAxisLength'],
+        orientation=row['AreaShape_Orientation'],
+        perimeter=row['AreaShape_Perimeter'],
+        solidity=row['AreaShape_Solidity']
     )
 
 

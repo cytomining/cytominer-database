@@ -6,9 +6,9 @@ import click
 import perturbation.database
 import pkg_resources
 import subprocess
-import time
 import logging
 import logging.config
+
 
 def __version__(context, parameter, argument):
     if not argument or context.resilient_parsing:
@@ -45,7 +45,6 @@ def __main__(input, output, sqlfile, verbose, skipmunge):
 
     logger = logging.getLogger(__name__)
 
-
     if not skipmunge:
         logger.debug('Calling munge')
         subprocess.call(['./munge.sh', input])
@@ -55,6 +54,7 @@ def __main__(input, output, sqlfile, verbose, skipmunge):
     perturbation.database.seed(input=input, output=output, sqlfile=sqlfile, verbose=verbose)
 
     logger.debug('Finish')
+
 
 if __name__ == '__main__':
     __main__()

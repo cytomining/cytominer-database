@@ -13,6 +13,48 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+create_center = perturbation.migration.models.create_center
+
+create_center_mass_intensity = perturbation.migration.models.create_center_mass_intensity
+
+create_channel = perturbation.migration.models.create_channel
+
+create_correlation = perturbation.migration.models.create_correlation
+
+create_edge = perturbation.migration.models.create_edge
+
+create_image = perturbation.migration.models.create_image
+
+create_intensity = perturbation.migration.models.create_intensity
+
+create_location = perturbation.migration.models.create_location
+
+create_match = perturbation.migration.models.create_match
+
+create_max_intensity = perturbation.migration.models.create_max_intensity
+
+create_moment = perturbation.migration.models.create_moment
+
+create_neighborhood = perturbation.migration.models.create_neighborhood
+
+create_object = perturbation.migration.models.create_object
+
+create_plate = perturbation.migration.models.create_plate
+
+create_quality = perturbation.migration.models.create_quality
+
+create_radial_distribution = perturbation.migration.models.create_radial_distribution
+
+create_shape = perturbation.migration.models.create_shape
+
+create_shape_center = perturbation.migration.models.create_shape_center
+
+create_texture = perturbation.migration.models.create_texture
+
+create_well = perturbation.migration.models.create_well
+
+find_plate_by = perturbation.migration.models.find_plate_by
+
 
 def find_directories(directory):
     """
@@ -109,33 +151,7 @@ def seed(input, output, sqlfile, verbose=False):
 
         logger.debug('\tParse plates, wells, images, quality')
 
-        for plate_description in plate_descriptions:
-            plate = perturbation.migration.models.find_plate_by(plates, str(int(plate_description)))
-
-            if not plate:
-                plate = perturbation.migration.models.create_plate(plate_description, plate)
-
-                plates.append(plate)
-
-            well_descriptions = data[data['Metadata_Barcode'] == plate_description]['Metadata_Well'].unique()
-
-            for well_description in well_descriptions:
-                well = perturbation.migration.models.create_well(plate, well_description)
-
-                wells.append(well)
-
-                image_descriptions = data[
-                    (data['Metadata_Barcode'] == plate_description) & (data['Metadata_Well'] == well_description)
-                ]['ImageNumber'].unique()
-
-                for image_description in image_descriptions:
-                    image = perturbation.migration.models.create_image(digest, image_description, well)
-
-                    images.append(image)
-
-                    quality = perturbation.migration.models.create_quality(data, image_description, image)
-
-                    qualities.append(quality)
+        create_plates(data, digest, images, plate_descriptions, plates, qualities, wells)
 
         logger.debug('\tParse objects')
 
@@ -145,17 +161,12 @@ def seed(input, output, sqlfile, verbose=False):
         def get_object_numbers(s):
             return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
 
-        object_numbers = pandas.concat(
-                [get_object_numbers(s) for s in ['ObjectNumber',
-                                                 'Neighbors_FirstClosestObjectNumber_5',
-                                                 'Neighbors_SecondClosestObjectNumber_5'
-                                                 ]]
-        )
+        object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_5', 'Neighbors_SecondClosestObjectNumber_5']])
 
         object_numbers.drop_duplicates()
 
         for index, object_number in object_numbers.iterrows():
-            object_dictionary = perturbation.migration.models.create_object(digest, images, object_number)
+            object_dictionary = create_object(digest, images, object_number)
 
             objects.append(object_dictionary)
 
@@ -177,10 +188,7 @@ def seed(input, output, sqlfile, verbose=False):
         patterns = []
 
         for pattern_description in pattern_descriptions:
-            pattern = perturbation.models.Pattern.find_or_create_by(
-                    session=session,
-                    description=pattern_description
-            )
+            pattern = perturbation.models.Pattern.find_or_create_by(session=session, description=pattern_description)
 
             patterns.append(pattern)
 
@@ -199,27 +207,26 @@ def seed(input, output, sqlfile, verbose=False):
         channel_descriptions = set(channel_descriptions)
 
         for channel_description in channel_descriptions:
-            channel_dictionary = perturbation.migration.models.find_channel_by(channels,
-                                                                               channel_description)
+            channel = perturbation.migration.models.find_channel_by(channels, channel_description)
 
-            if not channel_dictionary:
-                channel_dictionary = perturbation.migration.models.create_channel(channel_description,
-                                                                                  channel_dictionary)
+            if not channel:
+                channel = create_channel(channel_description, channel)
 
-                channels.append(channel_dictionary)
+                channels.append(channel)
 
         for column in columns:
             split_columns = column.split('_')
 
             a = None
             b = None
-            if split_columns[0] == 'Correlation':
-                for channel_dictionary in channels:
-                    if channel_dictionary.description == split_columns[2]:
-                        a = channel_dictionary
 
-                    if channel_dictionary.description == split_columns[3]:
-                        b = channel_dictionary
+            if split_columns[0] == 'Correlation':
+                for channel in channels:
+                    if channel.description == split_columns[2]:
+                        a = channel
+
+                    if channel.description == split_columns[3]:
+                        b = channel
 
                 correlation_columns.append((a, b))
 
@@ -256,161 +263,151 @@ def seed(input, output, sqlfile, verbose=False):
 
             data = pandas.read_csv(os.path.join(directory, '{}.csv').format(pattern.description))
 
-            with click.progressbar(length=data.shape[0], label="Processing " + pattern.description,
-                                   show_eta=True) as bar:
+            with click.progressbar(length=data.shape[0], label="Processing " + pattern.description, show_eta=True) as bar:
                 for index, row in data.iterrows():
                     bar.update(1)
 
                     row = collections.defaultdict(lambda: None, row)
 
-                    image_id = perturbation.migration.models.find_image_by(
-                            description='{}_{}'.format(
-                                    digest,
-                                    int(row[
-                                            'ImageNumber'
-                                        ])),
-                            dictionaries=images
-                    )
+                    image_id = perturbation.migration.models.find_image_by(description='{}_{}'.format(digest, int(row['ImageNumber'])), dictionaries=images)
 
-                    object_id = perturbation.migration.models.find_object_by(
-                            description=str(int(
-                                    row[
-                                        'ObjectNumber'
-                                    ]
-                            )),
-                            image_id=image_id,
-                            dictionaries=objects
-                    )
+                    object_id = perturbation.migration.models.find_object_by(description=str(int(row['ObjectNumber'])), image_id=image_id, dictionaries=objects)
 
-                    center = perturbation.migration.models.create_center(row)
+                    center = create_center(row)
 
                     coordinates.append(center)
 
-                    neighborhood_dictionary = perturbation.migration.models.create_neighborhood(object_id, row)
+                    neighborhood = create_neighborhood(object_id, row)
 
                     if row['Neighbors_FirstClosestObjectNumber_5']:
                         description = str(int(row['Neighbors_FirstClosestObjectNumber_5']))
 
-                        closest_id = perturbation.migration.models.find_object_by(
-                                description=description,
-                                image_id=image_id,
-                                dictionaries=objects
-                        )
+                        closest_id = perturbation.migration.models.find_object_by(description=description, image_id=image_id, dictionaries=objects)
 
-                        neighborhood_dictionary._replace(closest_id=closest_id)
+                        neighborhood._replace(closest_id=closest_id)
 
                     if row['Neighbors_SecondClosestObjectNumber_5']:
                         description = str(int(row['Neighbors_SecondClosestObjectNumber_5']))
 
-                        second_closest_id = perturbation.migration.models.find_object_by(
-                                description=description,
-                                image_id=image_id,
-                                dictionaries=objects
-                        )
+                        second_closest_id = perturbation.migration.models.find_object_by(description=description, image_id=image_id, dictionaries=objects)
 
-                        neighborhood_dictionary._replace(second_closest_id=second_closest_id)
+                        neighborhood._replace(second_closest_id=second_closest_id)
 
-                    neighborhoods.append(neighborhood_dictionary)
+                    neighborhoods.append(neighborhood)
 
-                    shape_center = perturbation.migration.models.create_shape_center(row)
+                    shape_center = create_shape_center(row)
 
                     coordinates.append(shape_center)
 
-                    shape = perturbation.migration.models.create_shape(row, shape_center)
+                    shape = create_shape(row, shape_center)
 
                     shapes.append(shape)
 
                     for a, b in moments:
-                        moment_dictionary = perturbation.migration.models.create_moment(a, b, row, shape)
+                        moment = create_moment(a, b, row, shape)
 
-                        moments_group.append(moment_dictionary)
+                        moments_group.append(moment)
 
-                    match = perturbation.migration.models.create_match(center, neighborhood_dictionary, object_id,
-                                                                       pattern, shape)
+                    match = create_match(center, neighborhood, object_id, pattern, shape)
 
                     matches.append(match)
 
                     for dependent, independent in correlation_columns:
-                        correlation_dictionary = perturbation.migration.models.create_correlation(dependent,
-                                                                                                  independent, match,
-                                                                                                  row)
+                        correlation = create_correlation(dependent, independent, match, row)
 
-                        correlations.append(correlation_dictionary)
+                        correlations.append(correlation)
 
-                    for channel_dictionary in channels:
-                        intensity_dictionary = perturbation.migration.models.create_intensity(channel_dictionary, match,
-                                                                                              row)
+                    for channel in channels:
+                        intensity = create_intensity(channel, match, row)
 
-                        intensities.append(intensity_dictionary)
+                        intensities.append(intensity)
 
-                        edges.append(
-                            perturbation.migration.models.create_edge(channel_dictionary, match, row))
+                        edge = create_edge(channel, match, row)
 
-                        center_mass_intensity = perturbation.migration.models.create_center_mass_intensity(
-                            channel_dictionary, row)
+                        edges.append(edge)
+
+                        center_mass_intensity = create_center_mass_intensity(channel, row)
 
                         coordinates.append(center_mass_intensity)
 
-                        max_intensity = perturbation.migration.models.create_max_intensity(channel_dictionary, row)
+                        max_intensity = create_max_intensity(channel, row)
 
                         coordinates.append(max_intensity)
 
-                        location = perturbation.migration.models.create_location(center_mass_intensity,
-                                                                                 channel_dictionary, match,
-                                                                                 max_intensity)
+                        location = create_location(center_mass_intensity, channel, match, max_intensity)
 
                         locations.append(location)
 
                         for scale in scales:
-                            texture_dictionary = perturbation.migration.models.create_texture(channel_dictionary, match,
-                                                                                              row, scale)
+                            texture = create_texture(channel, match, row, scale)
 
-                            textures.append(texture_dictionary)
+                            textures.append(texture)
 
                         for count in counts:
-                            radial_distribution_dictionary = perturbation.migration.models.create_radial_distribution(
-                                channel_dictionary, count, match, row)
+                            radial_distribution = create_radial_distribution(channel, count, match, row)
 
-                            radial_distributions.append(radial_distribution_dictionary)
+                            radial_distributions.append(radial_distribution)
 
         perturbation.migration.models.save_coordinates(coordinates, session)
+        perturbation.migration.models.save_edges(edges, session)
+        perturbation.migration.models.save_images(images, session)
+        perturbation.migration.models.save_matches(matches, session)
+        perturbation.migration.models.save_neighborhoods(neighborhoods, session)
+        perturbation.migration.models.save_objects(objects, session)
+        perturbation.migration.models.save_qualities(qualities, session)
+        perturbation.migration.models.save_shapes(session, shapes)
+        perturbation.migration.models.save_textures(session, texture_offset, textures)
+        perturbation.migration.models.save_wells(session, wells)
 
         perturbation.migration.models.save_correlations(correlation_offset, correlations, session)
-
-        perturbation.migration.models.save_edges(edges, session)
-
-        perturbation.migration.models.save_images(images, session)
-
         perturbation.migration.models.save_intensities(intensities, intensity_offset, session)
-
         perturbation.migration.models.save_locations(location_offset, locations, session)
-
-        perturbation.migration.models.save_matches(matches, session)
-
-        perturbation.migration.models.save_qualities(qualities, session)
-
         perturbation.migration.models.save_moments(moment_offset, moments, moments_group, session)
-
-        perturbation.migration.models.save_neighborhoods(neighborhoods, session)
-
-        perturbation.migration.models.save_objects(objects, session)
-
         perturbation.migration.models.save_radial_distributions(radial_distribution_offset, radial_distributions, session)
-
-        perturbation.migration.models.save_shapes(session, shapes)
-
-        perturbation.migration.models.save_textures(session, texture_offset, textures)
-
-        perturbation.migration.models.save_wells(session, wells)
 
         logger.debug('\tCommit {}'.format(os.path.basename(directory)))
 
         session.commit()
 
     perturbation.migration.models.save_channels(channels, session)
-
     perturbation.migration.models.save_plates(plates, session)
 
     logger.debug('Commit plate, channel')
 
     session.commit()
+
+
+def create_images(data, digest, descriptions, images, qualities, well):
+    for description in descriptions:
+        image = create_image(digest, description, well)
+
+        images.append(image)
+
+        quality = create_quality(data, description, image)
+
+        qualities.append(quality)
+
+
+def create_plates(data, digest, images, descriptions, plates, qualities, wells):
+    for description in descriptions:
+        plate = find_plate_by(plates, str(int(description)))
+
+        if not plate:
+            plate = create_plate(description, plate)
+
+            plates.append(plate)
+
+        well_descriptions = data[data['Metadata_Barcode'] == description]['Metadata_Well'].unique()
+
+        create_wells(data, digest, images, plate, description, qualities, well_descriptions, wells)
+
+
+def create_wells(data, digest, images, plate, plate_description, qualities, descriptions, wells):
+    for description in descriptions:
+        well = create_well(plate, description)
+
+        wells.append(well)
+
+        image_descriptions = data[(data['Metadata_Barcode'] == plate_description) & (data['Metadata_Well'] == description)]['ImageNumber'].unique()
+
+        create_images(data, digest, image_descriptions, images, qualities, well)
