@@ -130,7 +130,7 @@ def seed(input, output, sqlfile, verbose=False):
             # print('Skipping directory {} because image.csv not found.'.format(directory))
             continue
 
-        logger.debug('Parsing {}'.format(directory))
+        logger.debug('Parsing {}'.format(os.path.basename(directory)))
 
         coordinate_dictionaries = []
 
@@ -976,8 +976,6 @@ def seed(input, output, sqlfile, verbose=False):
 
                             radial_distribution_dictionaries.append(radial_distribution_dictionary)
 
-        logger.debug('\tBulk inserts')
-
         logger.debug('\tBulk insert Coordinate')
 
         session.bulk_insert_mappings(
@@ -1155,7 +1153,7 @@ def seed(input, output, sqlfile, verbose=False):
 
         well_dictionaries.clear()
 
-        logger.debug('\tCommit {}'.format(directory))
+        logger.debug('\tCommit {}'.format(os.path.basename(directory)))
 
         session.commit()
 

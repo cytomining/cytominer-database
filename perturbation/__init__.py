@@ -8,9 +8,7 @@ import pkg_resources
 import subprocess
 import time
 import logging
-
-logging.basicConfig(format='%(asctime)s %(message)s', level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+import logging.config
 
 def __version__(context, parameter, argument):
     if not argument or context.resilient_parsing:
@@ -40,9 +38,19 @@ def __main__(input, output, sqlfile, verbose, skipmunge):
 
     """
 
+    import json
+
+    with open("logging_config.json") as f:
+        logging.config.dictConfig(json.load(f))
+
+    logger = logging.getLogger(__name__)
+
+
     if not skipmunge:
         logger.debug('Calling munge')
         subprocess.call(['./munge.sh', input])
+    else:
+        logger.debug('Skipping munge')
 
     perturbation.database.seed(input=input, output=output, sqlfile=sqlfile, verbose=verbose)
 
