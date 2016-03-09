@@ -5,7 +5,7 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
-Channel = collections.namedtuple(
+__channel__ = collections.namedtuple(
     field_names=[
         'description',
         'id'
@@ -13,7 +13,7 @@ Channel = collections.namedtuple(
     typename='Channel'
 )
 
-Coordinate = collections.namedtuple(
+__coordinate__ = collections.namedtuple(
     field_names=[
         'abscissa',
         'id',
@@ -22,7 +22,7 @@ Coordinate = collections.namedtuple(
     typename='Coordinate'
 )
 
-Correlation = collections.namedtuple(
+__correlation__ = collections.namedtuple(
     field_names=[
         'coefficient',
         'dependent_id',
@@ -33,7 +33,7 @@ Correlation = collections.namedtuple(
     typename='Correlation'
 )
 
-Edge = collections.namedtuple(
+__edge__ = collections.namedtuple(
     typename='Edge',
     field_names=[
         'channel_id',
@@ -47,7 +47,7 @@ Edge = collections.namedtuple(
     ]
 )
 
-Image = collections.namedtuple(
+__image__ = collections.namedtuple(
     field_names=[
         'description',
         'id',
@@ -56,7 +56,7 @@ Image = collections.namedtuple(
     typename='Image'
 )
 
-Intensity = collections.namedtuple(
+__intensity__ = collections.namedtuple(
     field_names=[
         'channel_id',
         'first_quartile',
@@ -75,7 +75,7 @@ Intensity = collections.namedtuple(
     typename='Intensity'
 )
 
-Location = collections.namedtuple(
+__location__ = collections.namedtuple(
     field_names=[
         'center_mass_intensity_id',
         'channel_id',
@@ -86,7 +86,7 @@ Location = collections.namedtuple(
     typename='Location'
 )
 
-Match = collections.namedtuple(
+__match__ = collections.namedtuple(
     field_names=[
         'center_id',
         'id',
@@ -98,7 +98,7 @@ Match = collections.namedtuple(
     typename='Match'
 )
 
-Moment = collections.namedtuple(
+__moment__ = collections.namedtuple(
     field_names=[
         'a',
         'b',
@@ -109,7 +109,7 @@ Moment = collections.namedtuple(
     typename='Moment'
 )
 
-Object = collections.namedtuple(
+__object__ = collections.namedtuple(
     field_names=[
         'description',
         'id',
@@ -118,7 +118,7 @@ Object = collections.namedtuple(
     typename='Object'
 )
 
-Pattern = collections.namedtuple(
+__pattern__ = collections.namedtuple(
     field_names=[
         'description',
         'id'
@@ -126,7 +126,7 @@ Pattern = collections.namedtuple(
     typename='Pattern'
 )
 
-Plate = collections.namedtuple(
+__plate__ = collections.namedtuple(
     field_names=[
         'description',
         'id'
@@ -134,7 +134,7 @@ Plate = collections.namedtuple(
     typename='Plate'
 )
 
-Quality = collections.namedtuple(
+__quality__ = collections.namedtuple(
     field_names=[
         'count_cell_clump',
         'count_debris',
@@ -145,7 +145,7 @@ Quality = collections.namedtuple(
     typename='Quality'
 )
 
-RadialDistribution = collections.namedtuple(
+__radial_distribution__ = collections.namedtuple(
     field_names=[
         'bins',
         'channel_id',
@@ -158,7 +158,7 @@ RadialDistribution = collections.namedtuple(
     typename='RadialDistribution'
 )
 
-Neighborhood = collections.namedtuple(
+__neighborhood__ = collections.namedtuple(
     field_names=[
         'angle_between_neighbors_5',
         'angle_between_neighbors_adjacent',
@@ -180,7 +180,7 @@ Neighborhood = collections.namedtuple(
     typename='Neighborhood'
 )
 
-Shape = collections.namedtuple(
+__shape__ = collections.namedtuple(
     typename='Shape',
     field_names=[
         'area',
@@ -204,7 +204,7 @@ Shape = collections.namedtuple(
     ]
 )
 
-Texture = collections.namedtuple(
+__texture__ = collections.namedtuple(
     typename='Texture',
     field_names=[
         'angular_second_moment',
@@ -228,7 +228,7 @@ Texture = collections.namedtuple(
     ]
 )
 
-Well = collections.namedtuple(
+__well__ = collections.namedtuple(
     field_names=[
         'description',
         'id',
@@ -239,14 +239,14 @@ Well = collections.namedtuple(
 
 
 def create_channel(channel_description, channel_dictionary):
-    return Channel(
+    return __channel__(
         description=channel_description,
         id=uuid.uuid4()
     )
 
 
 def create_center(row):
-    return Coordinate(
+    return __coordinate__(
         abscissa=row[
             'Location_Center_X'
         ],
@@ -258,7 +258,7 @@ def create_center(row):
 
 
 def create_center_mass_intensity(channel_dictionary, row):
-    return Coordinate(
+    return __coordinate__(
         abscissa=row[
             'Location_CenterMassIntensity_X_{}'.format(
                     channel_dictionary.description
@@ -274,7 +274,7 @@ def create_center_mass_intensity(channel_dictionary, row):
 
 
 def create_correlation(dependent, independent, match, row):
-    return Correlation(
+    return __correlation__(
         coefficient=row[
             'Correlation_Correlation_{}_{}'.format(
                 dependent.description,
@@ -289,7 +289,7 @@ def create_correlation(dependent, independent, match, row):
 
 
 def create_edge(channel_dictionary, match, row):
-    return Edge(
+    return __edge__(
         channel_id=channel_dictionary.id,
         id=uuid.uuid4(),
         integrated=row[
@@ -322,7 +322,7 @@ def create_edge(channel_dictionary, match, row):
 
 
 def create_max_intensity(channel_dictionary, row):
-    return Coordinate(
+    return __coordinate__(
             abscissa=row[
                 'Location_MaxIntensity_X_{}'.format(
                         channel_dictionary.description
@@ -338,7 +338,7 @@ def create_max_intensity(channel_dictionary, row):
 
 
 def create_image(digest, image_description, well_dictionary):
-    return Image(
+    return __image__(
             description='{}_{}'.format(
                     digest,
                     int(image_description)
@@ -349,7 +349,7 @@ def create_image(digest, image_description, well_dictionary):
 
 
 def create_intensity(channel, match, row):
-    return Intensity(
+    return __intensity__(
         channel_id=channel.id,
         first_quartile=row[
             'Intensity_LowerQuartileIntensity_{}'.format(channel.description)
@@ -387,7 +387,7 @@ def create_intensity(channel, match, row):
 
 
 def create_location(center_mass_intensity, channel, match, max_intensity):
-    return Location(
+    return __location__(
         center_mass_intensity_id=center_mass_intensity.id,
         channel_id=channel.id,
         id=None,
@@ -397,7 +397,7 @@ def create_location(center_mass_intensity, channel, match, max_intensity):
 
 
 def create_match(center, neighborhood, object_id, pattern, shape):
-    return Match(
+    return __match__(
         center_id=center.id,
         id=uuid.uuid4(),
         neighborhood_id=neighborhood.id,
@@ -408,7 +408,7 @@ def create_match(center, neighborhood, object_id, pattern, shape):
 
 
 def create_moment(a, b, row, shape):
-    return Moment(
+    return __moment__(
         a=a,
         b=b,
         id=None,
@@ -420,7 +420,7 @@ def create_moment(a, b, row, shape):
 
 
 def create_neighborhood(object_id, row):
-    return Neighborhood(
+    return __neighborhood__(
         angle_between_neighbors_5=row[
             'Neighbors_AngleBetweenNeighbors_5'
         ],
@@ -465,7 +465,7 @@ def create_neighborhood(object_id, row):
 
 
 def create_object(digest, image_dictionaries, object_number):
-    return Object(
+    return __object__(
         description=str(
                 object_number[
                     'ObjectNumber'
@@ -480,14 +480,14 @@ def create_object(digest, image_dictionaries, object_number):
 
 
 def create_plate(description, plate):
-    return Plate(
+    return __plate__(
         description=str(int(description)),
         id=uuid.uuid4()
     )
 
 
 def create_quality(data, image_description, image):
-    return Quality(
+    return __quality__(
         id=uuid.uuid4(),
         image_id=image.id,
         count_cell_clump=int(data.loc[data['ImageNumber'] == image_description, 'Metadata_isCellClump']),
@@ -497,7 +497,7 @@ def create_quality(data, image_description, image):
 
 
 def create_radial_distribution(channel, count, match, row):
-    return RadialDistribution(
+    return __radial_distribution__(
         bins=count,
         channel_id=channel.id,
         frac_at_d=row[
@@ -524,7 +524,7 @@ def create_radial_distribution(channel, count, match, row):
 
 
 def create_shape(row, shape_center):
-    return Shape(
+    return __shape__(
         area=row[
             'AreaShape_Area'
         ],
@@ -579,7 +579,7 @@ def create_shape(row, shape_center):
 
 
 def create_shape_center(row):
-    return Coordinate(
+    return __coordinate__(
         abscissa=row['AreaShape_Center_X'],
         id=uuid.uuid4(),
         ordinate=row['AreaShape_Center_Y']
@@ -596,7 +596,7 @@ def create_texture(channel, match, row, scale):
             )
         ]
 
-    return Texture(
+    return __texture__(
         angular_second_moment=find_by('AngularSecondMoment'),
         channel_id=channel.id,
         contrast=find_by('Contrast'),
@@ -619,7 +619,7 @@ def create_texture(channel, match, row, scale):
 
 
 def create_well(plate_dictionary, well_description):
-    return Well(
+    return __well__(
         description=well_description,
         id=uuid.uuid4(),
         plate_id=plate_dictionary.id
