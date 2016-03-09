@@ -16,7 +16,7 @@ def __version__(context, parameter, argument):
     if not argument or context.resilient_parsing:
         return
 
-    click.echo('perturbation {}'.format(pkg_resources.get_distribution("perturbation").version))
+    click.echo('perturbation {}'.format(pkg_resources.get_distribution('perturbation').version))
 
     context.exit()
 
@@ -41,7 +41,7 @@ def __main__(input, output, sqlfile, verbose, skipmunge):
     """
 
     if not skipmunge:
-        logger.debug("Calling munge")
+        logger.debug('Calling munge')
         subprocess.call(['./munge.sh', input])
 
     perturbation.database.seed(input=input, output=output, sqlfile=sqlfile, verbose=verbose)
