@@ -274,6 +274,4 @@ INNER JOIN matches  ON matches.object_id   = objects.id
 INNER JOIN patterns ON matches.pattern_id  = patterns.id
 INNER JOIN channels ON textures.channel_id = channels.id
 INNER JOIN textures ON textures.match_id   = matches.id
-
-
-    
+;
