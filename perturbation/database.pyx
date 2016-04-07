@@ -66,7 +66,7 @@ class Base(object):
 
 logger = logging.getLogger(__name__)
 
-Base = perturbation.base.Base
+Base = Base
 
 Session = sqlalchemy.orm.sessionmaker()
 
@@ -492,47 +492,25 @@ cdef create_patterns(channels, coordinates, correlation_columns, correlation_off
     logger.debug('\tCommit {}'.format(os.path.basename(directory)))
 
 
-cdef inline find_pattern_descriptions(filenames):
-    pattern_descriptions = []
-
-    for filename in filenames:
-        pattern_descriptions.append(filename.split('.')[0])
-
-    return pattern_descriptions
 
 
-cdef inline find_objects(digest, images, object_numbers):
-    objects = []
-
-    for index, object_number in object_numbers.iterrows():
-        object_dictionary = create_object(digest, images, object_number)
-
-        objects.append(object_dictionary)
-
-    return objects
 
 
-cdef inline find_patterns(pattern_descriptions, session):
-    patterns = []
-
-    for pattern_description in pattern_descriptions:
-        pattern = perturbation.models.Pattern.find_or_create_by(session=session, description=pattern_description)
-
-        patterns.append(pattern)
-
-    return patterns
 
 
-cdef inline find_channel_descriptions(channels, columns):
-    channel_descriptions = []
+
+
+
+cdef inline set find_channel_descriptions(list channels, columns):
+    cdef set channel_descriptions = set()
 
     for column in columns:
-        split_columns = column.split('_')
+        split_columns = column.split("_")
 
-        if split_columns[0] == 'Intensity':
-            channel_descriptions.append(split_columns[2])
+        if split_columns[0] == "Intensity":
+            channel_description = split_columns[2]
 
-    channel_descriptions = set(channel_descriptions)
+            channel_descriptions.add(channel_description)
 
     for channel_description in channel_descriptions:
         channel = find_channel_by(channels, channel_description)
@@ -543,56 +521,16 @@ cdef inline find_channel_descriptions(channels, columns):
             channels.append(channel)
 
 
-cdef inline find_moments(columns):
-    moments = []
+cdef inline list find_correlation_columns(list channels, columns):
+    cdef list correlation_columns = []
 
     for column in columns:
-        split_columns = column.split('_')
-
-        if split_columns[0] == 'AreaShape' and split_columns[1] == 'Zernike':
-            moments.append((split_columns[2], split_columns[3]))
-
-    return moments
-
-
-cdef inline find_counts(columns):
-    counts = []
-
-    for column in columns:
-        split_columns = column.split('_')
-
-        if split_columns[0] == 'RadialDistribution':
-            counts.append(split_columns[3].split('of')[0])
-
-    counts = set(counts)
-
-    return counts
-
-
-cdef inline find_scales(columns):
-    scales = []
-
-    for column in columns:
-        split_columns = column.split('_')
-
-        if split_columns[0] == 'Texture':
-            scales.append(split_columns[3])
-
-    scales = set(scales)
-
-    return scales
-
-
-cdef inline find_correlation_columns(channels, columns):
-    correlation_columns = []
-
-    for column in columns:
-        split_columns = column.split('_')
+        split_columns = column.split("_")
 
         a = None
         b = None
 
-        if split_columns[0] == 'Correlation':
+        if split_columns[0] == "Correlation":
             for channel in channels:
                 if channel.description == split_columns[2]:
                     a = channel
@@ -600,9 +538,92 @@ cdef inline find_correlation_columns(channels, columns):
                 if channel.description == split_columns[3]:
                     b = channel
 
-            correlation_columns.append((a, b))
+            correlation_column = (a, b)
+
+            correlation_columns.append(correlation_column)
 
     return correlation_columns
+
+
+cdef inline set find_counts(columns):
+    cdef set counts = set()
+
+    for column in columns:
+        split_columns = column.split("_")
+
+        if split_columns[0] == "RadialDistribution":
+            count = split_columns[3].split('of')[0]
+
+            counts.add(count)
+
+    return counts
+
+
+cdef inline list find_moments(columns):
+    cdef list moments = []
+
+    for column in columns:
+        split_columns = column.split("_")
+
+        if split_columns[0] == "AreaShape" and split_columns[1] == "Zernike":
+            moment = (split_columns[2], split_columns[3])
+
+            moments.append(moment)
+
+    return moments
+
+
+cdef inline list find_objects(digest, list images, object_numbers):
+    cdef list objects = []
+
+    for index, object_number in object_numbers.iterrows():
+        object_dictionary = create_object(digest, images, object_number)
+
+        objects.append(object_dictionary)
+
+    return objects
+
+
+cdef inline list find_pattern_descriptions(list filenames):
+    cdef list pattern_descriptions = []
+
+    for filename in filenames:
+        pattern_description = filename.split('.')[0]
+
+        pattern_descriptions.append(pattern_description)
+
+    return pattern_descriptions
+
+
+cdef inline list find_patterns(list pattern_descriptions, session):
+    cdef list patterns = []
+
+    for pattern_description in pattern_descriptions:
+        pattern = perturbation.models.Pattern.find_or_create_by(
+                session=session,
+                description=pattern_description
+        )
+
+        patterns.append(pattern)
+
+    return patterns
+
+
+cdef inline set find_scales(columns):
+    cdef set scales = set()
+
+    for column in columns:
+        split_columns = column.split("_")
+
+        if split_columns[0] == "Texture":
+            scale = split_columns[3]
+
+            scales.add(scale)
+
+    return scales
+
+
+
 
 
 cdef inline create_correlations(correlation_columns, correlations, match, row):
