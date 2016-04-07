@@ -504,6 +504,8 @@ cdef create_patterns(channels, coordinates, correlation_columns, correlation_off
 cdef inline set find_channel_descriptions(list channels, columns):
     cdef set channel_descriptions = set()
 
+    cdef str column
+
     for column in columns:
         split_columns = column.split("_")
 
@@ -523,6 +525,8 @@ cdef inline set find_channel_descriptions(list channels, columns):
 
 cdef inline list find_correlation_columns(list channels, columns):
     cdef list correlation_columns = []
+
+    cdef str column
 
     for column in columns:
         split_columns = column.split("_")
@@ -548,6 +552,10 @@ cdef inline list find_correlation_columns(list channels, columns):
 cdef inline set find_counts(columns):
     cdef set counts = set()
 
+    cdef str column
+
+    cdef str count
+
     for column in columns:
         split_columns = column.split("_")
 
@@ -559,8 +567,29 @@ cdef inline set find_counts(columns):
     return counts
 
 
+cdef inline set find_directories(str directory):
+    cdef set directories = set()
+
+    cdef list filenames = glob.glob(os.path.join(directory, '*'))
+
+    cdef str filename
+
+    cdef str pathname
+
+    for filename in filenames:
+        pathname = os.path.relpath(filename)
+
+        directories.add(pathname)
+
+    return directories
+
+
 cdef inline list find_moments(columns):
     cdef list moments = []
+
+    cdef str column
+
+    cdef tuple moment
 
     for column in columns:
         split_columns = column.split("_")
@@ -576,6 +605,8 @@ cdef inline list find_moments(columns):
 cdef inline list find_objects(digest, list images, object_numbers):
     cdef list objects = []
 
+    cdef int index
+
     for index, object_number in object_numbers.iterrows():
         object_dictionary = create_object(digest, images, object_number)
 
@@ -587,6 +618,10 @@ cdef inline list find_objects(digest, list images, object_numbers):
 cdef inline list find_pattern_descriptions(list filenames):
     cdef list pattern_descriptions = []
 
+    cdef str filename
+
+    cdef str pattern_description
+
     for filename in filenames:
         pattern_description = filename.split('.')[0]
 
@@ -597,6 +632,8 @@ cdef inline list find_pattern_descriptions(list filenames):
 
 cdef inline list find_patterns(list pattern_descriptions, session):
     cdef list patterns = []
+
+    cdef str pattern_description
 
     for pattern_description in pattern_descriptions:
         pattern = perturbation.models.Pattern.find_or_create_by(
@@ -612,6 +649,8 @@ cdef inline list find_patterns(list pattern_descriptions, session):
 cdef inline set find_scales(columns):
     cdef set scales = set()
 
+    cdef str column
+
     for column in columns:
         split_columns = column.split("_")
 
@@ -625,32 +664,7 @@ cdef inline set find_scales(columns):
 
 
 
-
-cdef inline create_correlations(correlation_columns, correlations, match, row):
-    for dependent, independent in correlation_columns:
-        correlation = create_correlation(dependent, independent, match, row)
-
-        correlations.append(correlation)
-
-
-cdef inline create_views(sqlfile):
-    logger.debug('Parsing SQL file')
-
-    with open(sqlfile) as f:
-        import sqlparse
-
-        for s in sqlparse.split(f.read()):
-            engine.execute(s)
-
-
-cdef inline create_moments(moments, moments_group, row, shape):
-    for a, b in moments:
-        moment = create_moment(a, b, row, shape)
-
-        moments_group.append(moment)
-
-
-cdef inline create_channels(channels, coordinates, counts, edges, intensities, locations, match, radial_distributions, row, scales, textures):
+cdef inline void create_channels(channels, coordinates, counts, edges, intensities, locations, match, radial_distributions, row, scales, textures):
     for channel in channels:
         intensity = create_intensity(channel, match, row)
 
@@ -677,21 +691,14 @@ cdef inline create_channels(channels, coordinates, counts, edges, intensities, l
         create_radial_distributions(channel, counts, match, radial_distributions, row)
 
 
-cdef inline create_radial_distributions(channel, counts, match, radial_distributions, row):
-    for count in counts:
-        radial_distribution = create_radial_distribution(channel, count, match, row)
+cdef inline void create_correlations(correlation_columns, correlations, match, row):
+    for dependent, independent in correlation_columns:
+        correlation = create_correlation(dependent, independent, match, row)
 
-        radial_distributions.append(radial_distribution)
-
-
-cdef inline create_textures(channel, match, row, scales, textures):
-    for scale in scales:
-        texture = create_texture(channel, match, row, scale)
-
-        textures.append(texture)
+        correlations.append(correlation)
 
 
-cdef inline create_images(data, digest, descriptions, images, qualities, well):
+cdef inline void create_images(data, digest, descriptions, images, qualities, well):
     for description in descriptions:
         image = create_image(digest, description, well)
 
@@ -702,7 +709,14 @@ cdef inline create_images(data, digest, descriptions, images, qualities, well):
         qualities.append(quality)
 
 
-cdef inline create_plates(data, digest, images, descriptions, plates, qualities, wells):
+cdef inline void create_moments(moments, moments_group, row, shape):
+    for a, b in moments:
+        moment = create_moment(a, b, row, shape)
+
+        moments_group.append(moment)
+
+
+cdef inline void create_plates(data, digest, images, descriptions, plates, qualities, wells):
     for description in descriptions:
         plate = find_plate_by(plates, str(int(description)))
 
@@ -716,7 +730,31 @@ cdef inline create_plates(data, digest, images, descriptions, plates, qualities,
         create_wells(data, digest, images, plate, description, qualities, well_descriptions, wells)
 
 
-cdef inline create_wells(data, digest, images, plate, plate_description, qualities, descriptions, wells):
+cdef inline void create_radial_distributions(channel, counts, match, radial_distributions, row):
+    for count in counts:
+        radial_distribution = create_radial_distribution(channel, count, match, row)
+
+        radial_distributions.append(radial_distribution)
+
+
+cdef inline void create_textures(channel, match, row, scales, textures):
+    for scale in scales:
+        texture = create_texture(channel, match, row, scale)
+
+        textures.append(texture)
+
+
+cdef inline void create_views(sqlfile):
+    logger.debug('Parsing SQL file')
+
+    with open(sqlfile) as f:
+        import sqlparse
+
+        for s in sqlparse.split(f.read()):
+            engine.execute(s)
+
+
+cdef inline void create_wells(data, digest, images, plate, plate_description, qualities, descriptions, wells):
     for description in descriptions:
         well = create_well(plate, description)
 
@@ -726,15 +764,46 @@ cdef inline create_wells(data, digest, images, plate, plate_description, qualiti
 
         create_images(data, digest, image_descriptions, images, qualities, well)
 
-cdef inline find_directories(directory):
-    directories = []
 
-    filenames = glob.glob(os.path.join(directory, '*'))
 
-    for filename in filenames:
-        directories.append(os.path.relpath(filename))
 
-    return set(directories)
+
+
+cdef inline find_channel_by(dictionaries, description):
+    for dictionary in dictionaries:
+        if dictionary.description == description:
+            return dictionary.id
+
+
+cdef inline find_image_by(dictionaries, description):
+    for dictionary in dictionaries:
+        if dictionary.description == description:
+            return dictionary.id
+
+
+cdef inline find_object_by(description, dictionaries, image_id):
+    for dictionary in dictionaries:
+        if (dictionary.description == description) and (dictionary.image_id == image_id):
+            return dictionary.id
+
+
+cdef inline find_plate_by(dictionaries, description):
+    for dictionary in dictionaries:
+        if dictionary.description == description:
+            return dictionary
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 cdef inline create_channel(description, channel_dictionary):
@@ -977,133 +1046,77 @@ cdef inline create_well(plate_dictionary, well_description):
     )
 
 
-cdef inline find_channel_by(dictionaries, description):
-    for dictionary in dictionaries:
-        if dictionary.description == description:
-            return dictionary.id
 
 
-cdef inline find_image_by(dictionaries, description):
-    for dictionary in dictionaries:
-        if dictionary.description == description:
-            return dictionary.id
-
-
-cdef inline find_object_by(description, dictionaries, image_id):
-    for dictionary in dictionaries:
-        if (dictionary.description == description) and (dictionary.image_id == image_id):
-            return dictionary.id
-
-
-cdef inline find_plate_by(dictionaries, description):
-    for dictionary in dictionaries:
-        if dictionary.description == description:
-            return dictionary
-
-
-cdef inline save_coordinates(coordinates):
-    logger.debug('\tBulk insert Coordinate')
-
+cdef inline void save_coordinates(coordinates):
     __save__(perturbation.models.Coordinate, coordinates)
 
 
-cdef inline save_correlations(offset, correlations):
-    logger.debug('\tBulk insert Correlation')
-
+cdef inline void save_correlations(offset, correlations):
     __save__(perturbation.models.Correlation, correlations, offset)
 
 
-cdef inline save_edges(edges):
-    logger.debug('\tBulk insert Edge')
-
+cdef inline void save_edges(edges):
     __save__(perturbation.models.Edge, edges)
 
 
-cdef inline save_channels(channels):
-    logger.debug('\tBulk insert Channel')
-
+cdef inline void save_channels(channels):
     __save__(perturbation.models.Channel, channels)
 
 
-cdef inline save_plates(plates):
-    logger.debug('\tBulk insert Plate')
-
+cdef inline void save_plates(plates):
     __save__(perturbation.models.Plate, plates)
 
 
-cdef inline save_images(images):
-    logger.debug('\tBulk insert Image')
-
+cdef inline void save_images(images):
     __save__(perturbation.models.Image, images)
 
 
-cdef inline save_intensities(intensities, offset):
-    logger.debug('\tBulk insert Intensity')
-
+cdef inline void save_intensities(intensities, offset):
     __save__(perturbation.models.Intensity, intensities, offset)
 
 
-cdef inline save_locations(offset, locations):
-    logger.debug('\tBulk insert Location')
-
+cdef inline void save_locations(offset, locations):
     __save__(perturbation.models.Location, locations, offset)
 
 
-cdef inline save_matches(matches):
-    logger.debug('\tBulk insert Match')
-
+cdef inline void save_matches(matches):
     __save__(perturbation.models.Match, matches)
 
 
-cdef inline save_qualities(qualities):
-    logger.debug('\tBulk insert Quality')
-
+cdef inline void save_qualities(qualities):
     __save__(perturbation.models.Quality, qualities)
 
 
-cdef inline save_wells(wells):
-    logger.debug('\tBulk insert Well')
-
+cdef inline void save_wells(wells):
     __save__(perturbation.models.Well, wells)
 
 
-cdef inline save_textures(offset, textures):
-    logger.debug('\tBulk insert Texture')
-
+cdef inline void save_textures(offset, textures):
     __save__(perturbation.models.Texture, textures, offset)
 
 
-cdef inline save_objects(objects):
-    logger.debug('\tBulk insert Object')
-
+cdef inline void save_objects(objects):
     __save__(perturbation.models.Object, objects)
 
 
-cdef inline save_neighborhoods(neighborhoods):
-    logger.debug('\tBulk insert Neighborhood')
-
+cdef inline void save_neighborhoods(neighborhoods):
     __save__(perturbation.models.Neighborhood, neighborhoods)
 
 
-cdef inline save_moments(offset, moments, moments_group):
-    logger.debug('\tBulk insert Moment')
-
+cdef inline void save_moments(offset, moments, moments_group):
     __save__(perturbation.models.Moment, moments_group, offset)
 
 
-cdef inline save_shapes(shapes):
-    logger.debug('\tBulk insert Shape')
-
+cdef inline void save_shapes(shapes):
     __save__(perturbation.models.Shape, shapes)
 
 
-cdef inline save_radial_distributions(offset, radial_distributions):
-    logger.debug('\tBulk insert RadialDistribution')
-
+cdef inline void save_radial_distributions(offset, radial_distributions):
     __save__(perturbation.models.RadialDistribution, radial_distributions, offset)
 
 
-cdef inline __save__(table, records, offset=None):
+cdef inline void __save__(table, records, offset=None):
     def __create_mappings__(items):
         return [item._asdict() for item in items]
 
