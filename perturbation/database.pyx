@@ -70,48 +70,29 @@ engine = None
 scoped_session = sqlalchemy.orm.scoped_session(Session)
 
 
-correlation_offset = 0
-
-intensity_offset = 0
-
-location_offset = 0
-
-moment_offset = 0
-
-texture_offset = 0
-
-radial_distribution_offset = 0
+cdef int correlation_offset = 0
+cdef int intensity_offset = 0
+cdef int location_offset = 0
+cdef int moment_offset = 0
+cdef int texture_offset = 0
+cdef int radial_distribution_offset = 0
 
 
-channels = []
-
-coordinates = []
-
-correlations = []
-
-edges = []
-
-images = []
-
-intensities = []
-
-locations = []
-
-qualities = []
-
-matches = []
-
-neighborhoods = []
-
-plates = []
-
-radial_distributions = []
-
-shapes = []
-
-textures = []
-
-wells = []
+cdef list channels = []
+cdef list coordinates = []
+cdef list correlations = []
+cdef list edges = []
+cdef list images = []
+cdef list intensities = []
+cdef list locations = []
+cdef list qualities = []
+cdef list matches = []
+cdef list neighborhoods = []
+cdef list plates = []
+cdef list radial_distributions = []
+cdef list shapes = []
+cdef list textures = []
+cdef list wells = []
 
 
 def find_directories(directory):
