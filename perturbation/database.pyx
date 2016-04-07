@@ -1,7 +1,10 @@
+#cython: infer_types=True
+
 import click
 import glob
 import hashlib
 import os
+import numpy
 import pandas
 import perturbation.base
 import perturbation.migration
@@ -494,7 +497,7 @@ cdef create_patterns(channels, coordinates, correlation_columns, correlation_off
     logger.debug('\tCommit {}'.format(os.path.basename(directory)))
 
 
-cdef find_pattern_descriptions(filenames):
+cdef inline find_pattern_descriptions(filenames):
     pattern_descriptions = []
 
     for filename in filenames:
@@ -503,7 +506,7 @@ cdef find_pattern_descriptions(filenames):
     return pattern_descriptions
 
 
-cdef find_objects(digest, images, object_numbers):
+cdef inline find_objects(digest, images, object_numbers):
     objects = []
 
     for index, object_number in object_numbers.iterrows():
@@ -514,7 +517,7 @@ cdef find_objects(digest, images, object_numbers):
     return objects
 
 
-cdef find_patterns(pattern_descriptions, session):
+cdef inline find_patterns(pattern_descriptions, session):
     patterns = []
 
     for pattern_description in pattern_descriptions:
@@ -525,7 +528,7 @@ cdef find_patterns(pattern_descriptions, session):
     return patterns
 
 
-cdef find_channel_descriptions(channels, columns):
+cdef inline find_channel_descriptions(channels, columns):
     channel_descriptions = []
 
     for column in columns:
@@ -545,7 +548,7 @@ cdef find_channel_descriptions(channels, columns):
             channels.append(channel)
 
 
-cdef find_moments(columns):
+cdef inline find_moments(columns):
     moments = []
 
     for column in columns:
@@ -557,7 +560,7 @@ cdef find_moments(columns):
     return moments
 
 
-cdef find_counts(columns):
+cdef inline find_counts(columns):
     counts = []
 
     for column in columns:
@@ -571,7 +574,7 @@ cdef find_counts(columns):
     return counts
 
 
-cdef find_scales(columns):
+cdef inline find_scales(columns):
     scales = []
 
     for column in columns:
@@ -585,7 +588,7 @@ cdef find_scales(columns):
     return scales
 
 
-cdef find_correlation_columns(channels, columns):
+cdef inline find_correlation_columns(channels, columns):
     correlation_columns = []
 
     for column in columns:
@@ -607,14 +610,14 @@ cdef find_correlation_columns(channels, columns):
     return correlation_columns
 
 
-cdef create_correlations(correlation_columns, correlations, match, row):
+cdef inline create_correlations(correlation_columns, correlations, match, row):
     for dependent, independent in correlation_columns:
         correlation = create_correlation(dependent, independent, match, row)
 
         correlations.append(correlation)
 
 
-cdef create_views(sqlfile):
+cdef inline create_views(sqlfile):
     logger.debug('Parsing SQL file')
 
     with open(sqlfile) as f:
@@ -624,14 +627,14 @@ cdef create_views(sqlfile):
             engine.execute(s)
 
 
-cdef create_moments(moments, moments_group, row, shape):
+cdef inline create_moments(moments, moments_group, row, shape):
     for a, b in moments:
         moment = create_moment(a, b, row, shape)
 
         moments_group.append(moment)
 
 
-cdef create_channels(channels, coordinates, counts, edges, intensities, locations, match, radial_distributions, row, scales, textures):
+cdef inline create_channels(channels, coordinates, counts, edges, intensities, locations, match, radial_distributions, row, scales, textures):
     for channel in channels:
         intensity = create_intensity(channel, match, row)
 
@@ -658,21 +661,21 @@ cdef create_channels(channels, coordinates, counts, edges, intensities, location
         create_radial_distributions(channel, counts, match, radial_distributions, row)
 
 
-cdef create_radial_distributions(channel, counts, match, radial_distributions, row):
+cdef inline create_radial_distributions(channel, counts, match, radial_distributions, row):
     for count in counts:
         radial_distribution = create_radial_distribution(channel, count, match, row)
 
         radial_distributions.append(radial_distribution)
 
 
-def create_textures(channel, match, row, scales, textures):
+cdef inline create_textures(channel, match, row, scales, textures):
     for scale in scales:
         texture = create_texture(channel, match, row, scale)
 
         textures.append(texture)
 
 
-cdef create_images(data, digest, descriptions, images, qualities, well):
+cdef inline create_images(data, digest, descriptions, images, qualities, well):
     for description in descriptions:
         image = create_image(digest, description, well)
 
@@ -683,7 +686,7 @@ cdef create_images(data, digest, descriptions, images, qualities, well):
         qualities.append(quality)
 
 
-cdef create_plates(data, digest, images, descriptions, plates, qualities, wells):
+cdef inline create_plates(data, digest, images, descriptions, plates, qualities, wells):
     for description in descriptions:
         plate = find_plate_by(plates, str(int(description)))
 
@@ -697,7 +700,7 @@ cdef create_plates(data, digest, images, descriptions, plates, qualities, wells)
         create_wells(data, digest, images, plate, description, qualities, well_descriptions, wells)
 
 
-cdef create_wells(data, digest, images, plate, plate_description, qualities, descriptions, wells):
+cdef inline create_wells(data, digest, images, plate, plate_description, qualities, descriptions, wells):
     for description in descriptions:
         well = create_well(plate, description)
 
@@ -707,7 +710,7 @@ cdef create_wells(data, digest, images, plate, plate_description, qualities, des
 
         create_images(data, digest, image_descriptions, images, qualities, well)
 
-cdef find_directories(directory):
+cdef inline find_directories(directory):
     directories = []
 
     filenames = glob.glob(os.path.join(directory, '*'))
@@ -718,14 +721,14 @@ cdef find_directories(directory):
     return set(directories)
 
 
-cdef create_channel(description, channel_dictionary):
+cdef inline create_channel(description, channel_dictionary):
     return __channel__(
             description=description,
             id=uuid.uuid4()
     )
 
 
-cdef create_center(row):
+cdef inline create_center(row):
     return __coordinate__(
             abscissa=row['Location_Center_X'],
             id=uuid.uuid4(),
@@ -733,7 +736,7 @@ cdef create_center(row):
     )
 
 
-cdef create_center_mass_intensity(channel, row):
+cdef inline create_center_mass_intensity(channel, row):
     return __coordinate__(
             abscissa=row['Location_CenterMassIntensity_X_{}'.format(channel.description)],
             id=uuid.uuid4(),
@@ -741,7 +744,7 @@ cdef create_center_mass_intensity(channel, row):
     )
 
 
-cdef create_correlation(dependent, independent, match, row):
+cdef inline create_correlation(dependent, independent, match, row):
     return __correlation__(
             coefficient=row['Correlation_Correlation_{}_{}'.format(dependent.description, independent.description)],
             dependent_id=dependent.id,
@@ -751,7 +754,7 @@ cdef create_correlation(dependent, independent, match, row):
     )
 
 
-cdef create_edge(channel, match, row):
+cdef inline create_edge(channel, match, row):
     return __edge__(
             channel_id=channel.id,
             id=uuid.uuid4(),
@@ -764,7 +767,7 @@ cdef create_edge(channel, match, row):
     )
 
 
-cdef create_max_intensity(channel, row):
+cdef inline create_max_intensity(channel, row):
     return __coordinate__(
             abscissa=row['Location_MaxIntensity_X_{}'.format(channel.description)],
             id=uuid.uuid4(),
@@ -780,7 +783,7 @@ cdef create_image(digest, description, well_dictionary):
     )
 
 
-cdef create_intensity(channel, match, row):
+cdef inline create_intensity(channel, match, row):
     return __intensity__(
             channel_id=channel.id,
             first_quartile=row['Intensity_LowerQuartileIntensity_{}'.format(channel.description)],
@@ -798,7 +801,7 @@ cdef create_intensity(channel, match, row):
     )
 
 
-cdef create_location(center_mass_intensity, channel, match, max_intensity):
+cdef inline create_location(center_mass_intensity, channel, match, max_intensity):
     return __location__(
             center_mass_intensity_id=center_mass_intensity.id,
             channel_id=channel.id,
@@ -808,7 +811,7 @@ cdef create_location(center_mass_intensity, channel, match, max_intensity):
     )
 
 
-cdef create_match(center, neighborhood, object_id, pattern, shape):
+cdef inline create_match(center, neighborhood, object_id, pattern, shape):
     return __match__(
             center_id=center.id,
             id=uuid.uuid4(),
@@ -819,7 +822,7 @@ cdef create_match(center, neighborhood, object_id, pattern, shape):
     )
 
 
-cdef create_moment(a, b, row, shape):
+cdef inline create_moment(a, b, row, shape):
     return __moment__(
             a=a,
             b=b,
@@ -829,7 +832,7 @@ cdef create_moment(a, b, row, shape):
     )
 
 
-cdef create_neighborhood(object_id, row):
+cdef inline create_neighborhood(object_id, row):
     return __neighborhood__(
             angle_between_neighbors_5=row['Neighbors_AngleBetweenNeighbors_5'],
             angle_between_neighbors_adjacent=row['Neighbors_AngleBetweenNeighbors_Adjacent'],
@@ -850,7 +853,7 @@ cdef create_neighborhood(object_id, row):
     )
 
 
-cdef create_object(digest, images, description):
+cdef inline create_object(digest, images, description):
     return __object__(
             description=str(description['ObjectNumber']),
             id=uuid.uuid4(),
@@ -858,14 +861,14 @@ cdef create_object(digest, images, description):
     )
 
 
-cdef create_plate(description, plate):
+cdef inline create_plate(description, plate):
     return __plate__(
             description=str(int(description)),
             id=uuid.uuid4()
     )
 
 
-cdef create_quality(data, image_description, image):
+cdef inline create_quality(data, image_description, image):
     return __quality__(
             id=uuid.uuid4(),
             image_id=image.id,
@@ -875,7 +878,7 @@ cdef create_quality(data, image_description, image):
     )
 
 
-cdef create_radial_distribution(channel, count, match, row):
+cdef inline create_radial_distribution(channel, count, match, row):
     return __radial_distribution__(
             bins=count,
             channel_id=channel.id,
@@ -887,7 +890,7 @@ cdef create_radial_distribution(channel, count, match, row):
     )
 
 
-cdef create_shape(row, shape_center):
+cdef inline create_shape(row, shape_center):
     return __shape__(
             area=row['AreaShape_Area'],
             center_id=shape_center.id,
@@ -910,7 +913,7 @@ cdef create_shape(row, shape_center):
     )
 
 
-cdef create_shape_center(row):
+cdef inline create_shape_center(row):
     return __coordinate__(
             abscissa=row['AreaShape_Center_X'],
             id=uuid.uuid4(),
@@ -918,7 +921,7 @@ cdef create_shape_center(row):
     )
 
 
-cdef create_texture(channel, match, row, scale):
+cdef inline create_texture(channel, match, row, scale):
     def find_by(key):
         return row[
             'Texture_{}_{}_{}_0'.format(
@@ -950,7 +953,7 @@ cdef create_texture(channel, match, row, scale):
     )
 
 
-cdef create_well(plate_dictionary, well_description):
+cdef inline create_well(plate_dictionary, well_description):
     return __well__(
             description=well_description,
             id=uuid.uuid4(),
@@ -958,133 +961,133 @@ cdef create_well(plate_dictionary, well_description):
     )
 
 
-cdef find_channel_by(dictionaries, description):
+cdef inline find_channel_by(dictionaries, description):
     for dictionary in dictionaries:
         if dictionary.description == description:
             return dictionary.id
 
 
-cdef find_image_by(dictionaries, description):
+cdef inline find_image_by(dictionaries, description):
     for dictionary in dictionaries:
         if dictionary.description == description:
             return dictionary.id
 
 
-cdef find_object_by(description, dictionaries, image_id):
+cdef inline find_object_by(description, dictionaries, image_id):
     for dictionary in dictionaries:
         if (dictionary.description == description) and (dictionary.image_id == image_id):
             return dictionary.id
 
 
-cdef find_plate_by(dictionaries, description):
+cdef inline find_plate_by(dictionaries, description):
     for dictionary in dictionaries:
         if dictionary.description == description:
             return dictionary
 
 
-cdef save_coordinates(coordinates):
+cdef inline save_coordinates(coordinates):
     logger.debug('\tBulk insert Coordinate')
 
     __save__(perturbation.models.Coordinate, coordinates)
 
 
-cdef save_correlations(offset, correlations):
+cdef inline save_correlations(offset, correlations):
     logger.debug('\tBulk insert Correlation')
 
     __save__(perturbation.models.Correlation, correlations, offset)
 
 
-cdef save_edges(edges):
+cdef inline save_edges(edges):
     logger.debug('\tBulk insert Edge')
 
     __save__(perturbation.models.Edge, edges)
 
 
-cdef save_channels(channels):
+cdef inline save_channels(channels):
     logger.debug('\tBulk insert Channel')
 
     __save__(perturbation.models.Channel, channels)
 
 
-cdef save_plates(plates):
+cdef inline save_plates(plates):
     logger.debug('\tBulk insert Plate')
 
     __save__(perturbation.models.Plate, plates)
 
 
-cdef save_images(images):
+cdef inline save_images(images):
     logger.debug('\tBulk insert Image')
 
     __save__(perturbation.models.Image, images)
 
 
-cdef save_intensities(intensities, offset):
+cdef inline save_intensities(intensities, offset):
     logger.debug('\tBulk insert Intensity')
 
     __save__(perturbation.models.Intensity, intensities, offset)
 
 
-cdef save_locations(offset, locations):
+cdef inline save_locations(offset, locations):
     logger.debug('\tBulk insert Location')
 
     __save__(perturbation.models.Location, locations, offset)
 
 
-cdef save_matches(matches):
+cdef inline save_matches(matches):
     logger.debug('\tBulk insert Match')
 
     __save__(perturbation.models.Match, matches)
 
 
-cdef save_qualities(qualities):
+cdef inline save_qualities(qualities):
     logger.debug('\tBulk insert Quality')
 
     __save__(perturbation.models.Quality, qualities)
 
 
-cdef save_wells(wells):
+cdef inline save_wells(wells):
     logger.debug('\tBulk insert Well')
 
     __save__(perturbation.models.Well, wells)
 
 
-cdef save_textures(offset, textures):
+cdef inline save_textures(offset, textures):
     logger.debug('\tBulk insert Texture')
 
     __save__(perturbation.models.Texture, textures, offset)
 
 
-cdef save_objects(objects):
+cdef inline save_objects(objects):
     logger.debug('\tBulk insert Object')
 
     __save__(perturbation.models.Object, objects)
 
 
-cdef save_neighborhoods(neighborhoods):
+cdef inline save_neighborhoods(neighborhoods):
     logger.debug('\tBulk insert Neighborhood')
 
     __save__(perturbation.models.Neighborhood, neighborhoods)
 
 
-cdef save_moments(offset, moments, moments_group):
+cdef inline save_moments(offset, moments, moments_group):
     logger.debug('\tBulk insert Moment')
 
     __save__(perturbation.models.Moment, moments_group, offset)
 
 
-cdef save_shapes(shapes):
+cdef inline save_shapes(shapes):
     logger.debug('\tBulk insert Shape')
 
     __save__(perturbation.models.Shape, shapes)
 
 
-cdef save_radial_distributions(offset, radial_distributions):
+cdef inline save_radial_distributions(offset, radial_distributions):
     logger.debug('\tBulk insert RadialDistribution')
 
     __save__(perturbation.models.RadialDistribution, radial_distributions, offset)
 
 
-def __save__(table, records, offset=None):
+cdef inline __save__(table, records, offset=None):
     def __create_mappings__(items):
         return [item._asdict() for item in items]
 
