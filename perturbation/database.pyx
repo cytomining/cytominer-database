@@ -1,12 +1,8 @@
-#cython: infer_types=True
-
 import click
 import glob
 import hashlib
 import os
-import numpy
 import pandas
-import perturbation.base
 import perturbation.migration
 import perturbation.models
 import sqlalchemy
@@ -16,7 +12,6 @@ import logging
 import perturbation.models
 import sqlalchemy.exc
 import sqlalchemy.ext.declarative
-import perturbation.UUID
 import uuid
 import sqlalchemy.types
 
