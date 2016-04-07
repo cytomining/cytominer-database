@@ -329,7 +329,7 @@ __well__ = collections.namedtuple(
         typename='Well'
 )
 
-cdef setup(database):
+cdef inline void setup(database):
     global engine
 
     engine = sqlalchemy.create_engine("sqlite:///{}".format(os.path.realpath(database)))
@@ -351,14 +351,19 @@ def seed(input, output, sqlfile, verbose=False):
     seed_plate(input)
 
 
-def seed_plate(directories):
-    for directory in find_directories(directories):
+cdef inline void seed_plate(str directories):
+    cdef str directory
+
+    cdef set pathnames = find_directories(directories)
+
+    cdef list moments_group
+    cdef list filenames
+
+    for directory in pathnames:
         try:
             data = pandas.read_csv(os.path.join(directory, 'image.csv'))
         except OSError:
             continue
-
-        logger.debug('Parsing {}'.format(os.path.basename(directory)))
 
         moments_group = []
 
@@ -366,11 +371,7 @@ def seed_plate(directories):
 
         plate_descriptions = data['Metadata_Barcode'].unique()
 
-        logger.debug('\tParse plates, wells, images, quality')
-
         create_plates(data, digest, images, plate_descriptions, plates, qualities, wells)
-
-        logger.debug('\tParse objects')
 
         # TODO: Read all the patterns because some columns are present in only one pattern
         data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
@@ -383,8 +384,6 @@ def seed_plate(directories):
         object_numbers.drop_duplicates()
 
         objects = find_objects(digest, images, object_numbers)
-
-        logger.debug('\tParse feature parameters')
 
         filenames = []
 
@@ -414,10 +413,8 @@ def seed_plate(directories):
 
     save_plates(plates)
 
-    logger.debug('Commit plate, channel')
 
-
-cdef create_patterns(channels, coordinates, correlation_columns, correlation_offset, correlations, counts, digest, directory, edges, images, intensities, intensity_offset, location_offset, locations, matches, moment_offset, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distribution_offset, radial_distributions, scales, shapes, texture_offset, textures, wells):
+cdef inline void create_patterns(channels, coordinates, correlation_columns, correlation_offset, correlations, counts, digest, directory, edges, images, intensities, intensity_offset, location_offset, locations, matches, moment_offset, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distribution_offset, radial_distributions, scales, shapes, texture_offset, textures, wells):
     for pattern in patterns:
         logger.debug('\tParse {}'.format(pattern.description))
 
@@ -769,25 +766,25 @@ cdef inline void create_wells(data, digest, images, plate, plate_description, qu
 
 
 
-cdef inline find_channel_by(dictionaries, description):
+cdef inline find_channel_by(list dictionaries, str description):
     for dictionary in dictionaries:
         if dictionary.description == description:
             return dictionary.id
 
 
-cdef inline find_image_by(dictionaries, description):
+cdef inline find_image_by(list dictionaries, str description):
     for dictionary in dictionaries:
         if dictionary.description == description:
             return dictionary.id
 
 
-cdef inline find_object_by(description, dictionaries, image_id):
+cdef inline find_object_by(str description, list dictionaries, image_id):
     for dictionary in dictionaries:
         if (dictionary.description == description) and (dictionary.image_id == image_id):
             return dictionary.id
 
 
-cdef inline find_plate_by(dictionaries, description):
+cdef inline find_plate_by(list dictionaries, str description):
     for dictionary in dictionaries:
         if dictionary.description == description:
             return dictionary
@@ -1048,75 +1045,75 @@ cdef inline create_well(plate_dictionary, well_description):
 
 
 
-cdef inline void save_coordinates(coordinates):
+cdef inline void save_coordinates(list coordinates):
     __save__(perturbation.models.Coordinate, coordinates)
 
 
-cdef inline void save_correlations(offset, correlations):
+cdef inline void save_correlations(int offset, list correlations):
     __save__(perturbation.models.Correlation, correlations, offset)
 
 
-cdef inline void save_edges(edges):
+cdef inline void save_edges(list edges):
     __save__(perturbation.models.Edge, edges)
 
 
-cdef inline void save_channels(channels):
+cdef inline void save_channels(list channels):
     __save__(perturbation.models.Channel, channels)
 
 
-cdef inline void save_plates(plates):
+cdef inline void save_plates(list plates):
     __save__(perturbation.models.Plate, plates)
 
 
-cdef inline void save_images(images):
+cdef inline void save_images(list images):
     __save__(perturbation.models.Image, images)
 
 
-cdef inline void save_intensities(intensities, offset):
+cdef inline void save_intensities(list intensities, int offset):
     __save__(perturbation.models.Intensity, intensities, offset)
 
 
-cdef inline void save_locations(offset, locations):
+cdef inline void save_locations(int offset, list locations):
     __save__(perturbation.models.Location, locations, offset)
 
 
-cdef inline void save_matches(matches):
+cdef inline void save_matches(list matches):
     __save__(perturbation.models.Match, matches)
 
 
-cdef inline void save_qualities(qualities):
+cdef inline void save_qualities(list qualities):
     __save__(perturbation.models.Quality, qualities)
 
 
-cdef inline void save_wells(wells):
+cdef inline void save_wells(list wells):
     __save__(perturbation.models.Well, wells)
 
 
-cdef inline void save_textures(offset, textures):
+cdef inline void save_textures(int offset, list textures):
     __save__(perturbation.models.Texture, textures, offset)
 
 
-cdef inline void save_objects(objects):
+cdef inline void save_objects(list objects):
     __save__(perturbation.models.Object, objects)
 
 
-cdef inline void save_neighborhoods(neighborhoods):
+cdef inline void save_neighborhoods(list neighborhoods):
     __save__(perturbation.models.Neighborhood, neighborhoods)
 
 
-cdef inline void save_moments(offset, moments, moments_group):
+cdef inline void save_moments(int offset, list moments, moments_group):
     __save__(perturbation.models.Moment, moments_group, offset)
 
 
-cdef inline void save_shapes(shapes):
+cdef inline void save_shapes(list shapes):
     __save__(perturbation.models.Shape, shapes)
 
 
-cdef inline void save_radial_distributions(offset, radial_distributions):
+cdef inline void save_radial_distributions(int offset, list radial_distributions):
     __save__(perturbation.models.RadialDistribution, radial_distributions, offset)
 
 
-cdef inline void __save__(table, records, offset=None):
+cdef inline void __save__(table, list records, offset=None):
     def __create_mappings__(items):
         return [item._asdict() for item in items]
 
