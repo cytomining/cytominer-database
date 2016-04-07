@@ -1,61 +1,63 @@
-import perturbation.models
-import click
 import collections
 import glob
 import hashlib
+import logging
 import os
-import perturbation.base
-import perturbation.migration.models
+
+import click
 import pandas
 import sqlalchemy
 import sqlalchemy.orm
-import logging
 
-create_center = perturbation.migration.models.create_center
+import perturbation.base
+import perturbation.migration
+import perturbation.models
 
-create_center_mass_intensity = perturbation.migration.models.create_center_mass_intensity
+create_center = perturbation.migration.create_center
 
-create_channel = perturbation.migration.models.create_channel
+create_center_mass_intensity = perturbation.migration.create_center_mass_intensity
 
-create_correlation = perturbation.migration.models.create_correlation
+create_channel = perturbation.migration.create_channel
 
-create_edge = perturbation.migration.models.create_edge
+create_correlation = perturbation.migration.create_correlation
 
-create_image = perturbation.migration.models.create_image
+create_edge = perturbation.migration.create_edge
 
-create_intensity = perturbation.migration.models.create_intensity
+create_image = perturbation.migration.create_image
 
-create_location = perturbation.migration.models.create_location
+create_intensity = perturbation.migration.create_intensity
 
-create_match = perturbation.migration.models.create_match
+create_location = perturbation.migration.create_location
 
-create_max_intensity = perturbation.migration.models.create_max_intensity
+create_match = perturbation.migration.create_match
 
-create_moment = perturbation.migration.models.create_moment
+create_max_intensity = perturbation.migration.create_max_intensity
 
-create_neighborhood = perturbation.migration.models.create_neighborhood
+create_moment = perturbation.migration.create_moment
 
-create_object = perturbation.migration.models.create_object
+create_neighborhood = perturbation.migration.create_neighborhood
 
-create_plate = perturbation.migration.models.create_plate
+create_object = perturbation.migration.create_object
 
-create_quality = perturbation.migration.models.create_quality
+create_plate = perturbation.migration.create_plate
 
-create_radial_distribution = perturbation.migration.models.create_radial_distribution
+create_quality = perturbation.migration.create_quality
 
-create_shape = perturbation.migration.models.create_shape
+create_radial_distribution = perturbation.migration.create_radial_distribution
 
-create_shape_center = perturbation.migration.models.create_shape_center
+create_shape = perturbation.migration.create_shape
 
-create_texture = perturbation.migration.models.create_texture
+create_shape_center = perturbation.migration.create_shape_center
 
-create_well = perturbation.migration.models.create_well
+create_texture = perturbation.migration.create_texture
 
-find_image_by = perturbation.migration.models.find_image_by
+create_well = perturbation.migration.create_well
 
-find_object_by = perturbation.migration.models.find_object_by
+find_image_by = perturbation.migration.find_image_by
 
-find_plate_by = perturbation.migration.models.find_plate_by
+find_object_by = perturbation.migration.find_object_by
+
+find_plate_by = perturbation.migration.find_plate_by
 
 
 logger = logging.getLogger(__name__)
@@ -197,9 +199,9 @@ def seed_plate(directories):
 
         create_patterns(channels, coordinates, correlation_columns, correlation_offset, correlations, counts, digest, directory, edges, images, intensities, intensity_offset, location_offset, locations, matches, moment_offset, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distribution_offset, radial_distributions, scales, shapes, texture_offset, textures, wells)
 
-    perturbation.migration.models.save_channels(channels)
+    perturbation.migration.save_channels(channels)
 
-    perturbation.migration.models.save_plates(plates)
+    perturbation.migration.save_plates(plates)
 
     logger.debug('Commit plate, channel')
 
@@ -271,21 +273,21 @@ def create_patterns(channels, coordinates, correlation_columns, correlation_offs
 
                 create_channels(channels, coordinates, counts, edges, intensities, locations, match, radial_distributions, row, scales, textures)
 
-    perturbation.migration.models.save_coordinates(coordinates)
-    perturbation.migration.models.save_edges(edges)
-    perturbation.migration.models.save_images(images)
-    perturbation.migration.models.save_matches(matches)
-    perturbation.migration.models.save_neighborhoods(neighborhoods)
-    perturbation.migration.models.save_objects(objects)
-    perturbation.migration.models.save_qualities(qualities)
-    perturbation.migration.models.save_shapes(shapes)
-    perturbation.migration.models.save_textures(texture_offset, textures)
-    perturbation.migration.models.save_wells(wells)
-    perturbation.migration.models.save_correlations(correlation_offset, correlations)
-    perturbation.migration.models.save_intensities(intensities, intensity_offset)
-    perturbation.migration.models.save_locations(location_offset, locations)
-    perturbation.migration.models.save_moments(moment_offset, moments, moments_group)
-    perturbation.migration.models.save_radial_distributions(radial_distribution_offset, radial_distributions)
+    perturbation.migration.save_coordinates(coordinates)
+    perturbation.migration.save_edges(edges)
+    perturbation.migration.save_images(images)
+    perturbation.migration.save_matches(matches)
+    perturbation.migration.save_neighborhoods(neighborhoods)
+    perturbation.migration.save_objects(objects)
+    perturbation.migration.save_qualities(qualities)
+    perturbation.migration.save_shapes(shapes)
+    perturbation.migration.save_textures(texture_offset, textures)
+    perturbation.migration.save_wells(wells)
+    perturbation.migration.save_correlations(correlation_offset, correlations)
+    perturbation.migration.save_intensities(intensities, intensity_offset)
+    perturbation.migration.save_locations(location_offset, locations)
+    perturbation.migration.save_moments(moment_offset, moments, moments_group)
+    perturbation.migration.save_radial_distributions(radial_distribution_offset, radial_distributions)
 
     logger.debug('\tCommit {}'.format(os.path.basename(directory)))
 
@@ -322,7 +324,7 @@ def find_channel_descriptions(channels, columns):
     channel_descriptions = set(channel_descriptions)
 
     for channel_description in channel_descriptions:
-        channel = perturbation.migration.models.find_channel_by(channels, channel_description)
+        channel = perturbation.migration.find_channel_by(channels, channel_description)
 
         if not channel:
             channel = create_channel(channel_description, channel)
