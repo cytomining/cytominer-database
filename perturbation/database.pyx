@@ -1,67 +1,72 @@
-import collections
+import click
 import glob
 import hashlib
-import logging
 import os
-
-import click
 import pandas
-import sqlalchemy
-import sqlalchemy.orm
-
 import perturbation.base
 import perturbation.migration
 import perturbation.models
+import sqlalchemy
+import sqlalchemy.orm
+import collections
+import logging
+import perturbation.models
+import sqlalchemy.exc
+import sqlalchemy.ext.declarative
+import perturbation.UUID
+import uuid
+import sqlalchemy.types
 
-create_center = perturbation.migration.create_center
 
-create_center_mass_intensity = perturbation.migration.create_center_mass_intensity
+class UUID(sqlalchemy.types.TypeDecorator):
+    impl = sqlalchemy.types.BINARY(16)
 
-create_channel = perturbation.migration.create_channel
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return value
+        else:
+            if not isinstance(value, uuid.UUID):
+                try:
+                    value = uuid.UUID(value)
+                except(TypeError, ValueError):
+                    value = uuid.UUID(bytes=value)
 
-create_correlation = perturbation.migration.create_correlation
+            return value.bytes
 
-create_edge = perturbation.migration.create_edge
+    def process_literal_param(self, value, dialect):
+        pass
 
-create_image = perturbation.migration.create_image
+    def process_result_value(self, value, dialect):
+        pass
 
-create_intensity = perturbation.migration.create_intensity
+    def python_type(self):
+        pass
 
-create_location = perturbation.migration.create_location
+@sqlalchemy.ext.declarative.as_declarative()
+class Base(object):
+    id = sqlalchemy.Column(UUID, default=uuid.uuid4, primary_key=True)
 
-create_match = perturbation.migration.create_match
+    @classmethod
+    def find_or_create_by(cls, session, create_method='', create_method_kwargs=None, **kwargs):
+        try:
+            return session.query(cls).filter_by(**kwargs).one()
+        except sqlalchemy.orm.exc.NoResultFound:
+            kwargs.update(create_method_kwargs or {})
 
-create_max_intensity = perturbation.migration.create_max_intensity
+            created = getattr(cls, create_method, cls)(**kwargs)
 
-create_moment = perturbation.migration.create_moment
+            try:
+                session.add(created)
 
-create_neighborhood = perturbation.migration.create_neighborhood
+                session.flush()
 
-create_object = perturbation.migration.create_object
+                return created
+            except sqlalchemy.exc.IntegrityError:
+                session.rollback()
 
-create_plate = perturbation.migration.create_plate
-
-create_quality = perturbation.migration.create_quality
-
-create_radial_distribution = perturbation.migration.create_radial_distribution
-
-create_shape = perturbation.migration.create_shape
-
-create_shape_center = perturbation.migration.create_shape_center
-
-create_texture = perturbation.migration.create_texture
-
-create_well = perturbation.migration.create_well
-
-find_image_by = perturbation.migration.find_image_by
-
-find_object_by = perturbation.migration.find_object_by
-
-find_plate_by = perturbation.migration.find_plate_by
-
+                return session.query(cls).filter_by(**kwargs).one()
 
 logger = logging.getLogger(__name__)
-
 
 Base = perturbation.base.Base
 
@@ -71,14 +76,12 @@ engine = None
 
 scoped_session = sqlalchemy.orm.scoped_session(Session)
 
-
 cdef int correlation_offset = 0
 cdef int intensity_offset = 0
 cdef int location_offset = 0
 cdef int moment_offset = 0
 cdef int texture_offset = 0
 cdef int radial_distribution_offset = 0
-
 
 cdef list channels = []
 cdef list coordinates = []
@@ -96,22 +99,242 @@ cdef list shapes = []
 cdef list textures = []
 cdef list wells = []
 
+__channel__ = collections.namedtuple(
+        field_names=[
+            'description',
+            'id'
+        ],
+        typename='Channel'
+)
 
-def find_directories(directory):
-    directories = []
+__coordinate__ = collections.namedtuple(
+        field_names=[
+            'abscissa',
+            'id',
+            'ordinate'
+        ],
+        typename='Coordinate'
+)
 
-    filenames = glob.glob(os.path.join(directory, '*'))
+__correlation__ = collections.namedtuple(
+        field_names=[
+            'coefficient',
+            'dependent_id',
+            'id',
+            'independent_id',
+            'match_id'
+        ],
+        typename='Correlation'
+)
 
-    for filename in filenames:
-        directories.append(os.path.relpath(filename))
+__edge__ = collections.namedtuple(
+        typename='Edge',
+        field_names=[
+            'channel_id',
+            'id',
+            'integrated',
+            'match_id',
+            'maximum',
+            'mean',
+            'minimum',
+            'standard_deviation'
+        ]
+)
 
-    return set(directories)
+__image__ = collections.namedtuple(
+        field_names=[
+            'description',
+            'id',
+            'well_id'
+        ],
+        typename='Image'
+)
 
+__intensity__ = collections.namedtuple(
+        field_names=[
+            'channel_id',
+            'first_quartile',
+            'id',
+            'integrated',
+            'mass_displacement',
+            'match_id',
+            'maximum',
+            'mean',
+            'median',
+            'median_absolute_deviation',
+            'minimum',
+            'standard_deviation',
+            'third_quartile'
+        ],
+        typename='Intensity'
+)
 
-def setup(database):
+__location__ = collections.namedtuple(
+        field_names=[
+            'center_mass_intensity_id',
+            'channel_id',
+            'id',
+            'match_id',
+            'max_intensity_id'
+        ],
+        typename='Location'
+)
+
+__match__ = collections.namedtuple(
+        field_names=[
+            'center_id',
+            'id',
+            'neighborhood_id',
+            'object_id',
+            'pattern_id',
+            'shape_id'
+        ],
+        typename='Match'
+)
+
+__moment__ = collections.namedtuple(
+        field_names=[
+            'a',
+            'b',
+            'id',
+            'score',
+            'shape_id'
+        ],
+        typename='Moment'
+)
+
+__object__ = collections.namedtuple(
+        field_names=[
+            'description',
+            'id',
+            'image_id'
+        ],
+        typename='Object'
+)
+
+__pattern__ = collections.namedtuple(
+        field_names=[
+            'description',
+            'id'
+        ],
+        typename='Pattern'
+)
+
+__plate__ = collections.namedtuple(
+        field_names=[
+            'description',
+            'id'
+        ],
+        typename='Plate'
+)
+
+__quality__ = collections.namedtuple(
+        field_names=[
+            'count_cell_clump',
+            'count_debris',
+            'count_low_intensity',
+            'id',
+            'image_id'
+        ],
+        typename='Quality'
+)
+
+__radial_distribution__ = collections.namedtuple(
+        field_names=[
+            'bins',
+            'channel_id',
+            'frac_at_d',
+            'id',
+            'match_id',
+            'mean_frac',
+            'radial_cv'
+        ],
+        typename='RadialDistribution'
+)
+
+__neighborhood__ = collections.namedtuple(
+        field_names=[
+            'angle_between_neighbors_5',
+            'angle_between_neighbors_adjacent',
+            'closest_id',
+            'first_closest_distance_5',
+            'first_closest_distance_adjacent',
+            'first_closest_object_number_adjacent',
+            'id',
+            'number_of_neighbors_5',
+            'number_of_neighbors_adjacent',
+            'object_id',
+            'percent_touching_5',
+            'percent_touching_adjacent',
+            'second_closest_distance_5',
+            'second_closest_distance_adjacent',
+            'second_closest_id',
+            'second_closest_object_number_adjacent'
+        ],
+        typename='Neighborhood'
+)
+
+__shape__ = collections.namedtuple(
+        typename='Shape',
+        field_names=[
+            'area',
+            'center_id',
+            'compactness',
+            'eccentricity',
+            'euler_number',
+            'extent',
+            'form_factor',
+            'id',
+            'major_axis_length',
+            'max_feret_diameter',
+            'maximum_radius',
+            'mean_radius',
+            'median_radius',
+            'min_feret_diameter',
+            'minor_axis_length',
+            'orientation',
+            'perimeter',
+            'solidity'
+        ]
+)
+
+__texture__ = collections.namedtuple(
+        typename='Texture',
+        field_names=[
+            'angular_second_moment',
+            'channel_id',
+            'contrast',
+            'correlation',
+            'difference_entropy',
+            'difference_variance',
+            'match_id',
+            'scale',
+            'entropy',
+            'gabor',
+            'id',
+            'info_meas_1',
+            'info_meas_2',
+            'inverse_difference_moment',
+            'sum_average',
+            'sum_entropy',
+            'sum_variance',
+            'variance'
+        ]
+)
+
+__well__ = collections.namedtuple(
+        field_names=[
+            'description',
+            'id',
+            'plate_id'
+        ],
+        typename='Well'
+)
+
+cdef setup(database):
     global engine
 
-    engine = sqlalchemy.create_engine('sqlite:///{}'.format(os.path.realpath(database)))
+    engine = sqlalchemy.create_engine("sqlite:///{}".format(os.path.realpath(database)))
 
     scoped_session.remove()
 
@@ -128,16 +351,6 @@ def seed(input, output, sqlfile, verbose=False):
     create_views(sqlfile)
 
     seed_plate(input)
-
-
-def create_views(sqlfile):
-    logger.debug('Parsing SQL file')
-
-    with open(sqlfile) as f:
-        import sqlparse
-
-        for s in sqlparse.split(f.read()):
-            engine.execute(s)
 
 
 def seed_plate(directories):
@@ -199,25 +412,14 @@ def seed_plate(directories):
 
         create_patterns(channels, coordinates, correlation_columns, correlation_offset, correlations, counts, digest, directory, edges, images, intensities, intensity_offset, location_offset, locations, matches, moment_offset, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distribution_offset, radial_distributions, scales, shapes, texture_offset, textures, wells)
 
-    perturbation.migration.save_channels(channels)
+    save_channels(channels)
 
-    perturbation.migration.save_plates(plates)
+    save_plates(plates)
 
     logger.debug('Commit plate, channel')
 
 
-def find_objects(digest, images, object_numbers):
-    objects = []
-
-    for index, object_number in object_numbers.iterrows():
-        object_dictionary = create_object(digest, images, object_number)
-
-        objects.append(object_dictionary)
-
-    return objects
-
-
-def create_patterns(channels, coordinates, correlation_columns, correlation_offset, correlations, counts, digest, directory, edges, images, intensities, intensity_offset, location_offset, locations, matches, moment_offset, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distribution_offset, radial_distributions, scales, shapes, texture_offset, textures, wells):
+cdef create_patterns(channels, coordinates, correlation_columns, correlation_offset, correlations, counts, digest, directory, edges, images, intensities, intensity_offset, location_offset, locations, matches, moment_offset, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distribution_offset, radial_distributions, scales, shapes, texture_offset, textures, wells):
     for pattern in patterns:
         logger.debug('\tParse {}'.format(pattern.description))
 
@@ -273,26 +475,26 @@ def create_patterns(channels, coordinates, correlation_columns, correlation_offs
 
                 create_channels(channels, coordinates, counts, edges, intensities, locations, match, radial_distributions, row, scales, textures)
 
-    perturbation.migration.save_coordinates(coordinates)
-    perturbation.migration.save_edges(edges)
-    perturbation.migration.save_images(images)
-    perturbation.migration.save_matches(matches)
-    perturbation.migration.save_neighborhoods(neighborhoods)
-    perturbation.migration.save_objects(objects)
-    perturbation.migration.save_qualities(qualities)
-    perturbation.migration.save_shapes(shapes)
-    perturbation.migration.save_textures(texture_offset, textures)
-    perturbation.migration.save_wells(wells)
-    perturbation.migration.save_correlations(correlation_offset, correlations)
-    perturbation.migration.save_intensities(intensities, intensity_offset)
-    perturbation.migration.save_locations(location_offset, locations)
-    perturbation.migration.save_moments(moment_offset, moments, moments_group)
-    perturbation.migration.save_radial_distributions(radial_distribution_offset, radial_distributions)
+    save_coordinates(coordinates)
+    save_edges(edges)
+    save_images(images)
+    save_matches(matches)
+    save_neighborhoods(neighborhoods)
+    save_objects(objects)
+    save_qualities(qualities)
+    save_shapes(shapes)
+    save_textures(texture_offset, textures)
+    save_wells(wells)
+    save_correlations(correlation_offset, correlations)
+    save_intensities(intensities, intensity_offset)
+    save_locations(location_offset, locations)
+    save_moments(moment_offset, moments, moments_group)
+    save_radial_distributions(radial_distribution_offset, radial_distributions)
 
     logger.debug('\tCommit {}'.format(os.path.basename(directory)))
 
 
-def find_pattern_descriptions(filenames):
+cdef find_pattern_descriptions(filenames):
     pattern_descriptions = []
 
     for filename in filenames:
@@ -301,7 +503,18 @@ def find_pattern_descriptions(filenames):
     return pattern_descriptions
 
 
-def find_patterns(pattern_descriptions, session):
+cdef find_objects(digest, images, object_numbers):
+    objects = []
+
+    for index, object_number in object_numbers.iterrows():
+        object_dictionary = create_object(digest, images, object_number)
+
+        objects.append(object_dictionary)
+
+    return objects
+
+
+cdef find_patterns(pattern_descriptions, session):
     patterns = []
 
     for pattern_description in pattern_descriptions:
@@ -312,7 +525,7 @@ def find_patterns(pattern_descriptions, session):
     return patterns
 
 
-def find_channel_descriptions(channels, columns):
+cdef find_channel_descriptions(channels, columns):
     channel_descriptions = []
 
     for column in columns:
@@ -324,7 +537,7 @@ def find_channel_descriptions(channels, columns):
     channel_descriptions = set(channel_descriptions)
 
     for channel_description in channel_descriptions:
-        channel = perturbation.migration.find_channel_by(channels, channel_description)
+        channel = find_channel_by(channels, channel_description)
 
         if not channel:
             channel = create_channel(channel_description, channel)
@@ -332,7 +545,7 @@ def find_channel_descriptions(channels, columns):
             channels.append(channel)
 
 
-def find_moments(columns):
+cdef find_moments(columns):
     moments = []
 
     for column in columns:
@@ -344,7 +557,7 @@ def find_moments(columns):
     return moments
 
 
-def find_counts(columns):
+cdef find_counts(columns):
     counts = []
 
     for column in columns:
@@ -358,7 +571,7 @@ def find_counts(columns):
     return counts
 
 
-def find_scales(columns):
+cdef find_scales(columns):
     scales = []
 
     for column in columns:
@@ -372,7 +585,7 @@ def find_scales(columns):
     return scales
 
 
-def find_correlation_columns(channels, columns):
+cdef find_correlation_columns(channels, columns):
     correlation_columns = []
 
     for column in columns:
@@ -394,21 +607,31 @@ def find_correlation_columns(channels, columns):
     return correlation_columns
 
 
-def create_correlations(correlation_columns, correlations, match, row):
+cdef create_correlations(correlation_columns, correlations, match, row):
     for dependent, independent in correlation_columns:
         correlation = create_correlation(dependent, independent, match, row)
 
         correlations.append(correlation)
 
 
-def create_moments(moments, moments_group, row, shape):
+cdef create_views(sqlfile):
+    logger.debug('Parsing SQL file')
+
+    with open(sqlfile) as f:
+        import sqlparse
+
+        for s in sqlparse.split(f.read()):
+            engine.execute(s)
+
+
+cdef create_moments(moments, moments_group, row, shape):
     for a, b in moments:
         moment = create_moment(a, b, row, shape)
 
         moments_group.append(moment)
 
 
-def create_channels(channels, coordinates, counts, edges, intensities, locations, match, radial_distributions, row, scales, textures):
+cdef create_channels(channels, coordinates, counts, edges, intensities, locations, match, radial_distributions, row, scales, textures):
     for channel in channels:
         intensity = create_intensity(channel, match, row)
 
@@ -435,7 +658,7 @@ def create_channels(channels, coordinates, counts, edges, intensities, locations
         create_radial_distributions(channel, counts, match, radial_distributions, row)
 
 
-def create_radial_distributions(channel, counts, match, radial_distributions, row):
+cdef create_radial_distributions(channel, counts, match, radial_distributions, row):
     for count in counts:
         radial_distribution = create_radial_distribution(channel, count, match, row)
 
@@ -449,7 +672,7 @@ def create_textures(channel, match, row, scales, textures):
         textures.append(texture)
 
 
-def create_images(data, digest, descriptions, images, qualities, well):
+cdef create_images(data, digest, descriptions, images, qualities, well):
     for description in descriptions:
         image = create_image(digest, description, well)
 
@@ -460,7 +683,7 @@ def create_images(data, digest, descriptions, images, qualities, well):
         qualities.append(quality)
 
 
-def create_plates(data, digest, images, descriptions, plates, qualities, wells):
+cdef create_plates(data, digest, images, descriptions, plates, qualities, wells):
     for description in descriptions:
         plate = find_plate_by(plates, str(int(description)))
 
@@ -474,7 +697,7 @@ def create_plates(data, digest, images, descriptions, plates, qualities, wells):
         create_wells(data, digest, images, plate, description, qualities, well_descriptions, wells)
 
 
-def create_wells(data, digest, images, plate, plate_description, qualities, descriptions, wells):
+cdef create_wells(data, digest, images, plate, plate_description, qualities, descriptions, wells):
     for description in descriptions:
         well = create_well(plate, description)
 
@@ -483,3 +706,396 @@ def create_wells(data, digest, images, plate, plate_description, qualities, desc
         image_descriptions = data[(data['Metadata_Barcode'] == plate_description) & (data['Metadata_Well'] == description)]['ImageNumber'].unique()
 
         create_images(data, digest, image_descriptions, images, qualities, well)
+
+cdef find_directories(directory):
+    directories = []
+
+    filenames = glob.glob(os.path.join(directory, '*'))
+
+    for filename in filenames:
+        directories.append(os.path.relpath(filename))
+
+    return set(directories)
+
+
+cdef create_channel(description, channel_dictionary):
+    return __channel__(
+            description=description,
+            id=uuid.uuid4()
+    )
+
+
+cdef create_center(row):
+    return __coordinate__(
+            abscissa=row['Location_Center_X'],
+            id=uuid.uuid4(),
+            ordinate=row['Location_Center_Y']
+    )
+
+
+cdef create_center_mass_intensity(channel, row):
+    return __coordinate__(
+            abscissa=row['Location_CenterMassIntensity_X_{}'.format(channel.description)],
+            id=uuid.uuid4(),
+            ordinate=row['Location_CenterMassIntensity_Y_{}'.format(channel.description)]
+    )
+
+
+cdef create_correlation(dependent, independent, match, row):
+    return __correlation__(
+            coefficient=row['Correlation_Correlation_{}_{}'.format(dependent.description, independent.description)],
+            dependent_id=dependent.id,
+            id=None,
+            independent_id=independent.id,
+            match_id=match.id
+    )
+
+
+cdef create_edge(channel, match, row):
+    return __edge__(
+            channel_id=channel.id,
+            id=uuid.uuid4(),
+            integrated=row['Intensity_IntegratedIntensityEdge_{}'.format(channel.description)],
+            match_id=match.id,
+            maximum=row['Intensity_MaxIntensityEdge_{}'.format(channel.description)],
+            mean=row['Intensity_MeanIntensityEdge_{}'.format(channel.description)],
+            minimum=row['Intensity_MinIntensityEdge_{}'.format(channel.description)],
+            standard_deviation=row['Intensity_StdIntensityEdge_{}'.format(channel.description)]
+    )
+
+
+cdef create_max_intensity(channel, row):
+    return __coordinate__(
+            abscissa=row['Location_MaxIntensity_X_{}'.format(channel.description)],
+            id=uuid.uuid4(),
+            ordinate=row['Location_MaxIntensity_Y_{}'.format(channel.description)]
+    )
+
+
+cdef create_image(digest, description, well_dictionary):
+    return __image__(
+            description='{}_{}'.format(digest, int(description)),
+            id=uuid.uuid4(),
+            well_id=well_dictionary.id
+    )
+
+
+cdef create_intensity(channel, match, row):
+    return __intensity__(
+            channel_id=channel.id,
+            first_quartile=row['Intensity_LowerQuartileIntensity_{}'.format(channel.description)],
+            id=None,
+            integrated=row['Intensity_IntegratedIntensity_{}'.format(channel.description)],
+            mass_displacement=row['Intensity_MassDisplacement_{}'.format(channel.description)],
+            match_id=match.id,
+            maximum=row['Intensity_MaxIntensity_{}'.format(channel.description)],
+            mean=row['Intensity_MeanIntensity_{}'.format(channel.description)],
+            median=row['Intensity_MedianIntensity_{}'.format(channel.description)],
+            median_absolute_deviation=row['Intensity_MADIntensity_{}'.format(channel.description)],
+            minimum=row['Intensity_MinIntensity_{}'.format(channel.description)],
+            standard_deviation=row['Intensity_StdIntensity_{}'.format(channel.description)],
+            third_quartile=row['Intensity_UpperQuartileIntensity_{}'.format(channel.description)]
+    )
+
+
+cdef create_location(center_mass_intensity, channel, match, max_intensity):
+    return __location__(
+            center_mass_intensity_id=center_mass_intensity.id,
+            channel_id=channel.id,
+            id=None,
+            match_id=match.id,
+            max_intensity_id=max_intensity.id
+    )
+
+
+cdef create_match(center, neighborhood, object_id, pattern, shape):
+    return __match__(
+            center_id=center.id,
+            id=uuid.uuid4(),
+            neighborhood_id=neighborhood.id,
+            object_id=object_id,
+            pattern_id=pattern.id,
+            shape_id=shape.id
+    )
+
+
+cdef create_moment(a, b, row, shape):
+    return __moment__(
+            a=a,
+            b=b,
+            id=None,
+            score=row['AreaShape_Zernike_{}_{}'.format(a, b)],
+            shape_id=shape.id
+    )
+
+
+cdef create_neighborhood(object_id, row):
+    return __neighborhood__(
+            angle_between_neighbors_5=row['Neighbors_AngleBetweenNeighbors_5'],
+            angle_between_neighbors_adjacent=row['Neighbors_AngleBetweenNeighbors_Adjacent'],
+            closest_id=None,
+            first_closest_distance_5=row['Neighbors_FirstClosestDistance_5'],
+            first_closest_distance_adjacent=row['Neighbors_FirstClosestDistance_Adjacent'],
+            first_closest_object_number_adjacent=row['Neighbors_FirstClosestObjectNumber_Adjacent'],
+            id=uuid.uuid4(),
+            number_of_neighbors_5=row['Neighbors_NumberOfNeighbors_5'],
+            number_of_neighbors_adjacent=row['Neighbors_NumberOfNeighbors_Adjacent'],
+            object_id=object_id,
+            percent_touching_5=row['Neighbors_PercentTouching_5'],
+            percent_touching_adjacent=row['Neighbors_PercentTouching_Adjacent'],
+            second_closest_distance_5=row['Neighbors_SecondClosestDistance_5'],
+            second_closest_distance_adjacent=row['Neighbors_SecondClosestDistance_Adjacent'],
+            second_closest_id=None,
+            second_closest_object_number_adjacent=row['Neighbors_SecondClosestObjectNumber_Adjacent']
+    )
+
+
+cdef create_object(digest, images, description):
+    return __object__(
+            description=str(description['ObjectNumber']),
+            id=uuid.uuid4(),
+            image_id=find_image_by(description='{}_{}'.format(digest, int(description['ImageNumber'])), dictionaries=images)
+    )
+
+
+cdef create_plate(description, plate):
+    return __plate__(
+            description=str(int(description)),
+            id=uuid.uuid4()
+    )
+
+
+cdef create_quality(data, image_description, image):
+    return __quality__(
+            id=uuid.uuid4(),
+            image_id=image.id,
+            count_cell_clump=int(data.loc[data['ImageNumber'] == image_description, 'Metadata_isCellClump']),
+            count_debris=int(data.loc[data['ImageNumber'] == image_description, 'Metadata_isDebris']),
+            count_low_intensity=int(data.loc[data['ImageNumber'] == image_description, 'Metadata_isLowIntensity'])
+    )
+
+
+cdef create_radial_distribution(channel, count, match, row):
+    return __radial_distribution__(
+            bins=count,
+            channel_id=channel.id,
+            frac_at_d=row['RadialDistribution_FracAtD_{}_{}of4'.format(channel.description, count)],
+            id=None,
+            match_id=match.id,
+            mean_frac=row['RadialDistribution_MeanFrac_{}_{}of4'.format(channel.description, count)],
+            radial_cv=row['RadialDistribution_RadialCV_{}_{}of4'.format(channel.description, count)]
+    )
+
+
+cdef create_shape(row, shape_center):
+    return __shape__(
+            area=row['AreaShape_Area'],
+            center_id=shape_center.id,
+            compactness=row['AreaShape_Compactness'],
+            eccentricity=row['AreaShape_Eccentricity'],
+            euler_number=row['AreaShape_EulerNumber'],
+            extent=row['AreaShape_Extent'],
+            form_factor=row['AreaShape_FormFactor'],
+            id=uuid.uuid4(),
+            major_axis_length=row['AreaShape_MajorAxisLength'],
+            max_feret_diameter=row['AreaShape_MaxFeretDiameter'],
+            maximum_radius=row['AreaShape_MaximumRadius'],
+            mean_radius=row['AreaShape_MeanRadius'],
+            median_radius=row['AreaShape_MedianRadius'],
+            min_feret_diameter=row['AreaShape_MinFeretDiameter'],
+            minor_axis_length=row['AreaShape_MinorAxisLength'],
+            orientation=row['AreaShape_Orientation'],
+            perimeter=row['AreaShape_Perimeter'],
+            solidity=row['AreaShape_Solidity']
+    )
+
+
+cdef create_shape_center(row):
+    return __coordinate__(
+            abscissa=row['AreaShape_Center_X'],
+            id=uuid.uuid4(),
+            ordinate=row['AreaShape_Center_Y']
+    )
+
+
+cdef create_texture(channel, match, row, scale):
+    def find_by(key):
+        return row[
+            'Texture_{}_{}_{}_0'.format(
+                    key,
+                    channel.description,
+                    scale
+            )
+        ]
+
+    return __texture__(
+            angular_second_moment=find_by('AngularSecondMoment'),
+            channel_id=channel.id,
+            contrast=find_by('Contrast'),
+            correlation=find_by('Correlation'),
+            difference_entropy=find_by('DifferenceEntropy'),
+            difference_variance=find_by('DifferenceVariance'),
+            match_id=match.id,
+            scale=scale,
+            entropy=find_by('Entropy'),
+            gabor=find_by('Gabor'),
+            id=None,
+            info_meas_1=find_by('InfoMeas1'),
+            info_meas_2=find_by('InfoMeas2'),
+            inverse_difference_moment=find_by('InverseDifferenceMoment'),
+            sum_average=find_by('SumAverage'),
+            sum_entropy=find_by('SumEntropy'),
+            sum_variance=find_by('SumVariance'),
+            variance=find_by('Variance')
+    )
+
+
+cdef create_well(plate_dictionary, well_description):
+    return __well__(
+            description=well_description,
+            id=uuid.uuid4(),
+            plate_id=plate_dictionary.id
+    )
+
+
+cdef find_channel_by(dictionaries, description):
+    for dictionary in dictionaries:
+        if dictionary.description == description:
+            return dictionary.id
+
+
+cdef find_image_by(dictionaries, description):
+    for dictionary in dictionaries:
+        if dictionary.description == description:
+            return dictionary.id
+
+
+cdef find_object_by(description, dictionaries, image_id):
+    for dictionary in dictionaries:
+        if (dictionary.description == description) and (dictionary.image_id == image_id):
+            return dictionary.id
+
+
+cdef find_plate_by(dictionaries, description):
+    for dictionary in dictionaries:
+        if dictionary.description == description:
+            return dictionary
+
+
+cdef save_coordinates(coordinates):
+    logger.debug('\tBulk insert Coordinate')
+
+    __save__(perturbation.models.Coordinate, coordinates)
+
+
+cdef save_correlations(offset, correlations):
+    logger.debug('\tBulk insert Correlation')
+
+    __save__(perturbation.models.Correlation, correlations, offset)
+
+
+cdef save_edges(edges):
+    logger.debug('\tBulk insert Edge')
+
+    __save__(perturbation.models.Edge, edges)
+
+
+cdef save_channels(channels):
+    logger.debug('\tBulk insert Channel')
+
+    __save__(perturbation.models.Channel, channels)
+
+
+cdef save_plates(plates):
+    logger.debug('\tBulk insert Plate')
+
+    __save__(perturbation.models.Plate, plates)
+
+
+cdef save_images(images):
+    logger.debug('\tBulk insert Image')
+
+    __save__(perturbation.models.Image, images)
+
+
+cdef save_intensities(intensities, offset):
+    logger.debug('\tBulk insert Intensity')
+
+    __save__(perturbation.models.Intensity, intensities, offset)
+
+
+cdef save_locations(offset, locations):
+    logger.debug('\tBulk insert Location')
+
+    __save__(perturbation.models.Location, locations, offset)
+
+
+cdef save_matches(matches):
+    logger.debug('\tBulk insert Match')
+
+    __save__(perturbation.models.Match, matches)
+
+
+cdef save_qualities(qualities):
+    logger.debug('\tBulk insert Quality')
+
+    __save__(perturbation.models.Quality, qualities)
+
+
+cdef save_wells(wells):
+    logger.debug('\tBulk insert Well')
+
+    __save__(perturbation.models.Well, wells)
+
+
+cdef save_textures(offset, textures):
+    logger.debug('\tBulk insert Texture')
+
+    __save__(perturbation.models.Texture, textures, offset)
+
+
+cdef save_objects(objects):
+    logger.debug('\tBulk insert Object')
+
+    __save__(perturbation.models.Object, objects)
+
+
+cdef save_neighborhoods(neighborhoods):
+    logger.debug('\tBulk insert Neighborhood')
+
+    __save__(perturbation.models.Neighborhood, neighborhoods)
+
+
+cdef save_moments(offset, moments, moments_group):
+    logger.debug('\tBulk insert Moment')
+
+    __save__(perturbation.models.Moment, moments_group, offset)
+
+
+cdef save_shapes(shapes):
+    logger.debug('\tBulk insert Shape')
+
+    __save__(perturbation.models.Shape, shapes)
+
+
+cdef save_radial_distributions(offset, radial_distributions):
+    logger.debug('\tBulk insert RadialDistribution')
+
+    __save__(perturbation.models.RadialDistribution, radial_distributions, offset)
+
+
+def __save__(table, records, offset=None):
+    def __create_mappings__(items):
+        return [item._asdict() for item in items]
+
+    if offset:
+        for index, record in enumerate(records):
+            record._replace(id=index + offset)
+
+            offset += len(records)
+
+    scoped_session.bulk_insert_mappings(table, __create_mappings__(records))
+
+    scoped_session.commit()
+
+    records.clear()
