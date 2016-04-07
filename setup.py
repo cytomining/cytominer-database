@@ -1,3 +1,4 @@
+import Cython.Build
 import setuptools
 import setuptools.command.test
 import sys
@@ -36,6 +37,9 @@ setuptools.setup(
         cmdclass={
             'test': Test
         },
+        ext_modules=Cython.Build.cythonize(
+                "perturbation/*.pyx"
+        ),
         packages=setuptools.find_packages(
                 exclude=[
                     'test'
