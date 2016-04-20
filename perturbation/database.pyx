@@ -1,3 +1,7 @@
+import pyximport
+
+pyximport.install()
+
 import click
 import glob
 import hashlib
