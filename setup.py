@@ -1,4 +1,4 @@
-import Cython.Build
+#import Cython.Build
 import setuptools
 import setuptools.command.test
 import sys
