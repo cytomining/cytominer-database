@@ -53,237 +53,6 @@ cdef list shapes = []
 cdef list textures = []
 cdef list wells = []
 
-__channel__ = collections.namedtuple(
-        field_names=[
-            'description',
-            'id'
-        ],
-        typename='Channel'
-)
-
-__coordinate__ = collections.namedtuple(
-        field_names=[
-            'abscissa',
-            'id',
-            'ordinate'
-        ],
-        typename='Coordinate'
-)
-
-__correlation__ = collections.namedtuple(
-        field_names=[
-            'coefficient',
-            'dependent_id',
-            'id',
-            'independent_id',
-            'match_id'
-        ],
-        typename='Correlation'
-)
-
-__edge__ = collections.namedtuple(
-        typename='Edge',
-        field_names=[
-            'channel_id',
-            'id',
-            'integrated',
-            'match_id',
-            'maximum',
-            'mean',
-            'minimum',
-            'standard_deviation'
-        ]
-)
-
-__image__ = collections.namedtuple(
-        field_names=[
-            'description',
-            'id',
-            'well_id'
-        ],
-        typename='Image'
-)
-
-__intensity__ = collections.namedtuple(
-        field_names=[
-            'channel_id',
-            'first_quartile',
-            'id',
-            'integrated',
-            'mass_displacement',
-            'match_id',
-            'maximum',
-            'mean',
-            'median',
-            'median_absolute_deviation',
-            'minimum',
-            'standard_deviation',
-            'third_quartile'
-        ],
-        typename='Intensity'
-)
-
-__location__ = collections.namedtuple(
-        field_names=[
-            'center_mass_intensity_id',
-            'channel_id',
-            'id',
-            'match_id',
-            'max_intensity_id'
-        ],
-        typename='Location'
-)
-
-__match__ = collections.namedtuple(
-        field_names=[
-            'center_id',
-            'id',
-            'neighborhood_id',
-            'object_id',
-            'pattern_id',
-            'shape_id'
-        ],
-        typename='Match'
-)
-
-__moment__ = collections.namedtuple(
-        field_names=[
-            'a',
-            'b',
-            'id',
-            'score',
-            'shape_id'
-        ],
-        typename='Moment'
-)
-
-__object__ = collections.namedtuple(
-        field_names=[
-            'description',
-            'id',
-            'image_id'
-        ],
-        typename='Object'
-)
-
-__pattern__ = collections.namedtuple(
-        field_names=[
-            'description',
-            'id'
-        ],
-        typename='Pattern'
-)
-
-__plate__ = collections.namedtuple(
-        field_names=[
-            'description',
-            'id'
-        ],
-        typename='Plate'
-)
-
-__quality__ = collections.namedtuple(
-        field_names=[
-            'count_cell_clump',
-            'count_debris',
-            'count_low_intensity',
-            'id',
-            'image_id'
-        ],
-        typename='Quality'
-)
-
-__radial_distribution__ = collections.namedtuple(
-        field_names=[
-            'bins',
-            'channel_id',
-            'frac_at_d',
-            'id',
-            'match_id',
-            'mean_frac',
-            'radial_cv'
-        ],
-        typename='RadialDistribution'
-)
-
-__neighborhood__ = collections.namedtuple(
-        field_names=[
-            'angle_between_neighbors_5',
-            'angle_between_neighbors_adjacent',
-            'closest_id',
-            'first_closest_distance_5',
-            'first_closest_distance_adjacent',
-            'first_closest_object_number_adjacent',
-            'id',
-            'number_of_neighbors_5',
-            'number_of_neighbors_adjacent',
-            'object_id',
-            'percent_touching_5',
-            'percent_touching_adjacent',
-            'second_closest_distance_5',
-            'second_closest_distance_adjacent',
-            'second_closest_id',
-            'second_closest_object_number_adjacent'
-        ],
-        typename='Neighborhood'
-)
-
-__shape__ = collections.namedtuple(
-        typename='Shape',
-        field_names=[
-            'area',
-            'center_id',
-            'compactness',
-            'eccentricity',
-            'euler_number',
-            'extent',
-            'form_factor',
-            'id',
-            'major_axis_length',
-            'max_feret_diameter',
-            'maximum_radius',
-            'mean_radius',
-            'median_radius',
-            'min_feret_diameter',
-            'minor_axis_length',
-            'orientation',
-            'perimeter',
-            'solidity'
-        ]
-)
-
-__texture__ = collections.namedtuple(
-        typename='Texture',
-        field_names=[
-            'angular_second_moment',
-            'channel_id',
-            'contrast',
-            'correlation',
-            'difference_entropy',
-            'difference_variance',
-            'match_id',
-            'scale',
-            'entropy',
-            'gabor',
-            'id',
-            'info_meas_1',
-            'info_meas_2',
-            'inverse_difference_moment',
-            'sum_average',
-            'sum_entropy',
-            'sum_variance',
-            'variance'
-        ]
-)
-
-__well__ = collections.namedtuple(
-        field_names=[
-            'description',
-            'id',
-            'plate_id'
-        ],
-        typename='Well'
-)
 
 cdef inline void setup(database):
     global engine
@@ -397,14 +166,14 @@ cdef inline void create_patterns(channels, coordinates, correlation_columns, cor
 
                     closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
 
-                    neighborhood._replace(closest_id=closest_id)
+                    neighborhood.update(closest_id=closest_id)
 
                 if row['Neighbors_SecondClosestObjectNumber_5']:
                     description = str(int(row['Neighbors_SecondClosestObjectNumber_5']))
 
                     second_closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
 
-                    neighborhood._replace(second_closest_id=second_closest_id)
+                    neighborhood.update(second_closest_id=second_closest_id)
 
                 neighborhoods.append(neighborhood)
 
@@ -489,10 +258,10 @@ cdef inline list find_correlation_columns(list channels, columns):
 
         if split_columns[0] == "Correlation":
             for channel in channels:
-                if channel.description == split_columns[2]:
+                if channel["description"] == split_columns[2]:
                     a = channel
 
-                if channel.description == split_columns[3]:
+                if channel["description"] == split_columns[3]:
                     b = channel
 
             correlation_column = (a, b)
@@ -724,25 +493,25 @@ cdef inline void create_wells(data, digest, images, plate, plate_description, qu
 
 cdef inline find_channel_by(list dictionaries, str description):
     for dictionary in dictionaries:
-        if dictionary.description == description:
-            return dictionary.id
+        if dictionary["description"] == description:
+            return dictionary["id"]
 
 
 cdef inline find_image_by(list dictionaries, str description):
     for dictionary in dictionaries:
-        if dictionary.description == description:
-            return dictionary.id
+        if dictionary["description"] == description:
+            return dictionary["id"]
 
 
 cdef inline find_object_by(str description, list dictionaries, image_id):
     for dictionary in dictionaries:
-        if (dictionary.description == description) and (dictionary.image_id == image_id):
-            return dictionary.id
+        if (dictionary["description"] == description) and (dictionary["image_id"] == image_id):
+            return dictionary["id"]
 
 
 cdef inline find_plate_by(list dictionaries, str description):
     for dictionary in dictionaries:
-        if dictionary.description == description:
+        if dictionary["description"] == description:
             return dictionary
 
 
@@ -758,205 +527,204 @@ cdef inline find_plate_by(list dictionaries, str description):
 
 
 
-
 cdef inline create_channel(description, channel_dictionary):
-    return __channel__(
-            description=description,
-            id=uuid.uuid4()
-    )
+    return {
+        "description": description,
+        "id": uuid.uuid4()
+    }
 
 
 cdef inline create_center(row):
-    return __coordinate__(
-            abscissa=row['Location_Center_X'],
-            id=uuid.uuid4(),
-            ordinate=row['Location_Center_Y']
-    )
+    return {
+            "abscissa": row['Location_Center_X'],
+            "id": uuid.uuid4(),
+            "ordinate": row['Location_Center_Y']
+    }
 
 
 cdef inline create_center_mass_intensity(channel, row):
-    return __coordinate__(
-            abscissa=row['Location_CenterMassIntensity_X_{}'.format(channel.description)],
-            id=uuid.uuid4(),
-            ordinate=row['Location_CenterMassIntensity_Y_{}'.format(channel.description)]
-    )
+    return {
+            "abscissa": row['Location_CenterMassIntensity_X_{}'.format(channel["description"])],
+            "id": uuid.uuid4(),
+            "ordinate": row['Location_CenterMassIntensity_Y_{}'.format(channel["description"])]
+    }
 
 
 cdef inline create_correlation(dependent, independent, match, row):
-    return __correlation__(
-            coefficient=row['Correlation_Correlation_{}_{}'.format(dependent.description, independent.description)],
-            dependent_id=dependent.id,
-            id=None,
-            independent_id=independent.id,
-            match_id=match.id
-    )
+    return {
+            "coefficient": row['Correlation_Correlation_{}_{}'.format(dependent["description"], independent["description"])],
+            "dependent_id": dependent["id"],
+            "id": None,
+            "independent_id": independent["id"],
+            "match_id": match["id"]
+    }
 
 
 cdef inline create_edge(channel, match, row):
-    return __edge__(
-            channel_id=channel.id,
-            id=uuid.uuid4(),
-            integrated=row['Intensity_IntegratedIntensityEdge_{}'.format(channel.description)],
-            match_id=match.id,
-            maximum=row['Intensity_MaxIntensityEdge_{}'.format(channel.description)],
-            mean=row['Intensity_MeanIntensityEdge_{}'.format(channel.description)],
-            minimum=row['Intensity_MinIntensityEdge_{}'.format(channel.description)],
-            standard_deviation=row['Intensity_StdIntensityEdge_{}'.format(channel.description)]
-    )
+    return {
+            "channel_id": channel["id"],
+            "id": uuid.uuid4(),
+            "integrated": row['Intensity_IntegratedIntensityEdge_{}'.format(channel["description"])],
+            "match_id": match["id"],
+            "maximum": row['Intensity_MaxIntensityEdge_{}'.format(channel["description"])],
+            "mean": row['Intensity_MeanIntensityEdge_{}'.format(channel["description"])],
+            "minimum": row['Intensity_MinIntensityEdge_{}'.format(channel["description"])],
+            "standard_deviation": row['Intensity_StdIntensityEdge_{}'.format(channel["description"])]
+    }
 
 
 cdef inline create_max_intensity(channel, row):
-    return __coordinate__(
-            abscissa=row['Location_MaxIntensity_X_{}'.format(channel.description)],
-            id=uuid.uuid4(),
-            ordinate=row['Location_MaxIntensity_Y_{}'.format(channel.description)]
-    )
+    return {
+            "abscissa": row['Location_MaxIntensity_X_{}'.format(channel["description"])],
+            "id": uuid.uuid4(),
+            "ordinate": row['Location_MaxIntensity_Y_{}'.format(channel["description"])]
+    }
 
 
-cdef create_image(digest, description, well_dictionary):
-    return __image__(
-            description='{}_{}'.format(digest, int(description)),
-            id=uuid.uuid4(),
-            well_id=well_dictionary.id
-    )
+cdef inline create_image(digest, description, well_dictionary):
+    return {
+            "description": '{}_{}'.format(digest, int(description)),
+            "id": uuid.uuid4(),
+            "well_id": well_dictionary["id"]
+    }
 
 
 cdef inline create_intensity(channel, match, row):
-    return __intensity__(
-            channel_id=channel.id,
-            first_quartile=row['Intensity_LowerQuartileIntensity_{}'.format(channel.description)],
-            id=None,
-            integrated=row['Intensity_IntegratedIntensity_{}'.format(channel.description)],
-            mass_displacement=row['Intensity_MassDisplacement_{}'.format(channel.description)],
-            match_id=match.id,
-            maximum=row['Intensity_MaxIntensity_{}'.format(channel.description)],
-            mean=row['Intensity_MeanIntensity_{}'.format(channel.description)],
-            median=row['Intensity_MedianIntensity_{}'.format(channel.description)],
-            median_absolute_deviation=row['Intensity_MADIntensity_{}'.format(channel.description)],
-            minimum=row['Intensity_MinIntensity_{}'.format(channel.description)],
-            standard_deviation=row['Intensity_StdIntensity_{}'.format(channel.description)],
-            third_quartile=row['Intensity_UpperQuartileIntensity_{}'.format(channel.description)]
-    )
+    return {
+            "channel_id": channel["id"],
+            "first_quartile": row['Intensity_LowerQuartileIntensity_{}'.format(channel["description"])],
+            "id": None,
+            "integrated": row['Intensity_IntegratedIntensity_{}'.format(channel["description"])],
+            "mass_displacement": row['Intensity_MassDisplacement_{}'.format(channel["description"])],
+            "match_id": match["id"],
+            "maximum": row['Intensity_MaxIntensity_{}'.format(channel["description"])],
+            "mean": row['Intensity_MeanIntensity_{}'.format(channel["description"])],
+            "median": row['Intensity_MedianIntensity_{}'.format(channel["description"])],
+            "median_absolute_deviation": row['Intensity_MADIntensity_{}'.format(channel["description"])],
+            "minimum": row['Intensity_MinIntensity_{}'.format(channel["description"])],
+            "standard_deviation": row['Intensity_StdIntensity_{}'.format(channel["description"])],
+            "third_quartile": row['Intensity_UpperQuartileIntensity_{}'.format(channel["description"])]
+    }
 
 
 cdef inline create_location(center_mass_intensity, channel, match, max_intensity):
-    return __location__(
-            center_mass_intensity_id=center_mass_intensity.id,
-            channel_id=channel.id,
-            id=None,
-            match_id=match.id,
-            max_intensity_id=max_intensity.id
-    )
+    return {
+            "center_mass_intensity_id": center_mass_intensity["id"],
+            "channel_id": channel["id"],
+            "id": None,
+            "match_id": match["id"],
+            "max_intensity_id": max_intensity["id"]
+    }
 
 
 cdef inline create_match(center, neighborhood, object_id, pattern, shape):
-    return __match__(
-            center_id=center.id,
-            id=uuid.uuid4(),
-            neighborhood_id=neighborhood.id,
-            object_id=object_id,
-            pattern_id=pattern.id,
-            shape_id=shape.id
-    )
+    return {
+            "center_id": center["id"],
+            "id": uuid.uuid4(),
+            "neighborhood_id": neighborhood["id"],
+            "object_id": object_id,
+            "pattern_id": pattern.id,
+            "shape_id": shape["id"]
+    }
 
 
 cdef inline create_moment(a, b, row, shape):
-    return __moment__(
-            a=a,
-            b=b,
-            id=None,
-            score=row['AreaShape_Zernike_{}_{}'.format(a, b)],
-            shape_id=shape.id
-    )
+    return {
+            "a": a,
+            "b": b,
+            "id": None,
+            "score": row['AreaShape_Zernike_{}_{}'.format(a, b)],
+            "shape_id": shape["id"]
+    }
 
 
 cdef inline create_neighborhood(object_id, row):
-    return __neighborhood__(
-            angle_between_neighbors_5=row['Neighbors_AngleBetweenNeighbors_5'],
-            angle_between_neighbors_adjacent=row['Neighbors_AngleBetweenNeighbors_Adjacent'],
-            closest_id=None,
-            first_closest_distance_5=row['Neighbors_FirstClosestDistance_5'],
-            first_closest_distance_adjacent=row['Neighbors_FirstClosestDistance_Adjacent'],
-            first_closest_object_number_adjacent=row['Neighbors_FirstClosestObjectNumber_Adjacent'],
-            id=uuid.uuid4(),
-            number_of_neighbors_5=row['Neighbors_NumberOfNeighbors_5'],
-            number_of_neighbors_adjacent=row['Neighbors_NumberOfNeighbors_Adjacent'],
-            object_id=object_id,
-            percent_touching_5=row['Neighbors_PercentTouching_5'],
-            percent_touching_adjacent=row['Neighbors_PercentTouching_Adjacent'],
-            second_closest_distance_5=row['Neighbors_SecondClosestDistance_5'],
-            second_closest_distance_adjacent=row['Neighbors_SecondClosestDistance_Adjacent'],
-            second_closest_id=None,
-            second_closest_object_number_adjacent=row['Neighbors_SecondClosestObjectNumber_Adjacent']
-    )
+    return {
+            "angle_between_neighbors_5": row['Neighbors_AngleBetweenNeighbors_5'],
+            "angle_between_neighbors_adjacent": row['Neighbors_AngleBetweenNeighbors_Adjacent'],
+            "closest_id": None,
+            "first_closest_distance_5": row['Neighbors_FirstClosestDistance_5'],
+            "first_closest_distance_adjacent": row['Neighbors_FirstClosestDistance_Adjacent'],
+            "first_closest_object_number_adjacent": row['Neighbors_FirstClosestObjectNumber_Adjacent'],
+            "id": uuid.uuid4(),
+            "number_of_neighbors_5": row['Neighbors_NumberOfNeighbors_5'],
+            "number_of_neighbors_adjacent": row['Neighbors_NumberOfNeighbors_Adjacent'],
+            "object_id": object_id,
+            "percent_touching_5": row['Neighbors_PercentTouching_5'],
+            "percent_touching_adjacent": row['Neighbors_PercentTouching_Adjacent'],
+            "second_closest_distance_5": row['Neighbors_SecondClosestDistance_5'],
+            "second_closest_distance_adjacent": row['Neighbors_SecondClosestDistance_Adjacent'],
+            "second_closest_id": None,
+            "second_closest_object_number_adjacent": row['Neighbors_SecondClosestObjectNumber_Adjacent']
+    }
 
 
 cdef inline create_object(digest, images, description):
-    return __object__(
-            description=str(description['ObjectNumber']),
-            id=uuid.uuid4(),
-            image_id=find_image_by(description='{}_{}'.format(digest, int(description['ImageNumber'])), dictionaries=images)
-    )
+    return {
+            "description": str(description['ObjectNumber']),
+            "id": uuid.uuid4(),
+            "image_id": find_image_by(description='{}_{}'.format(digest, int(description['ImageNumber'])), dictionaries=images)
+    }
 
 
 cdef inline create_plate(description, plate):
-    return __plate__(
-            description=str(int(description)),
-            id=uuid.uuid4()
-    )
+    return {
+            "description": str(int(description)),
+            "id": uuid.uuid4()
+    }
 
 
 cdef inline create_quality(data, image_description, image):
-    return __quality__(
-            id=uuid.uuid4(),
-            image_id=image.id,
-            count_cell_clump=int(data.loc[data['ImageNumber'] == image_description, 'Metadata_isCellClump']),
-            count_debris=int(data.loc[data['ImageNumber'] == image_description, 'Metadata_isDebris']),
-            count_low_intensity=int(data.loc[data['ImageNumber'] == image_description, 'Metadata_isLowIntensity'])
-    )
+    return {
+            "id": uuid.uuid4(),
+            "image_id": image["id"],
+            "count_cell_clump": int(data.loc[data['ImageNumber'] == image_description, 'Metadata_isCellClump']),
+            "count_debris": int(data.loc[data['ImageNumber'] == image_description, 'Metadata_isDebris']),
+            "count_low_intensity": int(data.loc[data['ImageNumber'] == image_description, 'Metadata_isLowIntensity'])
+    }
 
 
 cdef inline create_radial_distribution(channel, count, match, row):
-    return __radial_distribution__(
-            bins=count,
-            channel_id=channel.id,
-            frac_at_d=row['RadialDistribution_FracAtD_{}_{}of4'.format(channel.description, count)],
-            id=None,
-            match_id=match.id,
-            mean_frac=row['RadialDistribution_MeanFrac_{}_{}of4'.format(channel.description, count)],
-            radial_cv=row['RadialDistribution_RadialCV_{}_{}of4'.format(channel.description, count)]
-    )
+    return {
+            "bins": count,
+            "channel_id": channel["id"],
+            "frac_at_d": row['RadialDistribution_FracAtD_{}_{}of4'.format(channel["description"], count)],
+            "id": None,
+            "match_id": match["id"],
+            "mean_frac": row['RadialDistribution_MeanFrac_{}_{}of4'.format(channel["description"], count)],
+            "radial_cv": row['RadialDistribution_RadialCV_{}_{}of4'.format(channel["description"], count)]
+    }
 
 
 cdef inline create_shape(row, shape_center):
-    return __shape__(
-            area=row['AreaShape_Area'],
-            center_id=shape_center.id,
-            compactness=row['AreaShape_Compactness'],
-            eccentricity=row['AreaShape_Eccentricity'],
-            euler_number=row['AreaShape_EulerNumber'],
-            extent=row['AreaShape_Extent'],
-            form_factor=row['AreaShape_FormFactor'],
-            id=uuid.uuid4(),
-            major_axis_length=row['AreaShape_MajorAxisLength'],
-            max_feret_diameter=row['AreaShape_MaxFeretDiameter'],
-            maximum_radius=row['AreaShape_MaximumRadius'],
-            mean_radius=row['AreaShape_MeanRadius'],
-            median_radius=row['AreaShape_MedianRadius'],
-            min_feret_diameter=row['AreaShape_MinFeretDiameter'],
-            minor_axis_length=row['AreaShape_MinorAxisLength'],
-            orientation=row['AreaShape_Orientation'],
-            perimeter=row['AreaShape_Perimeter'],
-            solidity=row['AreaShape_Solidity']
-    )
+    return {
+            "area": row['AreaShape_Area'],
+            "center_id": shape_center["id"],
+            "compactness": row['AreaShape_Compactness'],
+            "eccentricity": row['AreaShape_Eccentricity'],
+            "euler_number": row['AreaShape_EulerNumber'],
+            "extent": row['AreaShape_Extent'],
+            "form_factor": row['AreaShape_FormFactor'],
+            "id": uuid.uuid4(),
+            "major_axis_length": row['AreaShape_MajorAxisLength'],
+            "max_feret_diameter": row['AreaShape_MaxFeretDiameter'],
+            "maximum_radius": row['AreaShape_MaximumRadius'],
+            "mean_radius": row['AreaShape_MeanRadius'],
+            "median_radius": row['AreaShape_MedianRadius'],
+            "min_feret_diameter": row['AreaShape_MinFeretDiameter'],
+            "minor_axis_length": row['AreaShape_MinorAxisLength'],
+            "orientation": row['AreaShape_Orientation'],
+            "perimeter": row['AreaShape_Perimeter'],
+            "solidity": row['AreaShape_Solidity']
+    }
 
 
 cdef inline create_shape_center(row):
-    return __coordinate__(
-            abscissa=row['AreaShape_Center_X'],
-            id=uuid.uuid4(),
-            ordinate=row['AreaShape_Center_Y']
-    )
+    return {
+            "abscissa": row['AreaShape_Center_X'],
+            "id": uuid.uuid4(),
+            "ordinate": row['AreaShape_Center_Y']
+    }
 
 
 cdef inline create_texture(channel, match, row, scale):
@@ -964,42 +732,39 @@ cdef inline create_texture(channel, match, row, scale):
         return row[
             'Texture_{}_{}_{}_0'.format(
                     key,
-                    channel.description,
+                    channel["description"],
                     scale
             )
         ]
 
-    return __texture__(
-            angular_second_moment=find_by('AngularSecondMoment'),
-            channel_id=channel.id,
-            contrast=find_by('Contrast'),
-            correlation=find_by('Correlation'),
-            difference_entropy=find_by('DifferenceEntropy'),
-            difference_variance=find_by('DifferenceVariance'),
-            match_id=match.id,
-            scale=scale,
-            entropy=find_by('Entropy'),
-            gabor=find_by('Gabor'),
-            id=None,
-            info_meas_1=find_by('InfoMeas1'),
-            info_meas_2=find_by('InfoMeas2'),
-            inverse_difference_moment=find_by('InverseDifferenceMoment'),
-            sum_average=find_by('SumAverage'),
-            sum_entropy=find_by('SumEntropy'),
-            sum_variance=find_by('SumVariance'),
-            variance=find_by('Variance')
-    )
+    return {
+            "angular_second_moment": find_by('AngularSecondMoment'),
+            "channel_id": channel["id"],
+            "contrast": find_by('Contrast'),
+            "correlation": find_by('Correlation'),
+            "difference_entropy": find_by('DifferenceEntropy'),
+            "difference_variance": find_by('DifferenceVariance'),
+            "match_id": match["id"],
+            "scale": scale,
+            "entropy": find_by('Entropy'),
+            "gabor": find_by('Gabor'),
+            "id": None,
+            "info_meas_1": find_by('InfoMeas1'),
+            "info_meas_2": find_by('InfoMeas2'),
+            "inverse_difference_moment": find_by('InverseDifferenceMoment'),
+            "sum_average": find_by('SumAverage'),
+            "sum_entropy": find_by('SumEntropy'),
+            "sum_variance": find_by('SumVariance'),
+            "variance": find_by('Variance')
+    }
 
 
 cdef inline create_well(plate_dictionary, well_description):
-    return __well__(
-            description=well_description,
-            id=uuid.uuid4(),
-            plate_id=plate_dictionary.id
-    )
-
-
-
+    return {
+            "description": well_description,
+            "id": uuid.uuid4(),
+            "plate_id": plate_dictionary["id"]
+    }
 
 cdef inline void save_coordinates(list coordinates):
     __save__(perturbation.models.Coordinate, coordinates)
@@ -1070,16 +835,13 @@ cdef inline void save_radial_distributions(int offset, list radial_distributions
 
 
 cdef inline void __save__(table, list records, offset=None):
-    def __create_mappings__(items):
-        return [item._asdict() for item in items]
-
     if offset:
         for index, record in enumerate(records):
-            record._replace(id=index + offset)
+            record.update(id=index + offset)
 
             offset += len(records)
 
-    scoped_session.bulk_insert_mappings(table, __create_mappings__(records))
+    scoped_session.bulk_insert_mappings(table, records)
 
     scoped_session.commit()
 
