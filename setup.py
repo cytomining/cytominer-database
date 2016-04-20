@@ -53,6 +53,9 @@ setuptools.setup(
         'sqlalchemy',
         'sqlparse'
     ],
+    setup_requires=[
+        'cython'
+    ],
     entry_points={
         'console_scripts': [
             'perturbation=perturbation:__main__',
