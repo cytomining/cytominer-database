@@ -299,10 +299,7 @@ cdef inline void setup(database):
     Base.metadata.create_all(engine)
 
 
-cdef void seed(str input, str output, str sqlfile, int verbose):
-    if verbose is None:
-        verbose = False
-
+def seed(input, output, sqlfile, verbose=False):
     setup(output)
 
     create_views(sqlfile)
