@@ -1,3 +1,4 @@
+import Cython.Build
 import setuptools
 import setuptools.command.test
 import sys
@@ -29,29 +30,32 @@ class Test(setuptools.command.test.test):
 
 
 setuptools.setup(
-        name='perturbation',
-        version='0.0.0',
-        author='Allen Goodman',
-        author_email='allen.goodman@icloud.com',
-        cmdclass={
-            'test': Test
-        },
-        packages=setuptools.find_packages(
-                exclude=[
-                    'test'
-                ]
-        ),
-        install_requires=[
-            'click',
-            'csvkit',
-            'pandas',
-            'pytest',
-            'sqlalchemy',
-            'sqlparse'
-        ],
-        entry_points={
-            'console_scripts': [
-                'perturbation=perturbation:__main__',
-            ]
-        }
+    name='perturbation',
+    version='0.0.0',
+    author='Allen Goodman',
+    author_email='allen.goodman@icloud.com',
+    cmdclass={
+        'test': Test
+    },
+    # ext_modules=Cython.Build.cythonize(
+    #     "perturbation/*.pyx"
+    # ),
+    packages=setuptools.find_packages(
+        exclude=[
+            'test'
+        ]
+    ),
+    install_requires=[
+        'click',
+        'csvkit',
+        'pandas',
+        'pytest',
+        'sqlalchemy',
+        'sqlparse'
+    ],
+    entry_points={
+        'console_scripts': [
+            'perturbation=perturbation:__main__',
+        ]
+    }
 )

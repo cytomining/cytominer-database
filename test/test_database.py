@@ -3,14 +3,15 @@
 """
 
 import os
-import perturbation.base
-import perturbation.database
-import perturbation.models
+import pyximport
+pyximport.install()
 import pytest
 import sqlalchemy
 import sqlalchemy.orm
 import subprocess
-
+import perturbation.base
+import perturbation.database
+import perturbation.models
 
 @pytest.fixture
 def session(output='/tmp/test.sqlite'):
@@ -26,14 +27,6 @@ def session(output='/tmp/test.sqlite'):
     perturbation.base.Base.metadata.create_all(engine)
 
     return session()
-
-
-def test_find_directories():
-    assert perturbation.database.find_directories(os.path.abspath('test/data')) == {
-        os.path.relpath('test/data/1'),
-        os.path.relpath('test/data/2'),
-        os.path.relpath('test/data/empty_dir')
-    }
 
 
 def test_seed(session):

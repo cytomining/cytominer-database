@@ -1,11 +1,13 @@
 addons:
     apt:
         packages:
+            - cython
             - python-numpy
             - python-pandas
 cache:
     - pip
 install:
+    - pip install cython
     - pip install -e .
 language:
     - python
