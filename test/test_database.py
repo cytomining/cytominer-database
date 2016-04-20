@@ -2,9 +2,10 @@
 
 """
 
-import os
 import pyximport
 pyximport.install()
+
+import os
 import pytest
 import sqlalchemy
 import sqlalchemy.orm

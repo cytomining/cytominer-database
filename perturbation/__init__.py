@@ -2,6 +2,9 @@
 
 """
 
+import pyximport
+pyximport.install()
+
 import click
 import perturbation.database
 import pkg_resources
