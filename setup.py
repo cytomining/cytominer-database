@@ -54,7 +54,7 @@ setuptools.setup(
         'sqlparse'
     ],
     setup_requires=[
-        'cython'
+        'Cython'
     ],
     entry_points={
         'console_scripts': [
