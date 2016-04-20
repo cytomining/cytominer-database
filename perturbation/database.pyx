@@ -3,70 +3,22 @@ import glob
 import hashlib
 import os
 import pandas
-import perturbation.migration
-import perturbation.models
-import sqlalchemy
-import sqlalchemy.orm
 import collections
 import logging
+import perturbation.base
 import perturbation.models
+import perturbation.UUID
+import sqlalchemy
 import sqlalchemy.exc
 import sqlalchemy.ext.declarative
-import uuid
+import sqlalchemy.orm
 import sqlalchemy.types
+import uuid
 
-
-class UUID(sqlalchemy.types.TypeDecorator):
-    impl = sqlalchemy.types.BINARY(16)
-
-    def process_bind_param(self, value, dialect):
-        if value is None:
-            return value
-        else:
-            if not isinstance(value, uuid.UUID):
-                try:
-                    value = uuid.UUID(value)
-                except(TypeError, ValueError):
-                    value = uuid.UUID(bytes=value)
-
-            return value.bytes
-
-    def process_literal_param(self, value, dialect):
-        pass
-
-    def process_result_value(self, value, dialect):
-        pass
-
-    def python_type(self):
-        pass
-
-@sqlalchemy.ext.declarative.as_declarative()
-class Base(object):
-    id = sqlalchemy.Column(UUID, default=uuid.uuid4, primary_key=True)
-
-    @classmethod
-    def find_or_create_by(cls, session, create_method='', create_method_kwargs=None, **kwargs):
-        try:
-            return session.query(cls).filter_by(**kwargs).one()
-        except sqlalchemy.orm.exc.NoResultFound:
-            kwargs.update(create_method_kwargs or {})
-
-            created = getattr(cls, create_method, cls)(**kwargs)
-
-            try:
-                session.add(created)
-
-                session.flush()
-
-                return created
-            except sqlalchemy.exc.IntegrityError:
-                session.rollback()
-
-                return session.query(cls).filter_by(**kwargs).one()
 
 logger = logging.getLogger(__name__)
 
-Base = Base
+Base = perturbation.base.Base
 
 Session = sqlalchemy.orm.sessionmaker()
 
@@ -343,7 +295,10 @@ cdef inline void setup(database):
     Base.metadata.create_all(engine)
 
 
-def seed(input, output, sqlfile, verbose=False):
+cdef void seed(str input, str output, str sqlfile, int verbose):
+    if verbose is None:
+        verbose = False
+
     setup(output)
 
     create_views(sqlfile)

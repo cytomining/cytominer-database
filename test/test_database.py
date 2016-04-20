@@ -3,14 +3,18 @@
 """
 
 import os
-import perturbation.base
-import perturbation.database
-import perturbation.models
 import pytest
 import sqlalchemy
 import sqlalchemy.orm
 import subprocess
 
+import pyximport
+
+pyximport.install()
+
+import perturbation.base
+import perturbation.database
+import perturbation.models
 
 @pytest.fixture
 def session(output='/tmp/test.sqlite'):
