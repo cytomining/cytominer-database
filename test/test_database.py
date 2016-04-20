@@ -7,11 +7,6 @@ import pytest
 import sqlalchemy
 import sqlalchemy.orm
 import subprocess
-
-import pyximport
-
-pyximport.install()
-
 import perturbation.base
 import perturbation.database
 import perturbation.models
