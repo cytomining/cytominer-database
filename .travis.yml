@@ -1,6 +1,7 @@
 addons:
     apt:
         packages:
+            - cython
             - python-numpy
             - python-pandas
 cache:
