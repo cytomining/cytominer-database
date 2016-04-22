@@ -398,7 +398,7 @@ def create_moments(moments, moments_group, row, shape):
 
 def create_plates(data, digest, images, descriptions, plates, qualities, wells):
     for description in descriptions:
-        plate = find_plate_by(plates, str(int(description)))
+        plate = find_plate_by(plates, str(description))
 
         if not plate:
             plate = create_plate(description, plate)
@@ -614,7 +614,7 @@ def create_object(digest, images, description):
 
 def create_plate(description, plate):
     return {
-            "description": str(int(description)),
+            "description": str(description),
             "id": uuid.uuid4()
     }
 
