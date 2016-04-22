@@ -1,4 +1,3 @@
-#import Cython.Build
 import setuptools
 import setuptools.command.test
 import sys
@@ -43,16 +42,13 @@ setuptools.setup(
         ]
     ),
     install_requires=[
-        "alembic",
+        'alembic',
         'click',
         'csvkit',
         'pandas',
         'pytest',
         'sqlalchemy',
         'sqlparse'
-    ],
-    setup_requires=[
-        'Cython'
     ],
     entry_points={
         'console_scripts': [
