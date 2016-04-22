@@ -2,9 +2,6 @@
 
 """
 
-import pyximport
-pyximport.install()
-
 import os
 import pytest
 import sqlalchemy
