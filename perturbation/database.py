@@ -85,7 +85,7 @@ def seed_plate(directories):
 
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
-        #TODO: The string 'Metadata_Barcode' should be gotten from a config file
+        #TODO: 'Metadata_Barcode' should be gotten from a config file
         plate_descriptions = data['Metadata_Barcode'].unique()
 
         create_plates(data, digest, images, plate_descriptions, plates, qualities, wells)
@@ -97,7 +97,7 @@ def seed_plate(directories):
         def get_object_numbers(s):
             return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
 
-        # TODO: Avoid needing to explicity names all *ObjectNumber* columns
+        # TODO: Avoid needing to explicity name all *ObjectNumber* columns
         object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_5', 'Neighbors_SecondClosestObjectNumber_5']])
 
         object_numbers.drop_duplicates()
@@ -155,6 +155,7 @@ def create_patterns(channels, coordinates, correlation_columns, correlation_offs
 
                 neighborhood = create_neighborhood(object_id, row)
 
+                # TODO: Avoid needing to explicity name all *ObjectNumber* columns
                 if row['Neighbors_FirstClosestObjectNumber_5']:
                     description = str(int(row['Neighbors_FirstClosestObjectNumber_5']))
 
@@ -404,6 +405,7 @@ def create_plates(data, digest, images, descriptions, plates, qualities, wells):
 
             plates.append(plate)
 
+        #TODO: 'Metadata_Barcode' should be gotten from a config file
         well_descriptions = data[data['Metadata_Barcode'] == description]['Metadata_Well'].unique()
 
         create_wells(data, digest, images, plate, description, qualities, well_descriptions, wells)
@@ -439,6 +441,8 @@ def create_wells(data, digest, images, plate, plate_description, qualities, desc
 
         wells.append(well)
 
+        #TODO: 'Metadata_Barcode' and 'Metadata_Well' should be gotten 
+        # from a config file
         image_descriptions = data[(data['Metadata_Barcode'] == plate_description) & (data['Metadata_Well'] == description)]['ImageNumber'].unique()
 
         create_images(data, digest, image_descriptions, images, qualities, well)
@@ -616,6 +620,7 @@ def create_plate(description, plate):
 
 
 def create_quality(data, image_description, image):
+    #TODO: 'Metadata_*' should be gotten from a config file
     return {
             "id": uuid.uuid4(),
             "image_id": image["id"],
