@@ -1,4 +1,4 @@
-import Cython.Build
+#import Cython.Build
 import setuptools
 import setuptools.command.test
 import sys
@@ -50,6 +50,9 @@ setuptools.setup(
         'pytest',
         'sqlalchemy',
         'sqlparse'
+    ],
+    setup_requires=[
+        'Cython'
     ],
     entry_points={
         'console_scripts': [
