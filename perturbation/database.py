@@ -85,16 +85,19 @@ def seed_plate(directories):
 
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
+        #TODO: The string 'Metadata_Barcode' should be gotten from a config file
         plate_descriptions = data['Metadata_Barcode'].unique()
 
         create_plates(data, digest, images, plate_descriptions, plates, qualities, wells)
 
         # TODO: Read all the patterns because some columns are present in only one pattern
+        # TODO: This assumes that Cells.csv exists, whereas it could be any pattern
         data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
 
         def get_object_numbers(s):
             return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
 
+        # TODO: Avoid needing to explicity names all *ObjectNumber* columns
         object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_5', 'Neighbors_SecondClosestObjectNumber_5']])
 
         object_numbers.drop_duplicates()
