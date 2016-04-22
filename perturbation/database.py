@@ -59,6 +59,10 @@ def setup(database):
 
     scoped_session.configure(autoflush=False, bind=engine, expire_on_commit=False)
 
+    Base.metadata.drop_all(engine)
+
+    Base.metadata.create_all(engine)
+
 
 def seed(input, output, sqlfile, verbose=False):
     setup(output)
@@ -773,7 +777,7 @@ def __save__(table, records, offset=None):
         for index, record in enumerate(records):
             record.update(id=index + offset)
 
-            off+= len(records)
+            offset += len(records)
 
     scoped_session.execute(table.__table__.insert(), records)
 
