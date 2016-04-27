@@ -26,7 +26,6 @@ engine = None
 
 scoped_session = sqlalchemy.orm.scoped_session(Session)
 
-# FIXME: @0x00b1 Can you check if these offsets are working as you expect? I don't think they are.
 # initialize offsets that are used to generate primary keys
 correlation_offset = 0
 intensity_offset = 0
