@@ -26,6 +26,8 @@ engine = None
 
 scoped_session = sqlalchemy.orm.scoped_session(Session)
 
+# FIXME: @0x00b1 Can you check if these offsets are working as you expect? I don't think they are.
+# initialize offsets that are used to generate primary keys
 correlation_offset = 0
 intensity_offset = 0
 location_offset = 0
@@ -33,6 +35,7 @@ moment_offset = 0
 texture_offset = 0
 radial_distribution_offset = 0
 
+# initialize lists that will be used to store tables
 channels = []
 coordinates = []
 correlations = []
@@ -51,6 +54,11 @@ wells = []
 
 
 def setup(database):
+    """Sets up SQLite database
+
+    :param database: name of SQLlite database
+    :return: None
+    """
     global engine
 
     engine = sqlalchemy.create_engine("sqlite:///{}".format(os.path.realpath(database)))
@@ -64,15 +72,31 @@ def setup(database):
     Base.metadata.create_all(engine)
 
 
-def seed(input, output, sqlfile, verbose=False):
+def seed(input, output, sqlfile):
+    """Call functions to create backend
+
+    :param input: top-level directory containing sub-directories, each of which have an image.csv and object.csv
+    :param output: name of SQLite databse
+    :param sqlfile: SQL file to be executed on the backend database after it is created
+    :return:
+    """
     setup(output)
 
+    logger.debug('Parsing SQL file')
+
     create_views(sqlfile)
+
+    logger.debug('Parsing csvs')
 
     seed_plate(input)
 
 
 def seed_plate(directories):
+    """Creates backend
+
+    :param directories: top-level directory containing sub-directories, each of which have an image.csv and object.csv
+    :return: None
+    """
     pathnames = find_directories(directories)
 
     for directory in pathnames:
@@ -81,17 +105,21 @@ def seed_plate(directories):
         except OSError:
             continue
 
+        # FIXME: @0x00b1 Ok to make moments_group global, just like all the others?
         moments_group = []
 
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
-        #TODO: 'Metadata_Barcode' should be gotten from a config file
+        # TODO: 'Metadata_Barcode' should be gotten from a config file
         plate_descriptions = data['Metadata_Barcode'].unique()
 
+        # Populate plates[], wells[], images[], qualities[]
+        # This pre-computes UUIDs so that we don't need to look up the db
+        # (which will be slow)
+        
         create_plates(data, digest, images, plate_descriptions, plates, qualities, wells)
 
-        # TODO: Read all the patterns because some columns are present in only one pattern
-        # TODO: This assumes that Cells.csv exists, whereas it could be any pattern
+        # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern) 
         data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
 
         def get_object_numbers(s):
@@ -102,6 +130,7 @@ def seed_plate(directories):
 
         object_numbers.drop_duplicates()
 
+        # Populate objects[]
         objects = find_objects(digest, images, object_numbers)
 
         filenames = []
@@ -116,6 +145,7 @@ def seed_plate(directories):
 
         columns = data.columns
 
+        # FIXME: @0x00b1 Why are is channels being passed, given that it is global? Also, rename to find_channels?
         find_channel_descriptions(channels, columns)
 
         correlation_columns = find_correlation_columns(channels, columns)
@@ -126,6 +156,8 @@ def seed_plate(directories):
 
         moments = find_moments(columns)
 
+        # FIXME: 0x00b1 many of the arguments are globals. Was this intentional?
+        # Populate all the tables
         create_patterns(channels, coordinates, correlation_columns, correlation_offset, correlations, counts, digest, directory, edges, images, intensities, intensity_offset, location_offset, locations, matches, moment_offset, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distribution_offset, radial_distributions, scales, shapes, texture_offset, textures, wells)
 
     save_channels(channels)
@@ -134,8 +166,46 @@ def seed_plate(directories):
 
 
 def create_patterns(channels, coordinates, correlation_columns, correlation_offset, correlations, counts, digest, directory, edges, images, intensities, intensity_offset, location_offset, locations, matches, moment_offset, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distribution_offset, radial_distributions, scales, shapes, texture_offset, textures, wells):
+    """Populates all the tables in the backend
+
+    Each parameter corresponds to the either the name of the list that stores the table, or to an offset for the
+    corresponding table, where the offset is used to generate primary keys
+
+    :param channels:
+    :param coordinates:
+    :param correlation_columns:
+    :param correlation_offset:
+    :param correlations:
+    :param counts:
+    :param digest:
+    :param directory:
+    :param edges:
+    :param images:
+    :param intensities:
+    :param intensity_offset:
+    :param location_offset:
+    :param locations:
+    :param matches:
+    :param moment_offset:
+    :param moments:
+    :param moments_group:
+    :param neighborhoods:
+    :param objects:
+    :param patterns:
+    :param qualities:
+    :param radial_distribution_offset:
+    :param radial_distributions:
+    :param scales:
+    :param shapes:
+    :param texture_offset:
+    :param textures:
+    :param wells:
+    :return: None
+    """
+    logger.debug('Reading {}'.format(os.path.basename(directory)))
+
     for pattern in patterns:
-        logger.debug('\tParse {}'.format(pattern.description))
+        logger.debug('\tStarted parsing {}'.format(pattern.description))
 
         data = pandas.read_csv(os.path.join(directory, '{}.csv').format(pattern.description))
 
@@ -155,7 +225,7 @@ def create_patterns(channels, coordinates, correlation_columns, correlation_offs
 
                 neighborhood = create_neighborhood(object_id, row)
 
-                # TODO: Avoid needing to explicity name all *ObjectNumber* columns
+                # TODO: Avoid needing to explicitly name all *ObjectNumber* columns
                 if row['Neighbors_FirstClosestObjectNumber_5']:
                     description = str(int(row['Neighbors_FirstClosestObjectNumber_5']))
 
@@ -188,7 +258,12 @@ def create_patterns(channels, coordinates, correlation_columns, correlation_offs
 
                 create_correlations(correlation_columns, correlations, match, row)
 
+                # FIXME: 0x00b1 many of the arguments are globals. Was this intentional?
                 create_channels(channels, coordinates, counts, edges, intensities, locations, match, radial_distributions, row, scales, textures)
+
+        logger.debug('\tCompleted parsing {}'.format(pattern.description))
+
+    logger.debug('\tStarted committing {}'.format(os.path.basename(directory)))
 
     save_coordinates(coordinates)
     save_edges(edges)
@@ -206,7 +281,8 @@ def create_patterns(channels, coordinates, correlation_columns, correlation_offs
     save_moments(moment_offset, moments, moments_group)
     save_radial_distributions(radial_distribution_offset, radial_distributions)
 
-    logger.debug('\tCommit {}'.format(os.path.basename(directory)))
+    logger.debug('\tintensity_offset = {}'.format(intensity_offset))
+    logger.debug('\tCompleted committing {}'.format(os.path.basename(directory)))
 
 
 def find_channel_descriptions(channels, columns):
@@ -401,11 +477,11 @@ def create_plates(data, digest, images, descriptions, plates, qualities, wells):
         plate = find_plate_by(plates, str(description))
 
         if not plate:
-            plate = create_plate(description, plate)
+            plate = create_plate(description)
 
             plates.append(plate)
 
-        #TODO: 'Metadata_Barcode' should be gotten from a config file
+        # TODO: 'Metadata_Barcode' should be gotten from a config file
         well_descriptions = data[data['Metadata_Barcode'] == description]['Metadata_Well'].unique()
 
         create_wells(data, digest, images, plate, description, qualities, well_descriptions, wells)
@@ -426,8 +502,6 @@ def create_textures(channel, match, row, scales, textures):
 
 
 def create_views(sqlfile):
-    logger.debug('Parsing SQL file')
-
     with open(sqlfile) as f:
         import sqlparse
 
@@ -612,7 +686,7 @@ def create_object(digest, images, description):
     }
 
 
-def create_plate(description, plate):
+def create_plate(description):
     return {
             "description": str(description),
             "id": uuid.uuid4()
@@ -620,7 +694,7 @@ def create_plate(description, plate):
 
 
 def create_quality(data, image_description, image):
-    #TODO: 'Metadata_*' should be gotten from a config file
+    # TODO: 'Metadata_*' should be gotten from a config file
     return {
             "id": uuid.uuid4(),
             "image_id": image["id"],
@@ -781,14 +855,41 @@ def save_radial_distributions(offset, radial_distributions):
 
 
 def __save__(table, records, offset=None):
+    """ Save records to table
+
+    :param table: table class
+    :param records: records to insert in the table
+    :param offset: offset to compute primary key
+    :return:
+    """
+    logger.debug('\tStarted saving: {}'.format(str(table.__tablename__)))
+
+    logger.debug('\t\tOffsetting')
+
+    # FIXME: @0x00b1 Offset is working as intended. The updated value gets lost after exiting the function.
+    # FIXME: @ox00b1 Also "if offset" is never true because it starts off as None or 0 and then never changes
+    assert ((offset is None) or ([record['id'] for record in records if record['id'] is not None] == []))
+
     if offset:
         for index, record in enumerate(records):
             record.update(id=index + offset)
 
             offset += len(records)
 
+    logger.debug('\t\toffset = {}'.format(offset))
+
+    logger.debug('\t\tlen(records) = {}'.format(len(records)))
+
+    logger.debug('\t\tInserting')
+
     scoped_session.execute(table.__table__.insert(), records)
+
+    logger.debug('\t\tCommiting')
 
     scoped_session.commit()
 
+    logger.debug('\t\tClearing')
+
     records.clear()
+
+    logger.debug('\tCompleted saving: {}'.format(str(table.__tablename__)))
