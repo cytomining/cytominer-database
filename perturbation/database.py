@@ -866,7 +866,7 @@ def __save__(table, records, offset=None):
 
     logger.debug('\t\tOffsetting')
 
-    # FIXME: @0x00b1 Offset is working as intended. The updated value gets lost after exiting the function.
+    # FIXME: @0x00b1 Offset is not working as intended. The updated value gets lost after exiting the function.
     # FIXME: @ox00b1 Also "if offset" is never true because it starts off as None or 0 and then never changes
     assert ((offset is None) or ([record['id'] for record in records if record['id'] is not None] == []))
 
