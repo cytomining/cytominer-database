@@ -147,39 +147,24 @@ def seed_plate(directories):
 
         # FIXME: 0x00b1 many of the arguments are globals. Was this intentional?
         # Populate all the tables
-        create_patterns(channels, coordinates, correlation_columns, correlations, counts, digest, directory, edges, images, intensities, locations, matches, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distributions, scales, shapes, textures, wells)
+        create_patterns(correlation_columns, counts, digest, directory, moments, objects, patterns, scales)
 
-    save_channels(channels)
+    __save__(perturbation.models.Channel, channels)
 
-    save_plates(plates)
+    __save__(perturbation.models.Plate, plates)
 
 
-def create_patterns(channels, coordinates, correlation_columns, correlations, counts, digest, directory, edges, images, intensities, locations, matches, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distributions, scales, shapes, textures, wells):
+def create_patterns(correlation_columns, counts, digest, directory, moments, objects, patterns, scales):
     """Populates all the tables in the backend
 
-    :param channels:
-    :param coordinates:
     :param correlation_columns:
-    :param correlations:
     :param counts:
     :param digest:
     :param directory:
-    :param edges:
-    :param images:
-    :param intensities:
-    :param locations:
-    :param matches:
     :param moments:
-    :param moments_group:
-    :param neighborhoods:
     :param objects:
     :param patterns:
-    :param qualities:
-    :param radial_distributions:
     :param scales:
-    :param shapes:
-    :param textures:
-    :param wells:
     :return: None
     """
     logger.debug('Reading {}'.format(os.path.basename(directory)))
@@ -239,27 +224,27 @@ def create_patterns(channels, coordinates, correlation_columns, correlations, co
                 create_correlations(correlation_columns, correlations, match, row)
 
                 # FIXME: 0x00b1 many of the arguments are globals. Was this intentional?
-                create_channels(channels, coordinates, counts, edges, intensities, locations, match, radial_distributions, row, scales, textures)
+                create_channels(counts, match, row, scales)
 
         logger.debug('\tCompleted parsing {}'.format(pattern.description))
 
     logger.debug('\tStarted committing {}'.format(os.path.basename(directory)))
 
-    save_coordinates(coordinates)
-    save_edges(edges)
-    save_images(images)
-    save_matches(matches)
-    save_neighborhoods(neighborhoods)
-    save_objects(objects)
-    save_qualities(qualities)
-    save_shapes(shapes)
-    save_textures(textures)
-    save_wells(wells)
-    save_correlations(correlations)
-    save_intensities(intensities)
-    save_locations(locations)
-    save_moments(moments_group)
-    save_radial_distributions(radial_distributions)
+    __save__(perturbation.models.Coordinate, coordinates)
+    __save__(perturbation.models.Correlation, correlations)
+    __save__(perturbation.models.Edge, edges)
+    __save__(perturbation.models.Image, images)
+    __save__(perturbation.models.Intensity, intensities)
+    __save__(perturbation.models.Location, locations)
+    __save__(perturbation.models.Match, matches)
+    __save__(perturbation.models.Quality, qualities)
+    __save__(perturbation.models.Well, wells)
+    __save__(perturbation.models.Texture, textures)
+    __save__(perturbation.models.Object, objects)
+    __save__(perturbation.models.Neighborhood, neighborhoods)
+    __save__(perturbation.models.Moment, moments_group)
+    __save__(perturbation.models.Shape, shapes)
+    __save__(perturbation.models.RadialDistribution, radial_distributions)
 
     logger.debug('\tCompleted committing {}'.format(os.path.basename(directory)))
 
@@ -399,7 +384,7 @@ def find_scales(columns):
     return scales
 
 
-def create_channels(channels, coordinates, counts, edges, intensities, locations, match, radial_distributions, row, scales, textures):
+def create_channels(counts, match, row, scales):
     for channel in channels:
         intensity = create_intensity(channel, match, row)
 
@@ -764,72 +749,7 @@ def create_well(plate_dictionary, well_description):
             "plate_id": plate_dictionary["id"]
     }
 
-def save_coordinates(coordinates):
-    __save__(perturbation.models.Coordinate, coordinates)
 
-
-def save_correlations(correlations):
-    __save__(perturbation.models.Correlation, correlations)
-
-
-def save_edges(edges):
-    __save__(perturbation.models.Edge, edges)
-
-
-def save_channels(channels):
-    __save__(perturbation.models.Channel, channels)
-
-
-def save_plates(plates):
-    __save__(perturbation.models.Plate, plates)
-
-
-def save_images(images):
-    __save__(perturbation.models.Image, images)
-
-
-def save_intensities(intensities):
-    __save__(perturbation.models.Intensity, intensities)
-
-
-def save_locations(locations):
-    __save__(perturbation.models.Location, locations)
-
-
-def save_matches(matches):
-    __save__(perturbation.models.Match, matches)
-
-
-def save_qualities(qualities):
-    __save__(perturbation.models.Quality, qualities)
-
-
-def save_wells(wells):
-    __save__(perturbation.models.Well, wells)
-
-
-def save_textures(textures):
-    __save__(perturbation.models.Texture, textures)
-
-
-def save_objects(objects):
-    __save__(perturbation.models.Object, objects)
-
-
-def save_neighborhoods(neighborhoods):
-    __save__(perturbation.models.Neighborhood, neighborhoods)
-
-
-def save_moments(moments_group):
-    __save__(perturbation.models.Moment, moments_group)
-
-
-def save_shapes(shapes):
-    __save__(perturbation.models.Shape, shapes)
-
-
-def save_radial_distributions(radial_distributions):
-    __save__(perturbation.models.RadialDistribution, radial_distributions)
 
 
 def __save__(table, records):
