@@ -36,6 +36,7 @@ intensities = []
 locations = []
 qualities = []
 matches = []
+moments_group = []
 neighborhoods = []
 plates = []
 radial_distributions = []
@@ -95,9 +96,6 @@ def seed_plate(directories):
             data = pandas.read_csv(os.path.join(directory, 'image.csv'))
         except OSError:
             continue
-
-        # FIXME: @0x00b1 Ok to make moments_group global, just like all the others?
-        moments_group = []
 
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
@@ -260,7 +258,7 @@ def create_patterns(channels, coordinates, correlation_columns, correlations, co
     save_correlations(correlations)
     save_intensities(intensities)
     save_locations(locations)
-    save_moments(moments, moments_group)
+    save_moments(moments_group)
     save_radial_distributions(radial_distributions)
 
     logger.debug('\tCompleted committing {}'.format(os.path.basename(directory)))
@@ -822,7 +820,7 @@ def save_neighborhoods(neighborhoods):
     __save__(perturbation.models.Neighborhood, neighborhoods)
 
 
-def save_moments(moments, moments_group):
+def save_moments(moments_group):
     __save__(perturbation.models.Moment, moments_group)
 
 
