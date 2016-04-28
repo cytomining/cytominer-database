@@ -107,7 +107,7 @@ def seed_plate(directories):
         # This pre-computes UUIDs so that we don't need to look up the db
         # (which will be slow)
         
-        create_plates(data, digest, images, plate_descriptions, plates, qualities, wells)
+        create_plates(data, digest, plate_descriptions)
 
         # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern) 
         data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
@@ -120,8 +120,10 @@ def seed_plate(directories):
 
         object_numbers.drop_duplicates()
 
-        # Populate objects[]
-        objects = find_objects(digest, images, object_numbers)
+        for index, object_number in object_numbers.iterrows():
+            object_dictionary = create_object(digest, object_number)
+
+            objects.append(object_dictionary)
 
         filenames = []
 
@@ -135,10 +137,9 @@ def seed_plate(directories):
 
         columns = data.columns
 
-        # FIXME: @0x00b1 Why are is channels being passed, given that it is global? Also, rename to find_channels?
-        find_channel_descriptions(channels, columns)
+        find_channels(columns)
 
-        correlation_columns = find_correlation_columns(channels, columns)
+        correlation_columns = find_correlation_columns(columns)
 
         scales = find_scales(columns)
 
@@ -146,16 +147,15 @@ def seed_plate(directories):
 
         moments = find_moments(columns)
 
-        # FIXME: 0x00b1 many of the arguments are globals. Was this intentional?
         # Populate all the tables
-        create_patterns(correlation_columns, counts, digest, directory, moments, objects, patterns, scales)
+        create_patterns(correlation_columns, counts, digest, directory, moments, patterns, scales)
 
     __save__(perturbation.models.Channel, channels)
 
     __save__(perturbation.models.Plate, plates)
 
 
-def create_patterns(correlation_columns, counts, digest, directory, moments, objects, patterns, scales):
+def create_patterns(correlation_columns, counts, digest, directory, moments, patterns, scales):
     """Populates all the tables in the backend
 
     :param correlation_columns:
@@ -216,15 +216,14 @@ def create_patterns(correlation_columns, counts, digest, directory, moments, obj
 
                 shapes.append(shape)
 
-                create_moments(moments, moments_group, row, shape)
+                create_moments(moments, row, shape)
 
                 match = create_match(center, neighborhood, object_id, pattern, shape)
 
                 matches.append(match)
 
-                create_correlations(correlation_columns, correlations, match, row)
+                create_correlations(correlation_columns, match, row)
 
-                # FIXME: 0x00b1 many of the arguments are globals. Was this intentional?
                 create_channels(counts, match, row, scales)
 
         logger.debug('\tCompleted parsing {}'.format(pattern.description))
@@ -250,7 +249,7 @@ def create_patterns(correlation_columns, counts, digest, directory, moments, obj
     logger.debug('\tCompleted committing {}'.format(os.path.basename(directory)))
 
 
-def find_channel_descriptions(channels, columns):
+def find_channels(columns):
     channel_descriptions = set()
 
     for column in columns:
@@ -265,12 +264,12 @@ def find_channel_descriptions(channels, columns):
         channel = find_channel_by(channels, channel_description)
 
         if not channel:
-            channel = create_channel(channel_description, channel)
+            channel = create_channel(channel_description)
 
             channels.append(channel)
 
 
-def find_correlation_columns(channels, columns):
+def find_correlation_columns(columns):
     correlation_columns = []
 
     for column in columns:
@@ -335,17 +334,6 @@ def find_moments(columns):
     return moments
 
 
-def find_objects(digest, images, object_numbers):
-    objects = []
-
-    for index, object_number in object_numbers.iterrows():
-        object_dictionary = create_object(digest, images, object_number)
-
-        objects.append(object_dictionary)
-
-    return objects
-
-
 def find_pattern_descriptions(filenames):
     pattern_descriptions = []
 
@@ -407,19 +395,19 @@ def create_channels(counts, match, row, scales):
 
         locations.append(location)
 
-        create_textures(channel, match, row, scales, textures)
+        create_textures(channel, match, row, scales)
 
-        create_radial_distributions(channel, counts, match, radial_distributions, row)
+        create_radial_distributions(channel, counts, match, row)
 
 
-def create_correlations(correlation_columns, correlations, match, row):
+def create_correlations(correlation_columns, match, row):
     for dependent, independent in correlation_columns:
         correlation = create_correlation(dependent, independent, match, row)
 
         correlations.append(correlation)
 
 
-def create_images(data, digest, descriptions, images, qualities, well):
+def create_images(data, digest, descriptions, well):
     for description in descriptions:
         image = create_image(digest, description, well)
 
@@ -430,14 +418,14 @@ def create_images(data, digest, descriptions, images, qualities, well):
         qualities.append(quality)
 
 
-def create_moments(moments, moments_group, row, shape):
+def create_moments(moments, row, shape):
     for a, b in moments:
         moment = create_moment(a, b, row, shape)
 
         moments_group.append(moment)
 
 
-def create_plates(data, digest, images, descriptions, plates, qualities, wells):
+def create_plates(data, digest, descriptions):
     for description in descriptions:
         plate = find_plate_by(plates, str(description))
 
@@ -449,17 +437,17 @@ def create_plates(data, digest, images, descriptions, plates, qualities, wells):
         # TODO: 'Metadata_Barcode' should be gotten from a config file
         well_descriptions = data[data['Metadata_Barcode'] == description]['Metadata_Well'].unique()
 
-        create_wells(data, digest, images, plate, description, qualities, well_descriptions, wells)
+        create_wells(data, digest, plate, description, well_descriptions)
 
 
-def create_radial_distributions(channel, counts, match, radial_distributions, row):
+def create_radial_distributions(channel, counts, match, row):
     for count in counts:
         radial_distribution = create_radial_distribution(channel, count, match, row)
 
         radial_distributions.append(radial_distribution)
 
 
-def create_textures(channel, match, row, scales, textures):
+def create_textures(channel, match, row, scales):
     for scale in scales:
         texture = create_texture(channel, match, row, scale)
 
@@ -474,7 +462,7 @@ def create_views(sqlfile):
             engine.execute(s)
 
 
-def create_wells(data, digest, images, plate, plate_description, qualities, descriptions, wells):
+def create_wells(data, digest, plate, plate_description, descriptions):
     for description in descriptions:
         well = create_well(plate, description)
 
@@ -483,7 +471,7 @@ def create_wells(data, digest, images, plate, plate_description, qualities, desc
         # TODO: 'Metadata_Barcode' and 'Metadata_Well' should be gotten from a config file
         image_descriptions = data[(data['Metadata_Barcode'] == plate_description) & (data['Metadata_Well'] == description)]['ImageNumber'].unique()
 
-        create_images(data, digest, image_descriptions, images, qualities, well)
+        create_images(data, digest, image_descriptions, well)
 
 
 def find_channel_by(dictionaries, description):
@@ -510,7 +498,7 @@ def find_plate_by(dictionaries, description):
             return dictionary
 
 
-def create_channel(description, channel_dictionary):
+def create_channel(description):
     return {
         "description": description,
         "id": uuid.uuid4()
@@ -642,7 +630,7 @@ def create_neighborhood(object_id, row):
     }
 
 
-def create_object(digest, images, description):
+def create_object(digest, description):
     return {
             "description": str(description['ObjectNumber']),
             "id": uuid.uuid4(),
@@ -749,8 +737,6 @@ def create_well(plate_dictionary, well_description):
             "id": uuid.uuid4(),
             "plate_id": plate_dictionary["id"]
     }
-
-
 
 
 def __save__(table, records):
