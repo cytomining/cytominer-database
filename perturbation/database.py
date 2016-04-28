@@ -26,14 +26,6 @@ engine = None
 
 scoped_session = sqlalchemy.orm.scoped_session(Session)
 
-# initialize offsets that are used to generate primary keys
-correlation_offset = 0
-intensity_offset = 0
-location_offset = 0
-moment_offset = 0
-texture_offset = 0
-radial_distribution_offset = 0
-
 # initialize lists that will be used to store tables
 channels = []
 coordinates = []
@@ -157,23 +149,19 @@ def seed_plate(directories):
 
         # FIXME: 0x00b1 many of the arguments are globals. Was this intentional?
         # Populate all the tables
-        create_patterns(channels, coordinates, correlation_columns, correlation_offset, correlations, counts, digest, directory, edges, images, intensities, intensity_offset, location_offset, locations, matches, moment_offset, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distribution_offset, radial_distributions, scales, shapes, texture_offset, textures, wells)
+        create_patterns(channels, coordinates, correlation_columns, correlations, counts, digest, directory, edges, images, intensities, locations, matches, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distributions, scales, shapes, textures, wells)
 
     save_channels(channels)
 
     save_plates(plates)
 
 
-def create_patterns(channels, coordinates, correlation_columns, correlation_offset, correlations, counts, digest, directory, edges, images, intensities, intensity_offset, location_offset, locations, matches, moment_offset, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distribution_offset, radial_distributions, scales, shapes, texture_offset, textures, wells):
+def create_patterns(channels, coordinates, correlation_columns, correlations, counts, digest, directory, edges, images, intensities, locations, matches, moments, moments_group, neighborhoods, objects, patterns, qualities, radial_distributions, scales, shapes, textures, wells):
     """Populates all the tables in the backend
-
-    Each parameter corresponds to the either the name of the list that stores the table, or to an offset for the
-    corresponding table, where the offset is used to generate primary keys
 
     :param channels:
     :param coordinates:
     :param correlation_columns:
-    :param correlation_offset:
     :param correlations:
     :param counts:
     :param digest:
@@ -181,22 +169,17 @@ def create_patterns(channels, coordinates, correlation_columns, correlation_offs
     :param edges:
     :param images:
     :param intensities:
-    :param intensity_offset:
-    :param location_offset:
     :param locations:
     :param matches:
-    :param moment_offset:
     :param moments:
     :param moments_group:
     :param neighborhoods:
     :param objects:
     :param patterns:
     :param qualities:
-    :param radial_distribution_offset:
     :param radial_distributions:
     :param scales:
     :param shapes:
-    :param texture_offset:
     :param textures:
     :param wells:
     :return: None
@@ -272,15 +255,14 @@ def create_patterns(channels, coordinates, correlation_columns, correlation_offs
     save_objects(objects)
     save_qualities(qualities)
     save_shapes(shapes)
-    save_textures(texture_offset, textures)
+    save_textures(textures)
     save_wells(wells)
-    save_correlations(correlation_offset, correlations)
-    save_intensities(intensities, intensity_offset)
-    save_locations(location_offset, locations)
-    save_moments(moment_offset, moments, moments_group)
-    save_radial_distributions(radial_distribution_offset, radial_distributions)
+    save_correlations(correlations)
+    save_intensities(intensities)
+    save_locations(locations)
+    save_moments(moments, moments_group)
+    save_radial_distributions(radial_distributions)
 
-    logger.debug('\tintensity_offset = {}'.format(intensity_offset))
     logger.debug('\tCompleted committing {}'.format(os.path.basename(directory)))
 
 
@@ -572,7 +554,7 @@ def create_correlation(dependent, independent, match, row):
     return {
             "coefficient": row['Correlation_Correlation_{}_{}'.format(dependent["description"], independent["description"])],
             "dependent_id": dependent["id"],
-            "id": None,
+            "id": uuid.uuid4(),
             "independent_id": independent["id"],
             "match_id": match["id"]
     }
@@ -611,7 +593,7 @@ def create_intensity(channel, match, row):
     return {
             "channel_id": channel["id"],
             "first_quartile": row['Intensity_LowerQuartileIntensity_{}'.format(channel["description"])],
-            "id": None,
+            "id": uuid.uuid4(),
             "integrated": row['Intensity_IntegratedIntensity_{}'.format(channel["description"])],
             "mass_displacement": row['Intensity_MassDisplacement_{}'.format(channel["description"])],
             "match_id": match["id"],
@@ -629,7 +611,7 @@ def create_location(center_mass_intensity, channel, match, max_intensity):
     return {
             "center_mass_intensity_id": center_mass_intensity["id"],
             "channel_id": channel["id"],
-            "id": None,
+            "id": uuid.uuid4(),
             "match_id": match["id"],
             "max_intensity_id": max_intensity["id"]
     }
@@ -650,7 +632,7 @@ def create_moment(a, b, row, shape):
     return {
             "a": a,
             "b": b,
-            "id": None,
+            "id": uuid.uuid4(),
             "score": row['AreaShape_Zernike_{}_{}'.format(a, b)],
             "shape_id": shape["id"]
     }
@@ -708,7 +690,7 @@ def create_radial_distribution(channel, count, match, row):
             "bins": count,
             "channel_id": channel["id"],
             "frac_at_d": row['RadialDistribution_FracAtD_{}_{}of4'.format(channel["description"], count)],
-            "id": None,
+            "id": uuid.uuid4(),
             "match_id": match["id"],
             "mean_frac": row['RadialDistribution_MeanFrac_{}_{}of4'.format(channel["description"], count)],
             "radial_cv": row['RadialDistribution_RadialCV_{}_{}of4'.format(channel["description"], count)]
@@ -767,7 +749,7 @@ def create_texture(channel, match, row, scale):
             "scale": scale,
             "entropy": find_by('Entropy'),
             "gabor": find_by('Gabor'),
-            "id": None,
+            "id": uuid.uuid4(),
             "info_meas_1": find_by('InfoMeas1'),
             "info_meas_2": find_by('InfoMeas2'),
             "inverse_difference_moment": find_by('InverseDifferenceMoment'),
@@ -789,8 +771,8 @@ def save_coordinates(coordinates):
     __save__(perturbation.models.Coordinate, coordinates)
 
 
-def save_correlations(offset, correlations):
-    __save__(perturbation.models.Correlation, correlations, offset)
+def save_correlations(correlations):
+    __save__(perturbation.models.Correlation, correlations)
 
 
 def save_edges(edges):
@@ -809,12 +791,12 @@ def save_images(images):
     __save__(perturbation.models.Image, images)
 
 
-def save_intensities(intensities, offset):
-    __save__(perturbation.models.Intensity, intensities, offset)
+def save_intensities(intensities):
+    __save__(perturbation.models.Intensity, intensities)
 
 
-def save_locations(offset, locations):
-    __save__(perturbation.models.Location, locations, offset)
+def save_locations(locations):
+    __save__(perturbation.models.Location, locations)
 
 
 def save_matches(matches):
@@ -829,8 +811,8 @@ def save_wells(wells):
     __save__(perturbation.models.Well, wells)
 
 
-def save_textures(offset, textures):
-    __save__(perturbation.models.Texture, textures, offset)
+def save_textures(textures):
+    __save__(perturbation.models.Texture, textures)
 
 
 def save_objects(objects):
@@ -841,41 +823,26 @@ def save_neighborhoods(neighborhoods):
     __save__(perturbation.models.Neighborhood, neighborhoods)
 
 
-def save_moments(offset, moments, moments_group):
-    __save__(perturbation.models.Moment, moments_group, offset)
+def save_moments(moments, moments_group):
+    __save__(perturbation.models.Moment, moments_group)
 
 
 def save_shapes(shapes):
     __save__(perturbation.models.Shape, shapes)
 
 
-def save_radial_distributions(offset, radial_distributions):
-    __save__(perturbation.models.RadialDistribution, radial_distributions, offset)
+def save_radial_distributions(radial_distributions):
+    __save__(perturbation.models.RadialDistribution, radial_distributions)
 
 
-def __save__(table, records, offset=None):
+def __save__(table, records):
     """ Save records to table
 
     :param table: table class
     :param records: records to insert in the table
-    :param offset: offset to compute primary key
     :return:
     """
     logger.debug('\tStarted saving: {}'.format(str(table.__tablename__)))
-
-    logger.debug('\t\tOffsetting')
-
-    # FIXME: @0x00b1 Offset is not working as intended. The updated value gets lost after exiting the function.
-    # FIXME: @ox00b1 Also "if offset" is never true because it starts off as None or 0 and then never changes
-    assert ((offset is None) or ([record['id'] for record in records if record['id'] is not None] == []))
-
-    if offset:
-        for index, record in enumerate(records):
-            record.update(id=index + offset)
-
-            offset += len(records)
-
-    logger.debug('\t\toffset = {}'.format(offset))
 
     logger.debug('\t\tlen(records) = {}'.format(len(records)))
 
