@@ -496,8 +496,7 @@ def create_wells(data, digest, images, plate, plate_description, qualities, desc
 
         wells.append(well)
 
-        #TODO: 'Metadata_Barcode' and 'Metadata_Well' should be gotten 
-        # from a config file
+        # TODO: 'Metadata_Barcode' and 'Metadata_Well' should be gotten from a config file
         image_descriptions = data[(data['Metadata_Barcode'] == plate_description) & (data['Metadata_Well'] == description)]['ImageNumber'].unique()
 
         create_images(data, digest, image_descriptions, images, qualities, well)
