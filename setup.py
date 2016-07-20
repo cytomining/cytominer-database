@@ -46,6 +46,7 @@ setuptools.setup(
         'click',
         'csvkit',
         'pandas',
+        'psycopg2',
         'pytest',
         'sqlalchemy',
         'sqlparse'
