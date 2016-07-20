@@ -46,15 +46,15 @@ textures = []
 wells = []
 
 
-def setup(database):
+def setup(connection):
     """Sets up SQLite database
 
-    :param database: name of SQLlite database
+    :param connection: name of SQLlite/PostGreSQL database
     :return: None
     """
     global engine
 
-    engine = sqlalchemy.create_engine("sqlite:///{}".format(os.path.realpath(database)))
+    engine = sqlalchemy.create_engine(connection)
 
     scoped_session.remove()
 
@@ -65,11 +65,11 @@ def setup(database):
     Base.metadata.create_all(engine)
 
 
-def seed(input, output, sqlfile):
+def seed(input, output, sqlfile=None):
     """Call functions to create backend
 
     :param input: top-level directory containing sub-directories, each of which have an image.csv and object.csv
-    :param output: name of SQLite databse
+    :param output: name of SQLlite/PostGreSQL database
     :param sqlfile: SQL file to be executed on the backend database after it is created
     :return:
     """
@@ -77,7 +77,8 @@ def seed(input, output, sqlfile):
 
     logger.debug('Parsing SQL file')
 
-    create_views(sqlfile)
+    if sqlfile: 
+        create_views(sqlfile)
 
     logger.debug('Parsing csvs')
 
