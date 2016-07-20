@@ -12,13 +12,13 @@ import perturbation.database
 import perturbation.models
 
 @pytest.fixture
-def session(output='/tmp/test.sqlite'):
+def session(output='sqlite:////tmp/test.sqlite'):
     try:
         os.remove(output)
     except OSError:
         pass
 
-    engine = sqlalchemy.create_engine('sqlite:///{}'.format(os.path.realpath(output)))
+    engine = sqlalchemy.create_engine(output)
 
     session = sqlalchemy.orm.sessionmaker(bind=engine)
 
@@ -30,7 +30,7 @@ def session(output='/tmp/test.sqlite'):
 def test_seed(session):
     subprocess.call(['./munge.sh', 'test/data'])
 
-    perturbation.database.seed('test/data', '/tmp/test.sqlite', 'views.sql')
+    perturbation.database.seed('test/data', 'sqlite:////tmp/test.sqlite', 'views.sql')
 
     n_plates = 1
     n_channels = 3
