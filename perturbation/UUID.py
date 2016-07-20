@@ -11,7 +11,7 @@ class UUID(sqlalchemy.types.TypeDecorator):
 
     """
 
-    impl = sqlalchemy.types.BINARY(16)
+    impl = sqlalchemy.types.LargeBinary(16)
 
     def process_bind_param(self, value, dialect):
         """
