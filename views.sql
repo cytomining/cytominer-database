@@ -1,5 +1,5 @@
-DROP VIEW IF EXISTS 'view_correlations';
-CREATE VIEW 'view_correlations' AS
+DROP VIEW IF EXISTS "view_correlations";
+CREATE VIEW "view_correlations" AS
 SELECT
   plates.description          AS g_plate,
   wells.description           AS g_well,
@@ -24,8 +24,8 @@ INNER JOIN channels as channels2 ON correlations.independent_id = channels2.id
 INNER JOIN correlations          ON correlations.match_id       = matches.id
 ;
 
-DROP VIEW IF EXISTS 'view_edges';
-CREATE VIEW 'view_edges' AS
+DROP VIEW IF EXISTS "view_edges";
+CREATE VIEW "view_edges" AS
  SELECT
   plates.description          AS g_plate,
   wells.description           AS g_well,
@@ -52,8 +52,8 @@ INNER JOIN channels ON edges.channel_id   = channels.id
 INNER JOIN edges    ON edges.match_id     = matches.id
 ;
 
-DROP VIEW IF EXISTS 'view_intensities';
-CREATE VIEW 'view_intensities' AS
+DROP VIEW IF EXISTS "view_intensities";
+CREATE VIEW "view_intensities" AS
 SELECT
 	plates.description                    AS g_plate,
 	wells.description                     AS g_well,
@@ -84,8 +84,8 @@ INNER JOIN channels     ON intensities.channel_id = channels.id
 INNER JOIN intensities  ON intensities.match_id   = matches.id
 ;
 
-DROP VIEW IF EXISTS 'view_locations';
-CREATE VIEW 'view_locations' AS
+DROP VIEW IF EXISTS "view_locations";
+CREATE VIEW "view_locations" AS
 SELECT
   plates.description               AS g_plate,
   wells.description                AS g_well,
@@ -113,8 +113,8 @@ INNER JOIN coordinates as center_mass_intensity ON locations.center_mass_intensi
 INNER JOIN coordinates as max_intensity         ON locations.max_intensity_id         = max_intensity.id
 ;
 
-DROP VIEW IF EXISTS 'view_moments';
-CREATE VIEW 'view_moments' AS
+DROP VIEW IF EXISTS "view_moments";
+CREATE VIEW "view_moments" AS
 SELECT
   plates.description          AS g_plate,
   wells.description           AS g_well,
@@ -138,8 +138,8 @@ INNER JOIN shapes   ON matches.shape_id   = shapes.id
 INNER JOIN moments  ON moments.shape_id   = shapes.id
 ;
 
-DROP VIEW IF EXISTS 'view_neighborhoods';
-CREATE VIEW 'view_neighborhoods' AS
+DROP VIEW IF EXISTS "view_neighborhoods";
+CREATE VIEW "view_neighborhoods" AS
 SELECT
   plates.description                                  AS g_plate,
   wells.description                                   AS g_well,
@@ -171,8 +171,8 @@ INNER JOIN patterns      ON matches.pattern_id      = patterns.id
 INNER JOIN neighborhoods ON matches.neighborhood_id = neighborhoods.id
 ;
 
-DROP VIEW IF EXISTS 'view_radial_distributions';
-CREATE VIEW 'view_radial_distributions' AS
+DROP VIEW IF EXISTS "view_radial_distributions";
+CREATE VIEW "view_radial_distributions" AS
 SELECT
   plates.description               AS g_plate,
   wells.description                AS g_well,
@@ -198,8 +198,8 @@ INNER JOIN channels             ON radial_distributions.channel_id = channels.id
 INNER JOIN radial_distributions ON radial_distributions.match_id   = matches.id
 ;
 
-DROP VIEW IF EXISTS 'view_shapes';
-CREATE VIEW 'view_shapes' AS
+DROP VIEW IF EXISTS "view_shapes";
+CREATE VIEW "view_shapes" AS
 SELECT
   plates.description          AS g_plate,
   wells.description           AS g_well,
@@ -238,8 +238,8 @@ INNER JOIN shapes                ON matches.shape_id   = shapes.id
 INNER JOIN coordinates as center ON shapes.center_id   = center.id
 ;
 
-DROP VIEW IF EXISTS 'view_textures';
-CREATE VIEW 'view_textures' AS
+DROP VIEW IF EXISTS "view_textures";
+CREATE VIEW "view_textures" AS
 SELECT
   plates.description                 AS g_plate,
   wells.description                  AS g_well,
