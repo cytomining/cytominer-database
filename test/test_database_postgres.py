@@ -16,7 +16,7 @@ import time
 
 docker_name = 'testdb_{:04d}'.format(random.randint(0, 9999))
 
-@pytest.yield_fixture
+@pytest.yield_fixture(scope="module")
 def session():
 
     cmd = 'docker run --name {} -p 3210:5432 -P -e POSTGRES_PASSWORD=password -d postgres'.format(docker_name).split(' ')
