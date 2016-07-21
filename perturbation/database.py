@@ -47,7 +47,7 @@ wells = []
 
 
 def setup(connection):
-    """Sets up SQLite database
+    """Sets up SQLite/PostGreSQL database
 
     :param connection: name of SQLlite/PostGreSQL database
     :return: None
@@ -82,7 +82,13 @@ def seed(input, output, sqlfile=None):
 
     logger.debug('Parsing csvs')
 
+    # Temporarily disable PostGreSQL triggers so that bulk inserts are possible
+    scoped_session.execute("SET session_replication_role = replica;")
+
     seed_plate(input)
+
+    # enable PostGreSQL triggers
+    scoped_session.execute("SET session_replication_role = DEFAULT;")
 
 
 def seed_plate(directories):
@@ -755,7 +761,7 @@ def __save__(table, records):
 
     scoped_session.execute(table.__table__.insert(), records)
 
-    logger.debug('\t\tCommiting')
+    logger.debug('\t\tCommitting')
 
     scoped_session.commit()
 
