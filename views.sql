@@ -19,9 +19,9 @@ INNER JOIN quality               ON quality.image_id            = images.id
 INNER JOIN objects               ON objects.image_id            = images.id
 INNER JOIN matches               ON matches.object_id           = objects.id
 INNER JOIN patterns              ON matches.pattern_id          = patterns.id
+INNER JOIN correlations          ON correlations.match_id       = matches.id
 INNER JOIN channels as channels1 ON correlations.dependent_id   = channels1.id
 INNER JOIN channels as channels2 ON correlations.independent_id = channels2.id
-INNER JOIN correlations          ON correlations.match_id       = matches.id
 ;
 
 DROP VIEW IF EXISTS "view_edges";
@@ -48,8 +48,8 @@ INNER JOIN quality  ON quality.image_id   = images.id
 INNER JOIN objects  ON objects.image_id   = images.id
 INNER JOIN matches  ON matches.object_id  = objects.id
 INNER JOIN patterns ON matches.pattern_id = patterns.id
-INNER JOIN channels ON edges.channel_id   = channels.id
 INNER JOIN edges    ON edges.match_id     = matches.id
+INNER JOIN channels ON edges.channel_id   = channels.id
 ;
 
 DROP VIEW IF EXISTS "view_intensities";
@@ -80,8 +80,8 @@ INNER JOIN quality      ON quality.image_id       = images.id
 INNER JOIN objects      ON objects.image_id       = images.id
 INNER JOIN matches      ON matches.object_id      = objects.id
 INNER JOIN patterns     ON matches.pattern_id     = patterns.id
-INNER JOIN channels     ON intensities.channel_id = channels.id
 INNER JOIN intensities  ON intensities.match_id   = matches.id
+INNER JOIN channels     ON intensities.channel_id = channels.id
 ;
 
 DROP VIEW IF EXISTS "view_locations";
@@ -107,8 +107,8 @@ INNER JOIN quality                              ON quality.image_id             
 INNER JOIN objects                              ON objects.image_id                   = images.id
 INNER JOIN matches                              ON matches.object_id                  = objects.id
 INNER JOIN patterns                             ON matches.pattern_id                 = patterns.id
-INNER JOIN channels                             ON locations.channel_id               = channels.id
 INNER JOIN locations                            ON locations.match_id                 = matches.id
+INNER JOIN channels                             ON locations.channel_id               = channels.id
 INNER JOIN coordinates as center_mass_intensity ON locations.center_mass_intensity_id = center_mass_intensity.id
 INNER JOIN coordinates as max_intensity         ON locations.max_intensity_id         = max_intensity.id
 ;
@@ -194,8 +194,8 @@ INNER JOIN quality              ON quality.image_id                = images.id
 INNER JOIN objects              ON objects.image_id                = images.id
 INNER JOIN matches              ON matches.object_id               = objects.id
 INNER JOIN patterns             ON matches.pattern_id              = patterns.id
-INNER JOIN channels             ON radial_distributions.channel_id = channels.id
 INNER JOIN radial_distributions ON radial_distributions.match_id   = matches.id
+INNER JOIN channels             ON radial_distributions.channel_id = channels.id
 ;
 
 DROP VIEW IF EXISTS "view_shapes";
@@ -272,6 +272,6 @@ INNER JOIN quality  ON quality.image_id    = images.id
 INNER JOIN objects  ON objects.image_id    = images.id
 INNER JOIN matches  ON matches.object_id   = objects.id
 INNER JOIN patterns ON matches.pattern_id  = patterns.id
-INNER JOIN channels ON textures.channel_id = channels.id
 INNER JOIN textures ON textures.match_id   = matches.id
+INNER JOIN channels ON textures.channel_id = channels.id
 ;

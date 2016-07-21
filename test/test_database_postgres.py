@@ -10,27 +10,48 @@ import subprocess
 import perturbation.base
 import perturbation.database
 import perturbation.models
+import random
+import subprocess
+import time
 
-@pytest.fixture
-def session(output='sqlite:////tmp/test.sqlite'):
-    try:
-        os.remove(output)
-    except OSError:
-        pass
+docker_name = 'testdb_{:04d}'.format(random.randint(0, 9999))
 
-    engine = sqlalchemy.create_engine(output)
+@pytest.yield_fixture
+def session():
+
+    cmd = 'docker run --name {} -p 3210:5432 -P -e POSTGRES_PASSWORD=password -d postgres'.format(docker_name).split(' ')
+
+    subprocess.check_output(cmd)
+
+    time.sleep(7)
+
+    cmd = 'PGPASSWORD=password psql -h localhost -p 3210 -U postgres -c "CREATE DATABASE testdb"'
+
+    subprocess.check_output(cmd, shell=True)
+
+    engine = sqlalchemy.create_engine('postgresql://postgres:password@localhost:3210/testdb')
 
     session = sqlalchemy.orm.sessionmaker(bind=engine)
 
     perturbation.base.Base.metadata.create_all(engine)
 
-    return session()
+    yield session()
+
+    engine.dispose()
+
+    cmd = 'docker stop {}'.format(docker_name).split(' ')
+
+    subprocess.check_output(cmd)
+
+    cmd = 'docker rm {}'.format(docker_name).split(' ')
+
+    subprocess.check_output(cmd)
 
 
 def test_seed(session):
     subprocess.call(['./munge.sh', 'test/data'])
 
-    perturbation.database.seed('test/data', 'sqlite:////tmp/test.sqlite', 'views.sql')
+    perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'views.sql')
 
     n_plates = 1
     n_channels = 3
@@ -94,3 +115,4 @@ def test_seed(session):
     assert len(session.query(sqlalchemy.Table('view_textures', perturbation.base.Base.metadata,
                                               autoload_with=session.connection())).all()) == n_textures
 
+    session.connection().close()
