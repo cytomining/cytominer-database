@@ -83,12 +83,14 @@ def seed(input, output, sqlfile=None):
     logger.debug('Parsing csvs')
 
     # Temporarily disable PostGreSQL triggers so that bulk inserts are possible
-    scoped_session.execute("SET session_replication_role = replica;")
+    if engine.name == "postgresql":
+        scoped_session.execute("SET session_replication_role = replica;")
 
     seed_plate(input)
 
     # enable PostGreSQL triggers
-    scoped_session.execute("SET session_replication_role = DEFAULT;")
+    if engine.name == "postgresql":
+        scoped_session.execute("SET session_replication_role = DEFAULT;")
 
 
 def seed_plate(directories):
