@@ -11,7 +11,7 @@ import perturbation.base
 import perturbation.database
 import perturbation.models
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def session(output='sqlite:////tmp/test.sqlite'):
     try:
         os.remove(output)
