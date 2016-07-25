@@ -21,6 +21,6 @@ before_script:
     - sleep 5
 script:
     - python setup.py test
-before_script:
+after_script:
     - docker stop testdb
     - docker rm testdb
