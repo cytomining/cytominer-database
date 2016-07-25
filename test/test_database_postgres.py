@@ -114,4 +114,4 @@ def test_seed(session_postgres):
     assert len(session_postgres.query(sqlalchemy.Table('view_textures', perturbation.base.Base.metadata,
                                                        autoload_with=session_postgres.connection())).all()) == n_textures
 
-    session_postgres.connection().close()
+    # session_postgres.connection().close()

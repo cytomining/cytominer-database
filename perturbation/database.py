@@ -92,6 +92,10 @@ def seed(input, output, sqlfile=None):
     if engine.name == "postgresql":
         scoped_session.execute("SET session_replication_role = DEFAULT;")
 
+    # scoped_session.connection().close()
+    #
+    # scoped_session.remove()
+
 
 def seed_plate(directories):
     """Creates backend
