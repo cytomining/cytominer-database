@@ -19,11 +19,15 @@ docker_name = 'testdb_{:04d}'.format(random.randint(0, 9999))
 @pytest.yield_fixture()
 def session_postgres():
 
-    cmd = 'docker run --name {} -p 3210:5432 -P -e POSTGRES_PASSWORD=password -d postgres'.format(docker_name).split(' ')
+    # cmd = 'docker run --name {} -p 3210:5432 -P -e POSTGRES_PASSWORD=password -d postgres'.format(docker_name).split(' ')
+    #
+    # subprocess.check_output(cmd)
+    #
+    # time.sleep(7)
 
-    subprocess.check_output(cmd)
+    cmd = 'PGPASSWORD=password psql -h localhost -p 3210 -U postgres -c "DROP DATABASE IF EXISTS testdb"'
 
-    time.sleep(7)
+    subprocess.check_output(cmd, shell=True)
 
     cmd = 'PGPASSWORD=password psql -h localhost -p 3210 -U postgres -c "CREATE DATABASE testdb"'
 
@@ -39,15 +43,15 @@ def session_postgres():
 
     engine.dispose()
 
-    cmd = 'docker stop {}'.format(docker_name).split(' ')
+    # cmd = 'docker stop {}'.format(docker_name).split(' ')
+    #
+    # subprocess.check_output(cmd)
+    #
+    # cmd = 'docker rm {}'.format(docker_name).split(' ')
+    #
+    # subprocess.check_output(cmd)
 
-    subprocess.check_output(cmd)
-
-    cmd = 'docker rm {}'.format(docker_name).split(' ')
-
-    subprocess.check_output(cmd)
-
-def test_seed(session_postgres):
+def test_seed_postgres(session_postgres):
     subprocess.call(['./munge.sh', 'test/data'])
 
     perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'views.sql')
@@ -114,4 +118,3 @@ def test_seed(session_postgres):
     assert len(session_postgres.query(sqlalchemy.Table('view_textures', perturbation.base.Base.metadata,
                                                        autoload_with=session_postgres.connection())).all()) == n_textures
 
-    # session_postgres.connection().close()
