@@ -38,7 +38,10 @@ def session_postgres():
 def test_seed(session_postgres):
     subprocess.call(['./munge.sh', 'test/data'])
 
-    perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'views.sql')
+    perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'images', 'views.sql')
+
+    for directory in glob.glob(os.path.join('test/data', '*/')):
+        perturbation.database.seed(directory, 'postgresql://postgres:password@localhost:3210/testdb', 'objects', 'views.sql')
 
     n_plates = 1
     n_channels = 3
