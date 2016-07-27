@@ -670,14 +670,22 @@ def create_quality(data, image_description, image):
 
 
 def create_radial_distribution(channel, count, match, row):
+    def find_by(key):
+        return row[
+            'RadialDistribution_{}_{}_{}of4'.format(
+                    key,
+                    channel["description"],
+                    count
+            )
+        ]
     return {
             "bins": count,
             "channel_id": channel["id"],
-            "frac_at_d": row['RadialDistribution_FracAtD_{}_{}of4'.format(channel["description"], count)],
+            "frac_at_d": find_by("FracAtD"),
             "id": uuid.uuid4(),
             "match_id": match["id"],
-            "mean_frac": row['RadialDistribution_MeanFrac_{}_{}of4'.format(channel["description"], count)],
-            "radial_cv": row['RadialDistribution_RadialCV_{}_{}of4'.format(channel["description"], count)]
+            "mean_frac": find_by("MeanFrac"),
+            "radial_cv": find_by("RadialCV")
     }
 
 
