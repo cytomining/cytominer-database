@@ -507,10 +507,10 @@ def create_wells(data, digest, plate, plate_description, descriptions):
         create_images(data, digest, image_descriptions, well)
 
 
-def find_channel_by(dictionaries, description):
-    for dictionary in dictionaries:
-        if dictionary["description"] == description:
-            return dictionary["id"]
+# def find_channel_by(dictionaries, description):
+#     for dictionary in dictionaries:
+#         if dictionary["description"] == description:
+#             return dictionary["id"]
 
 
 def find_image_by(dictionaries, description):
@@ -531,11 +531,11 @@ def find_plate_by(dictionaries, description):
             return dictionary
 
 
-def create_channel(description):
-    return {
-        "description": description,
-        "id": uuid.uuid4()
-    }
+# def create_channel(description):
+#     return {
+#         "description": description,
+#         "id": uuid.uuid4()
+#     }
 
 
 def create_center(row):
