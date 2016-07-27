@@ -527,10 +527,17 @@ def create_center(row):
 
 
 def create_center_mass_intensity(channel, row):
+    def find_by(key):
+        return row[
+            'Location_CenterMassIntensity_{}_{}'.format(
+                    key,
+                    channel["description"]
+                    )
+        ]
     return {
-            "abscissa": row['Location_CenterMassIntensity_X_{}'.format(channel["description"])],
+            "abscissa": find_by('X'),
             "id": uuid.uuid4(),
-            "ordinate": row['Location_CenterMassIntensity_Y_{}'.format(channel["description"])]
+            "ordinate": find_by('Y')
     }
 
 
@@ -545,15 +552,22 @@ def create_correlation(dependent, independent, match, row):
 
 
 def create_edge(channel, match, row):
+    def find_by(key):
+        return row[
+            'Intensity_{}Edge_{}'.format(
+                    key,
+                    channel["description"]
+                    )
+        ]
     return {
             "channel_id": channel["id"],
             "id": uuid.uuid4(),
-            "integrated": row['Intensity_IntegratedIntensityEdge_{}'.format(channel["description"])],
+            "integrated": find_by('IntegratedIntensity'),
             "match_id": match["id"],
-            "maximum": row['Intensity_MaxIntensityEdge_{}'.format(channel["description"])],
-            "mean": row['Intensity_MeanIntensityEdge_{}'.format(channel["description"])],
-            "minimum": row['Intensity_MinIntensityEdge_{}'.format(channel["description"])],
-            "standard_deviation": row['Intensity_StdIntensityEdge_{}'.format(channel["description"])]
+            "maximum": find_by('MaxIntensity'),
+            "mean": find_by('MeanIntensity'),
+            "minimum": find_by('MinIntensity'),
+            "standard_deviation": find_by('StdIntensity')
     }
 
 
