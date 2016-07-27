@@ -1,0 +1,5 @@
+2016-07-27 16:49:38,523 - perturbation - DEBUG - Calling munge
+2016-07-27 16:49:38,531 - perturbation - DEBUG - Completed munge
+2016-07-27 16:49:38,552 - perturbation.database - DEBUG - Parsing csvs
+2016-07-27 16:49:38,553 - perturbation.seed_objects - DEBUG - image.csv not found in test/data//empty_dir. Skipping.
+2016-07-27 16:49:38,553 - perturbation - DEBUG - Finish

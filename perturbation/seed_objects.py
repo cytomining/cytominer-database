@@ -551,7 +551,9 @@ def __save__(table, records, session):
 
     logger.debug('\t\tInserting')
 
-    session.execute(table.__table__.insert(), records)
+    session.bulk_insert_mappings(table, records)
+
+    #session.execute(table.__table__.insert(), records)
 
     logger.debug('\t\tCommitting')
 

@@ -1,0 +1,89 @@
+2016-07-27 16:49:38,513 - perturbation - DEBUG - Calling munge
+2016-07-27 16:49:38,521 - perturbation - DEBUG - Completed munge
+2016-07-27 16:49:38,544 - perturbation.database - DEBUG - Parsing csvs
+2016-07-27 16:49:38,552 - perturbation.seed_objects - DEBUG - Parsing test/data//1
+2016-07-27 16:49:38,702 - perturbation.seed_objects - DEBUG - Reading 1
+2016-07-27 16:49:38,702 - perturbation.seed_objects - DEBUG - 	Started parsing Cells
+Processing Cells
+2016-07-27 16:49:38,786 - perturbation.seed_objects - DEBUG - 	Completed parsing Cells
+2016-07-27 16:49:38,786 - perturbation.seed_objects - DEBUG - 	Started parsing Cytoplasm
+Processing Cytoplasm
+2016-07-27 16:49:38,863 - perturbation.seed_objects - DEBUG - 	Completed parsing Cytoplasm
+2016-07-27 16:49:38,863 - perturbation.seed_objects - DEBUG - 	Started parsing Nuclei
+Processing Nuclei
+2016-07-27 16:49:38,939 - perturbation.seed_objects - DEBUG - 	Completed parsing Nuclei
+2016-07-27 16:49:38,939 - perturbation.seed_objects - DEBUG - 	Started committing 1
+2016-07-27 16:49:38,939 - perturbation.seed_objects - DEBUG - 	Started saving: objects
+2016-07-27 16:49:38,939 - perturbation.seed_objects - DEBUG - 		len(records) = 59
+2016-07-27 16:49:38,939 - perturbation.seed_objects - DEBUG - 		Inserting
+2016-07-27 16:49:38,958 - perturbation.seed_objects - DEBUG - 		Committing
+2016-07-27 16:49:38,960 - perturbation.seed_objects - DEBUG - 		Clearing
+2016-07-27 16:49:38,960 - perturbation.seed_objects - DEBUG - 	Completed saving: objects
+2016-07-27 16:49:38,960 - perturbation.seed_objects - DEBUG - 	Started saving: coordinates
+2016-07-27 16:49:38,960 - perturbation.seed_objects - DEBUG - 		len(records) = 480
+2016-07-27 16:49:38,960 - perturbation.seed_objects - DEBUG - 		Inserting
+2016-07-27 16:49:39,100 - perturbation.seed_objects - DEBUG - 		Committing
+2016-07-27 16:49:39,102 - perturbation.seed_objects - DEBUG - 		Clearing
+2016-07-27 16:49:39,103 - perturbation.seed_objects - DEBUG - 	Completed saving: coordinates
+2016-07-27 16:49:39,103 - perturbation.seed_objects - DEBUG - 	Started saving: neighborhoods
+2016-07-27 16:49:39,103 - perturbation.seed_objects - DEBUG - 		len(records) = 60
+2016-07-27 16:49:39,103 - perturbation.seed_objects - DEBUG - 		Inserting
+2016-07-27 16:49:39,128 - perturbation.seed_objects - DEBUG - 		Committing
+2016-07-27 16:49:39,129 - perturbation.seed_objects - DEBUG - 		Clearing
+2016-07-27 16:49:39,129 - perturbation.seed_objects - DEBUG - 	Completed saving: neighborhoods
+2016-07-27 16:49:39,129 - perturbation.seed_objects - DEBUG - 	Started saving: shapes
+2016-07-27 16:49:39,129 - perturbation.seed_objects - DEBUG - 		len(records) = 60
+2016-07-27 16:49:39,129 - perturbation.seed_objects - DEBUG - 		Inserting
+2016-07-27 16:49:39,156 - perturbation.seed_objects - DEBUG - 		Committing
+2016-07-27 16:49:39,157 - perturbation.seed_objects - DEBUG - 		Clearing
+2016-07-27 16:49:39,158 - perturbation.seed_objects - DEBUG - 	Completed saving: shapes
+2016-07-27 16:49:39,158 - perturbation.seed_objects - DEBUG - 	Started saving: moments
+2016-07-27 16:49:39,158 - perturbation.seed_objects - DEBUG - 		len(records) = 1800
+2016-07-27 16:49:39,158 - perturbation.seed_objects - DEBUG - 		Inserting
+2016-07-27 16:49:39,753 - perturbation.seed_objects - DEBUG - 		Committing
+2016-07-27 16:49:39,758 - perturbation.seed_objects - DEBUG - 		Clearing
+2016-07-27 16:49:39,759 - perturbation.seed_objects - DEBUG - 	Completed saving: moments
+2016-07-27 16:49:39,759 - perturbation.seed_objects - DEBUG - 	Started saving: matches
+2016-07-27 16:49:39,759 - perturbation.seed_objects - DEBUG - 		len(records) = 60
+2016-07-27 16:49:39,759 - perturbation.seed_objects - DEBUG - 		Inserting
+2016-07-27 16:49:39,783 - perturbation.seed_objects - DEBUG - 		Committing
+2016-07-27 16:49:39,785 - perturbation.seed_objects - DEBUG - 		Clearing
+2016-07-27 16:49:39,785 - perturbation.seed_objects - DEBUG - 	Completed saving: matches
+2016-07-27 16:49:39,785 - perturbation.seed_objects - DEBUG - 	Started saving: correlations
+2016-07-27 16:49:39,785 - perturbation.seed_objects - DEBUG - 		len(records) = 300
+2016-07-27 16:49:39,785 - perturbation.seed_objects - DEBUG - 		Inserting
+2016-07-27 16:49:39,896 - perturbation.seed_objects - DEBUG - 		Committing
+2016-07-27 16:49:39,899 - perturbation.seed_objects - DEBUG - 		Clearing
+2016-07-27 16:49:39,899 - perturbation.seed_objects - DEBUG - 	Completed saving: correlations
+2016-07-27 16:49:39,899 - perturbation.seed_objects - DEBUG - 	Started saving: edges
+2016-07-27 16:49:39,899 - perturbation.seed_objects - DEBUG - 		len(records) = 180
+2016-07-27 16:49:39,899 - perturbation.seed_objects - DEBUG - 		Inserting
+2016-07-27 16:49:39,968 - perturbation.seed_objects - DEBUG - 		Committing
+2016-07-27 16:49:39,969 - perturbation.seed_objects - DEBUG - 		Clearing
+2016-07-27 16:49:39,969 - perturbation.seed_objects - DEBUG - 	Completed saving: edges
+2016-07-27 16:49:39,970 - perturbation.seed_objects - DEBUG - 	Started saving: intensities
+2016-07-27 16:49:39,970 - perturbation.seed_objects - DEBUG - 		len(records) = 180
+2016-07-27 16:49:39,970 - perturbation.seed_objects - DEBUG - 		Inserting
+2016-07-27 16:49:40,044 - perturbation.seed_objects - DEBUG - 		Committing
+2016-07-27 16:49:40,046 - perturbation.seed_objects - DEBUG - 		Clearing
+2016-07-27 16:49:40,046 - perturbation.seed_objects - DEBUG - 	Completed saving: intensities
+2016-07-27 16:49:40,046 - perturbation.seed_objects - DEBUG - 	Started saving: locations
+2016-07-27 16:49:40,047 - perturbation.seed_objects - DEBUG - 		len(records) = 180
+2016-07-27 16:49:40,047 - perturbation.seed_objects - DEBUG - 		Inserting
+2016-07-27 16:49:40,112 - perturbation.seed_objects - DEBUG - 		Committing
+2016-07-27 16:49:40,115 - perturbation.seed_objects - DEBUG - 		Clearing
+2016-07-27 16:49:40,115 - perturbation.seed_objects - DEBUG - 	Completed saving: locations
+2016-07-27 16:49:40,115 - perturbation.seed_objects - DEBUG - 	Started saving: textures
+2016-07-27 16:49:40,115 - perturbation.seed_objects - DEBUG - 		len(records) = 540
+2016-07-27 16:49:40,115 - perturbation.seed_objects - DEBUG - 		Inserting
+2016-07-27 16:49:40,356 - perturbation.seed_objects - DEBUG - 		Committing
+2016-07-27 16:49:40,359 - perturbation.seed_objects - DEBUG - 		Clearing
+2016-07-27 16:49:40,360 - perturbation.seed_objects - DEBUG - 	Completed saving: textures
+2016-07-27 16:49:40,360 - perturbation.seed_objects - DEBUG - 	Started saving: radial_distributions
+2016-07-27 16:49:40,360 - perturbation.seed_objects - DEBUG - 		len(records) = 720
+2016-07-27 16:49:40,360 - perturbation.seed_objects - DEBUG - 		Inserting
+2016-07-27 16:49:40,609 - perturbation.seed_objects - DEBUG - 		Committing
+2016-07-27 16:49:40,613 - perturbation.seed_objects - DEBUG - 		Clearing
+2016-07-27 16:49:40,614 - perturbation.seed_objects - DEBUG - 	Completed saving: radial_distributions
+2016-07-27 16:49:40,614 - perturbation.seed_objects - DEBUG - 	Completed committing 1
+2016-07-27 16:49:40,614 - perturbation - DEBUG - Finish
