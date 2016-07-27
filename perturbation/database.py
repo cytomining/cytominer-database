@@ -558,10 +558,17 @@ def create_edge(channel, match, row):
 
 
 def create_max_intensity(channel, row):
+    def find_by(key):
+        return row[
+            'Location_MaxIntensity_{}_{}'.format(
+                    key,
+                    channel["description"]
+                    )
+        ]
     return {
-            "abscissa": row['Location_MaxIntensity_X_{}'.format(channel["description"])],
+            "abscissa": find_by('X'),
             "id": uuid.uuid4(),
-            "ordinate": row['Location_MaxIntensity_Y_{}'.format(channel["description"])]
+            "ordinate": find_by('Y')
     }
 
 
