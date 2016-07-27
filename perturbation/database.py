@@ -14,6 +14,23 @@ import sqlalchemy.types
 logger = logging.getLogger(__name__)
 
 
+def setup(connection):
+    """
+    """
+
+    Session = sqlalchemy.orm.sessionmaker()
+
+    scoped_session = sqlalchemy.orm.scoped_session(Session)
+
+    engine = sqlalchemy.create_engine(connection)
+
+    scoped_session.remove()
+
+    scoped_session.configure(autoflush=False, bind=engine, expire_on_commit=False)
+
+    return scoped_session, engine
+
+
 def seed(input, output, stage, sqlfile=None):
     """Call functions to create backend
 
@@ -25,19 +42,12 @@ def seed(input, output, stage, sqlfile=None):
     :return:
     """
 
-    Session = sqlalchemy.orm.sessionmaker()
-
-    scoped_session = sqlalchemy.orm.scoped_session(Session)
-
-    engine = sqlalchemy.create_engine(output)
-
-    scoped_session.remove()
-
-    scoped_session.configure(autoflush=False, bind=engine, expire_on_commit=False)
-
-    Base = perturbation.base.Base
+    scoped_session, engine = setup(output)
 
     if stage == 'images':
+
+        Base = perturbation.base.Base
+
         Base.metadata.drop_all(engine)
 
         Base.metadata.create_all(engine)
@@ -63,10 +73,6 @@ def seed(input, output, stage, sqlfile=None):
     # enable PostGreSQL triggers
     if engine.name == "postgresql":
         scoped_session.execute("SET session_replication_role = DEFAULT;")
-
-    scoped_session.connection().close()
-    
-    scoped_session.remove()
 
 
 def create_views(sqlfile, engine):
