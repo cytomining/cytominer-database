@@ -574,20 +574,27 @@ def create_image(digest, description, well_dictionary):
 
 
 def create_intensity(channel, match, row):
+    def find_by(key):
+        return row[
+            'Intensity_{}_{}'.format(
+                    key,
+                    channel["description"]
+                    )
+        ]
     return {
             "channel_id": channel["id"],
-            "first_quartile": row['Intensity_LowerQuartileIntensity_{}'.format(channel["description"])],
+            "first_quartile": find_by('LowerQuartileIntensity'),
             "id": uuid.uuid4(),
-            "integrated": row['Intensity_IntegratedIntensity_{}'.format(channel["description"])],
-            "mass_displacement": row['Intensity_MassDisplacement_{}'.format(channel["description"])],
+            "integrated": find_by('IntegratedIntensity'),
+            "mass_displacement": find_by('MassDisplacement'),
             "match_id": match["id"],
-            "maximum": row['Intensity_MaxIntensity_{}'.format(channel["description"])],
-            "mean": row['Intensity_MeanIntensity_{}'.format(channel["description"])],
-            "median": row['Intensity_MedianIntensity_{}'.format(channel["description"])],
-            "median_absolute_deviation": row['Intensity_MADIntensity_{}'.format(channel["description"])],
-            "minimum": row['Intensity_MinIntensity_{}'.format(channel["description"])],
-            "standard_deviation": row['Intensity_StdIntensity_{}'.format(channel["description"])],
-            "third_quartile": row['Intensity_UpperQuartileIntensity_{}'.format(channel["description"])]
+            "maximum": find_by('MaxIntensity'),
+            "mean": find_by('MeanIntensity'),
+            "median": find_by('MedianIntensity'),
+            "median_absolute_deviation": find_by('MADIntensity'),
+            "minimum": find_by('MinIntensity'),
+            "standard_deviation": find_by('StdIntensity'),
+            "third_quartile": find_by('UpperQuartileIntensity')
     }
 
 
