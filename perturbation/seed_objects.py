@@ -150,17 +150,17 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
 
     logger.debug('\tStarted committing {}'.format(os.path.basename(directory)))
 
+    __save__(perturbation.models.Object, objects, session)
     __save__(perturbation.models.Coordinate, coordinates, session)
+    __save__(perturbation.models.Neighborhood, neighborhoods, session)
+    __save__(perturbation.models.Shape, shapes, session)
+    __save__(perturbation.models.Moment, moments_group, session)
+    __save__(perturbation.models.Match, matches, session)
     __save__(perturbation.models.Correlation, correlations, session)
     __save__(perturbation.models.Edge, edges, session)
     __save__(perturbation.models.Intensity, intensities, session)
     __save__(perturbation.models.Location, locations, session)
-    __save__(perturbation.models.Match, matches, session)
     __save__(perturbation.models.Texture, textures, session)
-    __save__(perturbation.models.Object, objects, session)
-    __save__(perturbation.models.Neighborhood, neighborhoods, session)
-    __save__(perturbation.models.Moment, moments_group, session)
-    __save__(perturbation.models.Shape, shapes, session)
     __save__(perturbation.models.RadialDistribution, radial_distributions, session)
 
     logger.debug('\tCompleted committing {}'.format(os.path.basename(directory)))

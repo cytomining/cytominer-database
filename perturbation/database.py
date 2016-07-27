@@ -59,20 +59,12 @@ def seed(input, output, stage, sqlfile=None):
 
     logger.debug('Parsing csvs')
 
-    # Temporarily disable PostGreSQL triggers so that bulk inserts are possible
-    if engine.name == "postgresql":
-        scoped_session.execute("SET session_replication_role = replica;")
-
     if stage == 'images':
         perturbation.seed_images.seed(input, scoped_session)
     elif stage == 'objects':
         perturbation.seed_objects.seed(input, scoped_session)
     else:
         raise ValueError('Unknown stage {}'.format(stage))
-
-    # enable PostGreSQL triggers
-    if engine.name == "postgresql":
-        scoped_session.execute("SET session_replication_role = DEFAULT;")
 
 
 def create_views(sqlfile, engine):
