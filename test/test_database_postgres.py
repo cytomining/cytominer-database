@@ -108,7 +108,7 @@ def test_seed_objects(session_postgres):
     assert len(session_postgres.query(perturbation.models.Edge).all()) == n_edges
     assert len(session_postgres.query(perturbation.models.Intensity).all()) == n_intensities
     assert len(session_postgres.query(perturbation.models.Texture).all()) == n_textures
-    # assert len(session_postgres.query(perturbation.models.RadialDistribution).all()) == n_radial_distributions
+    assert len(session_postgres.query(perturbation.models.RadialDistribution).all()) == n_radial_distributions
     assert len(session_postgres.query(perturbation.models.Shape).all()) == n_shapes
     assert len(session_postgres.query(perturbation.models.Location).all()) == n_locations
     assert len(session_postgres.query(perturbation.models.Coordinate).all()) == n_coordinates
@@ -132,8 +132,8 @@ def test_seed_objects(session_postgres):
                                                        autoload_with=session_postgres.connection())).all()) == n_moments
     assert len(session_postgres.query(sqlalchemy.Table('view_neighborhoods', perturbation.base.Base.metadata,
                                                        autoload_with=session_postgres.connection())).all()) == n_neighborhoods
-    # assert len(session_postgres.query(sqlalchemy.Table('view_radial_distributions', perturbation.base.Base.metadata,
-    #                                                    autoload_with=session_postgres.connection())).all()) == n_radial_distributions
+    assert len(session_postgres.query(sqlalchemy.Table('view_radial_distributions', perturbation.base.Base.metadata,
+                                                       autoload_with=session_postgres.connection())).all()) == n_radial_distributions
     assert len(session_postgres.query(sqlalchemy.Table('view_shapes', perturbation.base.Base.metadata,
                                                        autoload_with=session_postgres.connection())).all()) == n_shapes
     assert len(session_postgres.query(sqlalchemy.Table('view_textures', perturbation.base.Base.metadata,

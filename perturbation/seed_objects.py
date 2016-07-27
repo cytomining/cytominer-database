@@ -163,7 +163,7 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
     __save__(perturbation.models.Neighborhood, neighborhoods, session)
     __save__(perturbation.models.Moment, moments_group, session)
     __save__(perturbation.models.Shape, shapes, session)
-    # __save__(perturbation.models.RadialDistribution, radial_distributions, session)
+    __save__(perturbation.models.RadialDistribution, radial_distributions, session)
 
     logger.debug('\tCompleted committing {}'.format(os.path.basename(directory)))
 
@@ -192,7 +192,7 @@ def create_channels(channels, counts, match, row, scales):
 
         create_textures(channel, match, row, scales)
 
-        # create_radial_distributions(channel, counts, match, row)
+        create_radial_distributions(channel, counts, match, row)
 
 
 def create_correlations(correlation_columns, match, row):
