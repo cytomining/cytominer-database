@@ -144,7 +144,7 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
 
                 matches.append(match)
 
-    #             create_correlations(correlation_columns, match, row)
+                create_correlations(correlation_columns, match, row)
 
     #             create_channels(channels, counts, match, row, scales)
 
@@ -153,7 +153,7 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
     logger.debug('\tStarted committing {}'.format(os.path.basename(directory)))
 
     __save__(perturbation.models.Coordinate, coordinates, session)
-    # __save__(perturbation.models.Correlation, correlations, session)
+    __save__(perturbation.models.Correlation, correlations, session)
     # __save__(perturbation.models.Edge, edges, session)
     # __save__(perturbation.models.Intensity, intensities, session)
     # __save__(perturbation.models.Location, locations, session)
