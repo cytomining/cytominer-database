@@ -46,7 +46,7 @@ def __main__(input, output, sqlfile, stage, verbose, skipmunge):
 
     logger = logging.getLogger(__name__)
 
-    if not skipmunge:
+    if not skipmunge and stage == "images":
         logger.debug('Calling munge')
         subprocess.call(['./munge.sh', input])
     else:
