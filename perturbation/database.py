@@ -1,9 +1,3 @@
-import click
-import glob
-import hashlib
-import os
-import pandas
-import collections
 import logging
 import perturbation.base
 import perturbation.models
@@ -15,7 +9,6 @@ import sqlalchemy.exc
 import sqlalchemy.ext.declarative
 import sqlalchemy.orm
 import sqlalchemy.types
-import uuid
 
 
 logger = logging.getLogger(__name__)
@@ -43,14 +36,15 @@ def seed(input, output, stage, sqlfile=None):
 
     Base = perturbation.base.Base
 
-    Base.metadata.drop_all(engine)
+    if stage == 'images':
+        Base.metadata.drop_all(engine)
 
-    Base.metadata.create_all(engine)
+        Base.metadata.create_all(engine)
 
-    logger.debug('Parsing SQL file')
+        logger.debug('Parsing SQL file')
 
-    if sqlfile: 
-        create_views(sqlfile, engine)
+        if sqlfile:
+            create_views(sqlfile, engine)
 
     logger.debug('Parsing csvs')
 

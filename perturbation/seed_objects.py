@@ -1,3 +1,11 @@
+import hashlib
+import os
+import pandas
+import perturbation.models
+import perturbation.utils
+import logging
+
+logger = logging.getLogger(__name__)
 
 # initialize lists that will be used to store tables
 coordinates = []
@@ -46,32 +54,20 @@ def seed(directories, scoped_session):
         #
         #     objects.append(object_dictionary)
         #
-        # filenames = []
-        #
-        # for filename in glob.glob(os.path.join(directory, '*.csv')):
-        #     if filename not in [os.path.join(directory, 'image.csv'), os.path.join(directory, 'object.csv')]:
-        #         filenames.append(os.path.basename(filename))
-        #
-        # pattern_descriptions = find_pattern_descriptions(filenames)
-        #
         # patterns = find_patterns(pattern_descriptions, scoped_session)
         #
-        # columns = data.columns
-        #
-        # channel_descriptions = find_channel_descriptions(columns)
-        #
         # channels = find_channels(channel_descriptions, scoped_session)
-
-        correlation_columns = find_correlation_columns(channels, columns)
-
-        scales = find_scales(columns)
-
-        counts = find_counts(columns)
-
-        moments = find_moments(columns)
-
-        # Populate all the tables
-        create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales)
+        #
+        # correlation_columns = find_correlation_columns(channels, columns)
+        #
+        # scales = find_scales(columns)
+        #
+        # counts = find_counts(columns)
+        #
+        # moments = find_moments(columns)
+        #
+        # # Populate all the tables
+        # create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales)
 
 
 def create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales):
