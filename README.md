@@ -25,7 +25,8 @@ where `DATADIR` is the top-level directory containing `image.csv` and `object.cs
 Second pass of creating backend
 
 ```
-parallel  --eta --joblog processing.log  perturbation {1} -o postgresql://postgres:password@localhost:3210/testdb -t objects ::: `find $DATADIR -depth 1`
+DIRS=`find $DATADIR -maxdepth 1`
+parallel  --eta --joblog processing.log  perturbation {1} -o postgresql://postgres:password@localhost:3210/testdb -t objects ::: `echo $DIRS`
 ```
 
 Shutdown
