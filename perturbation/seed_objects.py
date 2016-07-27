@@ -4,6 +4,7 @@ import pandas
 import perturbation.models
 import perturbation.utils
 import logging
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -38,21 +39,24 @@ def seed(directories, scoped_session):
 
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
-        # # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
-        # data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
-        #
-        # def get_object_numbers(s):
-        #     return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
-        #
-        # # TODO: Avoid explicitly naming all *ObjectNumber* columns
-        # object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_5', 'Neighbors_SecondClosestObjectNumber_5']])
-        #
-        # object_numbers.drop_duplicates()
-        #
-        # for index, object_number in object_numbers.iterrows():
-        #     object_dictionary = create_object(digest, object_number)
-        #
-        #     objects.append(object_dictionary)
+        # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
+        data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
+
+        def get_object_numbers(s):
+            return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
+
+        # TODO: Avoid explicitly naming all *ObjectNumber* columns
+        object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_5', 'Neighbors_SecondClosestObjectNumber_5']])
+
+        object_numbers.drop_duplicates()
+
+        for index, object_number in object_numbers.iterrows():
+            object_dictionary = create_object(digest, object_number, scoped_session)
+
+            objects.append(object_dictionary)
+
+    __save__(perturbation.models.Object, objects, scoped_session)
+
         #
         # patterns = find_patterns(pattern_descriptions, scoped_session)
         #
@@ -448,12 +452,17 @@ def create_neighborhood(object_id, row):
     }
 
 
-def create_object(digest, description):
+def create_object(digest, description, session):
     return {
             "description": str(description['ObjectNumber']),
             "id": uuid.uuid4(),
-            "image_id": find_image_by(description='{}_{}'.format(digest, int(description['ImageNumber'])), dictionaries=images)
+            "image_id": find_image_by(description='{}_{}'.format(digest, int(description['ImageNumber'])),
+                                      session=session).id
     }
+
+
+def find_image_by(description, session):
+    return session.query(perturbation.models.Image).filter(perturbation.models.Image.description == description).one()
 
 
 def create_radial_distribution(channel, count, match, row):
@@ -540,7 +549,7 @@ def create_texture(channel, match, row, scale):
     }
 
 
-def __save__(table, records):
+def __save__(table, records, scoped_session):
     """ Save records to table
 
     :param table: table class
