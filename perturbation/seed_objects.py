@@ -73,13 +73,13 @@ def seed(directories, scoped_session):
         moments = find_moments(columns)
 
         # Populate all the tables
-        create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales)
+        create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales, scoped_session)
 
 
     __save__(perturbation.models.Object, objects, scoped_session)
 
 
-def create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales):
+def create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales, session):
     """Populates all the tables in the backend
 
     :param channels:
@@ -106,9 +106,9 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
 
                 row = collections.defaultdict(lambda: None, row)
 
-    #             image_id = find_image_by(description='{}_{}'.format(digest, int(row['ImageNumber'])), dictionaries=images)
+                image_id = find_image_by(description='{}_{}'.format(digest, int(row['ImageNumber'])), session=session)
 
-    #             object_id = find_object_by(description=str(int(row['ObjectNumber'])), image_id=image_id, dictionaries=objects)
+                object_id = find_object_by(description=str(int(row['ObjectNumber'])), image_id=image_id, dictionaries=objects)
 
     #             center = create_center(row)
 
