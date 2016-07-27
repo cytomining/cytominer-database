@@ -1,3 +1,4 @@
+import glob
 import hashlib
 import os
 import pandas
@@ -57,7 +58,54 @@ def seed(directories, scoped_session):
                             count_debris=int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isDebris']),
                             count_low_intensity=int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isLowIntensity'])
                     )
+
+        filenames = []
+
+        for filename in glob.glob(os.path.join(directory, '*.csv')):
+            if filename not in [os.path.join(directory, 'image.csv'), os.path.join(directory, 'object.csv')]:
+                filenames.append(os.path.basename(filename))
+
+        pattern_descriptions = find_pattern_descriptions(filenames)
+
+        _ = find_patterns(pattern_descriptions, scoped_session)
+
+        # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
+        data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
+
+        columns = data.columns
+
+        channel_descriptions = find_channel_descriptions(columns)
+
+        _ = find_channels(channel_descriptions, scoped_session)
+
         scoped_session.commit()
+
+
+def find_channel_descriptions(columns):
+    channel_descriptions = set()
+
+    for column in columns:
+        split_columns = column.split("_")
+
+        if split_columns[0] == "Intensity":
+            channel_description = split_columns[2]
+
+            channel_descriptions.add(channel_description)
+
+    return channel_descriptions
+
+
+def find_channels(channel_descriptions, session):
+    channels = []
+
+    for channel_description in channel_descriptions:
+        channel = perturbation.models.Channel.find_or_create_by(
+            session=session,
+            description=channel_description
+        )
+        channels.append(channel)
+
+    return channels
 
 
 def find_images(image_descriptions, well, session):
@@ -73,6 +121,32 @@ def find_images(image_descriptions, well, session):
         images.append(image)
 
     return images
+
+
+def find_pattern_descriptions(filenames):
+    pattern_descriptions = []
+
+    for filename in filenames:
+        pattern_description = filename.split('.')[0]
+
+        pattern_descriptions.append(pattern_description)
+
+    return pattern_descriptions
+
+
+def find_patterns(pattern_descriptions, session):
+    patterns = []
+
+    for pattern_description in pattern_descriptions:
+        pattern = perturbation.models.Pattern.find_or_create_by(
+                session=session,
+                description=pattern_description
+        )
+
+        patterns.append(pattern)
+
+    return patterns
+
 
 def find_plates(plate_descriptions, session):
     plates = []

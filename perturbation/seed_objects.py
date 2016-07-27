@@ -14,7 +14,7 @@ shapes = []
 textures = []
 
 
-def seed(directories):
+def seed(directories, scoped_session):
     """Creates backend
 
     :param directories: top-level directory containing sub-directories, each of which have an image.csv and object.csv
@@ -29,37 +29,38 @@ def seed(directories):
             continue
 
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
-        # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
-        data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
 
-        def get_object_numbers(s):
-            return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
-
-        # TODO: Avoid explicitly naming all *ObjectNumber* columns
-        object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_5', 'Neighbors_SecondClosestObjectNumber_5']])
-
-        object_numbers.drop_duplicates()
-
-        for index, object_number in object_numbers.iterrows():
-            object_dictionary = create_object(digest, object_number)
-
-            objects.append(object_dictionary)
-
-        filenames = []
-
-        for filename in glob.glob(os.path.join(directory, '*.csv')):
-            if filename not in [os.path.join(directory, 'image.csv'), os.path.join(directory, 'object.csv')]:
-                filenames.append(os.path.basename(filename))
-
-        pattern_descriptions = find_pattern_descriptions(filenames)
-
-        patterns = find_patterns(pattern_descriptions, scoped_session)
-
-        columns = data.columns
-
-        channel_descriptions = find_channel_descriptions(columns)
-
-        channels = find_channels(channel_descriptions, scoped_session)
+        # # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
+        # data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
+        #
+        # def get_object_numbers(s):
+        #     return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
+        #
+        # # TODO: Avoid explicitly naming all *ObjectNumber* columns
+        # object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_5', 'Neighbors_SecondClosestObjectNumber_5']])
+        #
+        # object_numbers.drop_duplicates()
+        #
+        # for index, object_number in object_numbers.iterrows():
+        #     object_dictionary = create_object(digest, object_number)
+        #
+        #     objects.append(object_dictionary)
+        #
+        # filenames = []
+        #
+        # for filename in glob.glob(os.path.join(directory, '*.csv')):
+        #     if filename not in [os.path.join(directory, 'image.csv'), os.path.join(directory, 'object.csv')]:
+        #         filenames.append(os.path.basename(filename))
+        #
+        # pattern_descriptions = find_pattern_descriptions(filenames)
+        #
+        # patterns = find_patterns(pattern_descriptions, scoped_session)
+        #
+        # columns = data.columns
+        #
+        # channel_descriptions = find_channel_descriptions(columns)
+        #
+        # channels = find_channels(channel_descriptions, scoped_session)
 
         correlation_columns = find_correlation_columns(channels, columns)
 
@@ -165,30 +166,6 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
     logger.debug('\tCompleted committing {}'.format(os.path.basename(directory)))
 
 
-def find_channel_descriptions(columns):
-    channel_descriptions = set()
-
-    for column in columns:        if split_columns[0] == "Intensity":
-            channel_description = split_columns[2]
-
-            channel_descriptions.add(channel_description)
-
-    return channel_descriptions
-
-
-def find_channels(channel_descriptions, session):
-    channels = []
-
-    for channel_description in channel_descriptions:
-        channel = perturbation.models.Channel.find_or_create_by(
-                session=session,
-                description=channel_description
-        )
-        channels.append(channel)
-
-    return channels
-
-
 def find_correlation_columns(channels, columns):
     correlation_columns = []
 
@@ -239,31 +216,6 @@ def find_moments(columns):
             moments.append(moment)
 
     return moments
-
-
-def find_pattern_descriptions(filenames):
-    pattern_descriptions = []
-
-    for filename in filenames:
-        pattern_description = filename.split('.')[0]
-
-        pattern_descriptions.append(pattern_description)
-
-    return pattern_descriptions
-
-
-def find_patterns(pattern_descriptions, session):
-    patterns = []
-
-    for pattern_description in pattern_descriptions:
-        pattern = perturbation.models.Pattern.find_or_create_by(
-                session=session,
-                description=pattern_description
-        )
-
-        patterns.append(pattern)
-
-    return patterns
 
 
 def find_scales(columns):

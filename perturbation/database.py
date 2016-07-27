@@ -8,7 +8,7 @@ import logging
 import perturbation.base
 import perturbation.models
 import perturbation.seed_images
-#import perturbation.seed_objects
+import perturbation.seed_objects
 import perturbation.UUID
 import sqlalchemy
 import sqlalchemy.exc

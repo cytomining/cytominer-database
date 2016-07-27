@@ -71,10 +71,11 @@ def test_seed_images(session_postgres):
 
 
 @pytest.mark.skipif(True, reason="Temporarily disable")
-def test_seed_postgres(session_postgres):
+def test_seed_objects(session_postgres):
     subprocess.call(['./munge.sh', 'test/data'])
 
-    perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'views.sql')
+    perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'images', 'views.sql')
+    perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'objects', 'views.sql')
 
     n_plates = 1
     n_channels = 3
