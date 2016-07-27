@@ -37,6 +37,8 @@ def seed(directory, scoped_session):
         logger.debug('image.csv not found in {}. Skipping.'.format(directory))
         return
 
+    logger.debug('Parsing {}'.format(directory))
+
     digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
     # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)

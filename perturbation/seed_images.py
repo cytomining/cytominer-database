@@ -23,6 +23,8 @@ def seed(directories, scoped_session):
             logger.debug('image.csv not found in {}. Skipping.'.format(directory))
             continue
 
+        logger.debug('Parsing {}'.format(directory))
+
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
         # Populate plates, wells, images, qualities
