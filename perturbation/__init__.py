@@ -49,10 +49,9 @@ def __main__(input, output, sqlfile, stage, verbose, skipmunge):
     if not skipmunge and stage == "images":
         logger.debug('Calling munge')
         subprocess.call(['./munge.sh', input])
+        logger.debug('Completed munge')
     else:
         logger.debug('Skipping munge')
-
-    logger.debug('Completed munge')
 
     perturbation.database.seed(input=input, output=output, stage=stage, sqlfile=sqlfile)
 

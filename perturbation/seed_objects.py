@@ -551,9 +551,11 @@ def __save__(table, records, session):
 
     logger.debug('\t\tInserting')
 
-    session.bulk_insert_mappings(table, records)
+    # http://docs.sqlalchemy.org/en/latest/_modules/examples/performance/bulk_inserts.html
 
-    #session.execute(table.__table__.insert(), records)
+    #session.bulk_insert_mappings(table, records)
+
+    session.execute(table.__table__.insert(), records)
 
     logger.debug('\t\tCommitting')
 
