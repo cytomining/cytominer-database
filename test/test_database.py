@@ -2,6 +2,8 @@
 
 """
 
+import glob
+import os
 import pytest
 import sqlalchemy
 import sqlalchemy.orm
@@ -37,8 +39,8 @@ def test_seed(session_postgres):
     subprocess.call(['./munge.sh', 'test/data'])
 
     perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'images', 'views.sql')
-    
-    for directory in ['test/data/1', 'test/data/2', 'test/data/empty']:
+
+    for directory in glob.glob(os.path.join('test/data', '*/')):
         perturbation.database.seed(directory, 'postgresql://postgres:password@localhost:3210/testdb', 'objects', 'views.sql')
 
     n_plates = 1

@@ -20,6 +20,7 @@ def seed(directories, scoped_session):
         try:
             data = pandas.read_csv(os.path.join(directory, 'image.csv'))
         except OSError:
+            logger.debug('image.csv not found in {}. Skipping.'.format(directory))
             continue
 
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
