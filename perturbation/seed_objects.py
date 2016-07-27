@@ -42,6 +42,8 @@ def seed(directories, scoped_session):
         # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
         data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
 
+        columns = data.columns
+
         def get_object_numbers(s):
             return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
 
@@ -55,23 +57,24 @@ def seed(directories, scoped_session):
 
             objects.append(object_dictionary)
 
-    __save__(perturbation.models.Object, objects, scoped_session)
+        
+        patterns = scoped_session.query(perturbation.models.Pattern).all()
 
-        #
-        # patterns = find_patterns(pattern_descriptions, scoped_session)
-        #
-        # channels = find_channels(channel_descriptions, scoped_session)
-        #
-        # correlation_columns = find_correlation_columns(channels, columns)
-        #
-        # scales = find_scales(columns)
-        #
-        # counts = find_counts(columns)
-        #
-        # moments = find_moments(columns)
-        #
+        channels = scoped_session.query(perturbation.models.Channel).all()
+
+        correlation_columns = find_correlation_columns(channels, columns)
+
+        scales = find_scales(columns)
+
+        counts = find_counts(columns)
+
+        moments = find_moments(columns)
+
         # # Populate all the tables
         # create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales)
+
+
+    __save__(perturbation.models.Object, objects, scoped_session)
 
 
 def create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales):
@@ -166,72 +169,6 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
     logger.debug('\tCompleted committing {}'.format(os.path.basename(directory)))
 
 
-def find_correlation_columns(channels, columns):
-    correlation_columns = []
-
-    for column in columns:
-        split_columns = column.split("_")
-
-        a = None
-        b = None
-
-        if split_columns[0] == "Correlation":
-            for channel in channels:
-                if channel.description == split_columns[2]:
-                    a = channel
-
-                if channel.description == split_columns[3]:
-                    b = channel
-
-            correlation_column = (a, b)
-
-            correlation_columns.append(correlation_column)
-
-    return correlation_columns
-
-
-def find_counts(columns):
-    counts = set()
-
-    for column in columns:
-        split_columns = column.split("_")
-
-        if split_columns[0] == "RadialDistribution":
-            count = split_columns[3].split('of')[0]
-
-            counts.add(count)
-
-    return counts
-
-
-def find_moments(columns):
-    moments = []
-
-    for column in columns:
-        split_columns = column.split("_")
-
-        if split_columns[0] == "AreaShape" and split_columns[1] == "Zernike":
-            moment = (split_columns[2], split_columns[3])
-
-            moments.append(moment)
-
-    return moments
-
-
-def find_scales(columns):
-    scales = set()
-
-    for column in columns:
-        split_columns = column.split("_")
-
-        if split_columns[0] == "Texture":
-            scale = split_columns[3]
-
-            scales.add(scale)
-
-    return scales
-
-
 def create_channels(channels, counts, match, row, scales):
     for channel in channels:
         intensity = create_intensity(channel, match, row)
@@ -273,20 +210,6 @@ def create_moments(moments, row, shape):
         moments_group.append(moment)
 
 
-def find_patterns(pattern_descriptions, session):
-    patterns = []
-
-    for pattern_description in pattern_descriptions:
-        pattern = perturbation.models.Pattern.find_or_create_by(
-                session=session,
-                description=pattern_description
-        )
-
-        patterns.append(pattern)
-
-    return patterns
-
-
 def create_radial_distributions(channel, counts, match, row):
     for count in counts:
         radial_distribution = create_radial_distribution(channel, count, match, row)
@@ -299,12 +222,6 @@ def create_textures(channel, match, row, scales):
         texture = create_texture(channel, match, row, scale)
 
         textures.append(texture)
-
-
-def find_object_by(description, dictionaries, image_id):
-    for dictionary in dictionaries:
-        if (dictionary["description"] == description) and (dictionary["image_id"] == image_id):
-            return dictionary["id"]
 
 
 def create_center(row):
@@ -461,10 +378,6 @@ def create_object(digest, description, session):
     }
 
 
-def find_image_by(description, session):
-    return session.query(perturbation.models.Image).filter(perturbation.models.Image.description == description).one()
-
-
 def create_radial_distribution(channel, count, match, row):
     def find_by(key):
         return row[
@@ -547,6 +460,82 @@ def create_texture(channel, match, row, scale):
             "sum_variance": find_by('SumVariance'),
             "variance": find_by('Variance')
     }
+
+
+def find_correlation_columns(channels, columns):
+    correlation_columns = []
+
+    for column in columns:
+        split_columns = column.split("_")
+
+        a = None
+        b = None
+
+        if split_columns[0] == "Correlation":
+            for channel in channels:
+                if channel.description == split_columns[2]:
+                    a = channel
+
+                if channel.description == split_columns[3]:
+                    b = channel
+
+            correlation_column = (a, b)
+
+            correlation_columns.append(correlation_column)
+
+    return correlation_columns
+
+
+def find_counts(columns):
+    counts = set()
+
+    for column in columns:
+        split_columns = column.split("_")
+
+        if split_columns[0] == "RadialDistribution":
+            count = split_columns[3].split('of')[0]
+
+            counts.add(count)
+
+    return counts
+
+
+def find_moments(columns):
+    moments = []
+
+    for column in columns:
+        split_columns = column.split("_")
+
+        if split_columns[0] == "AreaShape" and split_columns[1] == "Zernike":
+            moment = (split_columns[2], split_columns[3])
+
+            moments.append(moment)
+
+    return moments
+
+
+def find_scales(columns):
+    scales = set()
+
+    for column in columns:
+        split_columns = column.split("_")
+
+        if split_columns[0] == "Texture":
+            scale = split_columns[3]
+
+            scales.add(scale)
+
+    return scales
+
+
+def find_object_by(description, dictionaries, image_id):
+    for dictionary in dictionaries:
+        if (dictionary["description"] == description) and (dictionary["image_id"] == image_id):
+            return dictionary["id"]
+
+
+def find_image_by(description, session):
+    return session.query(perturbation.models.Image).filter(perturbation.models.Image.description == description).one()
 
 
 def __save__(table, records, scoped_session):
