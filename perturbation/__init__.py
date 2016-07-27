@@ -24,10 +24,11 @@ def __version__(context, parameter, argument):
 @click.help_option(help='')
 @click.option('-o', '--output', type=click.Path(exists=False, file_okay=True, writable=True))
 @click.option('-s', '--sqlfile', default='views.sql', type=click.Path(exists=True, file_okay=True, readable=True))
+@click.option('-t', '--stage', default='images', type=click.Choice(['images', 'objects']))
 @click.option('-v', '--verbose', default=False, is_flag=True)
 @click.option('-d', '--skipmunge', default=False, is_flag=True)
 @click.option('-V', '--version', callback=__version__, expose_value=False, is_eager=True, is_flag=True)
-def __main__(input, output, sqlfile, verbose, skipmunge):
+def __main__(input, output, sqlfile, stage, verbose, skipmunge):
     """
 
     :param input:
@@ -53,7 +54,7 @@ def __main__(input, output, sqlfile, verbose, skipmunge):
 
     logger.debug('Completed munge')
 
-    perturbation.database.seed(input=input, output=output, sqlfile=sqlfile)
+    perturbation.database.seed(input=input, output=output, stage=stage, sqlfile=sqlfile)
 
     logger.debug('Finish')
 

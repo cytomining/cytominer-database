@@ -51,6 +51,26 @@ def session_postgres():
     #
     # subprocess.check_output(cmd)
 
+
+def test_seed_images(session_postgres):
+    subprocess.call(['./munge.sh', 'test/data'])
+
+    perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'images', 'views.sql')
+
+    n_plates = 1
+    # n_channels = 3
+    # n_patterns = 3
+    n_wells = 4
+    n_images = 8
+
+    # assert len(session_postgres.query(perturbation.models.Pattern).all()) == n_patterns
+    assert len(session_postgres.query(perturbation.models.Plate).all()) == n_plates
+    # assert len(session_postgres.query(perturbation.models.Channel).all()) == n_channels
+    assert len(session_postgres.query(perturbation.models.Well).all()) == n_wells
+    assert len(session_postgres.query(perturbation.models.Image).all()) == n_images
+
+
+@pytest.mark.skipif(True, reason="Temporarily disable")
 def test_seed_postgres(session_postgres):
     subprocess.call(['./munge.sh', 'test/data'])
 
