@@ -150,7 +150,7 @@ def seed_plate(directories):
 
         columns = data.columns
 
-        find_channels(columns)
+        find_channels_1(columns, scoped_session)
 
         correlation_columns = find_correlation_columns(columns)
 
@@ -163,7 +163,7 @@ def seed_plate(directories):
         # Populate all the tables
         create_patterns(correlation_columns, counts, digest, directory, moments, patterns, scales)
 
-    __save__(perturbation.models.Channel, channels)
+    # __save__(perturbation.models.Channel, channels)
 
     __save__(perturbation.models.Plate, plates)
 
@@ -282,6 +282,25 @@ def find_channels(columns):
             channels.append(channel)
 
 
+def find_channels_1(columns, session):
+    channel_descriptions = set()
+
+    for column in columns:
+        split_columns = column.split("_")
+
+        if split_columns[0] == "Intensity":
+            channel_description = split_columns[2]
+
+            channel_descriptions.add(channel_description)
+
+    for channel_description in channel_descriptions:
+        channel = perturbation.models.Channel.find_or_create_by(
+                session=session,
+                description=channel_description
+        )
+        channels.append(channel)
+
+
 def find_correlation_columns(columns):
     correlation_columns = []
 
@@ -293,10 +312,10 @@ def find_correlation_columns(columns):
 
         if split_columns[0] == "Correlation":
             for channel in channels:
-                if channel["description"] == split_columns[2]:
+                if channel.description == split_columns[2]:
                     a = channel
 
-                if channel["description"] == split_columns[3]:
+                if channel.description == split_columns[3]:
                     b = channel
 
             correlation_column = (a, b)
@@ -422,6 +441,7 @@ def create_correlations(correlation_columns, match, row):
 
 def create_images(data, digest, descriptions, well):
     for description in descriptions:
+        #TODO: Explain in comment why we don't check if image already exists
         image = create_image(digest, description, well)
 
         images.append(image)
@@ -531,7 +551,7 @@ def create_center_mass_intensity(channel, row):
         return row[
             'Location_CenterMassIntensity_{}_{}'.format(
                     key,
-                    channel["description"]
+                    channel.description
                     )
         ]
     return {
@@ -543,10 +563,10 @@ def create_center_mass_intensity(channel, row):
 
 def create_correlation(dependent, independent, match, row):
     return {
-            "coefficient": row['Correlation_Correlation_{}_{}'.format(dependent["description"], independent["description"])],
-            "dependent_id": dependent["id"],
+            "coefficient": row['Correlation_Correlation_{}_{}'.format(dependent.description, independent.description)],
+            "dependent_id": dependent.id,
             "id": uuid.uuid4(),
-            "independent_id": independent["id"],
+            "independent_id": independent.id,
             "match_id": match["id"]
     }
 
@@ -556,11 +576,11 @@ def create_edge(channel, match, row):
         return row[
             'Intensity_{}Edge_{}'.format(
                     key,
-                    channel["description"]
+                    channel.description
                     )
         ]
     return {
-            "channel_id": channel["id"],
+            "channel_id": channel.id,
             "id": uuid.uuid4(),
             "integrated": find_by('IntegratedIntensity'),
             "match_id": match["id"],
@@ -576,7 +596,7 @@ def create_max_intensity(channel, row):
         return row[
             'Location_MaxIntensity_{}_{}'.format(
                     key,
-                    channel["description"]
+                    channel.description
                     )
         ]
     return {
@@ -599,11 +619,11 @@ def create_intensity(channel, match, row):
         return row[
             'Intensity_{}_{}'.format(
                     key,
-                    channel["description"]
+                    channel.description
                     )
         ]
     return {
-            "channel_id": channel["id"],
+            "channel_id": channel.id,
             "first_quartile": find_by('LowerQuartileIntensity'),
             "id": uuid.uuid4(),
             "integrated": find_by('IntegratedIntensity'),
@@ -622,7 +642,7 @@ def create_intensity(channel, match, row):
 def create_location(center_mass_intensity, channel, match, max_intensity):
     return {
             "center_mass_intensity_id": center_mass_intensity["id"],
-            "channel_id": channel["id"],
+            "channel_id": channel.id,
             "id": uuid.uuid4(),
             "match_id": match["id"],
             "max_intensity_id": max_intensity["id"]
@@ -702,13 +722,13 @@ def create_radial_distribution(channel, count, match, row):
         return row[
             'RadialDistribution_{}_{}_{}of4'.format(
                     key,
-                    channel["description"],
+                    channel.description,
                     count
             )
         ]
     return {
             "bins": count,
-            "channel_id": channel["id"],
+            "channel_id": channel.id,
             "frac_at_d": find_by("FracAtD"),
             "id": uuid.uuid4(),
             "match_id": match["id"],
@@ -753,14 +773,14 @@ def create_texture(channel, match, row, scale):
         return row[
             'Texture_{}_{}_{}_0'.format(
                     key,
-                    channel["description"],
+                    channel.description,
                     scale
             )
         ]
 
     return {
             "angular_second_moment": find_by('AngularSecondMoment'),
-            "channel_id": channel["id"],
+            "channel_id": channel.id,
             "contrast": find_by('Contrast'),
             "correlation": find_by('Correlation'),
             "difference_entropy": find_by('DifferenceEntropy'),
