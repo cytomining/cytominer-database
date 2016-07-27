@@ -4,9 +4,11 @@
 
 A package for storing perturbation data
 
-## Note
+## Notes
 
-- Run PostGresQL in Docker
- - `docker run --name testdb6 -p 3210:5432 -P -e POSTGRES_PASSWORD=password -d postgres`
- - `PGPASSWORD=password psql -h localhost -p 3210 -U postgres --password`
+- Using PostGresQL as backend
+ - `docker run --name testdb -p 3210:5432 -P -e POSTGRES_PASSWORD=password -d postgres`
+ - `PGPASSWORD=password psql -h localhost -p 3210 -U postgres -c "DROP DATABASE IF EXISTS testdb"`
+ - `PGPASSWORD=password psql -h localhost -p 3210 -U postgres -c "CREATE DATABASE testdb"`
+ - connection string is `postgresql://postgres:password@localhost:3210/testdb`
 
