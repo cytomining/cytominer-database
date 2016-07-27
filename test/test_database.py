@@ -2,28 +2,21 @@
 
 """
 
+import glob
 import os
 import pytest
 import sqlalchemy
 import sqlalchemy.orm
-import subprocess
 import perturbation.base
 import perturbation.database
 import perturbation.models
 import random
 import subprocess
-import time
 
 docker_name = 'testdb_{:04d}'.format(random.randint(0, 9999))
 
 @pytest.yield_fixture()
 def session_postgres():
-
-    # cmd = 'docker run --name {} -p 3210:5432 -P -e POSTGRES_PASSWORD=password -d postgres'.format(docker_name).split(' ')
-    #
-    # subprocess.check_output(cmd)
-    #
-    # time.sleep(7)
 
     cmd = 'PGPASSWORD=password psql -h localhost -p 3210 -U postgres -c "DROP DATABASE IF EXISTS testdb"'
 
@@ -41,20 +34,14 @@ def session_postgres():
 
     yield session_postgres()
 
-    engine.dispose()
 
-    # cmd = 'docker stop {}'.format(docker_name).split(' ')
-    #
-    # subprocess.check_output(cmd)
-    #
-    # cmd = 'docker rm {}'.format(docker_name).split(' ')
-    #
-    # subprocess.check_output(cmd)
-
-def test_seed_postgres(session_postgres):
+def test_seed(session_postgres):
     subprocess.call(['./munge.sh', 'test/data'])
 
-    perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'views.sql')
+    perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'images', 'views.sql')
+
+    for directory in glob.glob(os.path.join('test/data', '*/')):
+        perturbation.database.seed(directory, 'postgresql://postgres:password@localhost:3210/testdb', 'objects', 'views.sql')
 
     n_plates = 1
     n_channels = 3
@@ -94,11 +81,11 @@ def test_seed_postgres(session_postgres):
     assert len(session_postgres.query(perturbation.models.Moment).all()) == n_moments
     assert len(session_postgres.query(perturbation.models.Neighborhood).all()) == n_neighborhoods
     assert len(session_postgres.query(perturbation.models.Correlation).all()) == n_correlations
-
+    
     correlations = session_postgres.query(perturbation.models.Correlation)
-
+    
     assert correlations.filter(perturbation.models.Correlation.match is None).all() == []
-
+    
     assert len(session_postgres.query(sqlalchemy.Table('view_correlations', perturbation.base.Base.metadata,
                                                        autoload_with=session_postgres.connection())).all()) == n_correlations
     assert len(session_postgres.query(sqlalchemy.Table('view_edges', perturbation.base.Base.metadata,
