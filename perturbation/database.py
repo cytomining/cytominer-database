@@ -30,19 +30,15 @@ scoped_session = sqlalchemy.orm.scoped_session(Session)
 coordinates = []
 correlations = []
 edges = []
-images = []
 intensities = []
 locations = []
-qualities = []
 matches = []
 moments_group = []
 neighborhoods = []
 objects = []
-plates = []
 radial_distributions = []
 shapes = []
 textures = []
-wells = []
 
 
 def setup(connection):
@@ -112,25 +108,55 @@ def seed_plate(directories):
 
         digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
+        # Populate plates, wells, images, qualities
+
+        data['Metadata_Barcode'] = data['Metadata_Barcode'].astype(str)
+
+        data['ImageNumber'] = data['ImageNumber'].astype(str)
+
+        data['digest_ImageNumber'] = data['ImageNumber'].apply(lambda x: '{}_{}'.format(digest, x))
+
         # TODO: 'Metadata_Barcode' should be gotten from a config file
         plate_descriptions = data['Metadata_Barcode'].unique()
 
-        # Populate plates[], wells[], images[], qualities[]
-        # This pre-computes UUIDs so that we don't need to look up the db
-        # (which will be slow)
-        
-        create_plates(data, digest, plate_descriptions)
+        plates = find_plates(plate_descriptions, scoped_session)
 
-        # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern) 
+        for plate in plates:
+            # TODO: 'Metadata_Barcode' should be gotten from a config file
+            well_descriptions = data[data['Metadata_Barcode'] == plate.description]['Metadata_Well'].unique()
+
+            wells = find_wells(well_descriptions, plate, scoped_session)
+
+            for well in wells:
+                image_descriptions = data[(data['Metadata_Barcode'] == plate.description) & (data['Metadata_Well'] == well.description)]['digest_ImageNumber'].unique()
+
+                images = find_images(image_descriptions, well, scoped_session)
+
+                for image in images:
+                    # TODO: Change find_or_create_by to create
+                    # TODO: 'Metadata_*' should be gotten from a config file
+                    quality = perturbation.models.Quality.find_or_create_by(
+                            session=scoped_session,
+                            image=image,
+                            count_cell_clump=int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isCellClump']),
+                            count_debris=int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isDebris']),
+                            count_low_intensity=int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isLowIntensity'])
+                    )
+
+        # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
         data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
 
         def get_object_numbers(s):
             return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
 
-        # TODO: Avoid needing to explicity name all *ObjectNumber* columns
+        # TODO: Avoid explicitly naming all *ObjectNumber* columns
         object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_5', 'Neighbors_SecondClosestObjectNumber_5']])
 
         object_numbers.drop_duplicates()
+
+        scoped_session.commit()
+
+        continue
 
         for index, object_number in object_numbers.iterrows():
             object_dictionary = create_object(digest, object_number)
@@ -163,8 +189,6 @@ def seed_plate(directories):
 
         # Populate all the tables
         create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales)
-
-    __save__(perturbation.models.Plate, plates)
 
 
 def create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales):
@@ -204,7 +228,7 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
 
                 neighborhood = create_neighborhood(object_id, row)
 
-                # TODO: Avoid needing to explicitly name all *ObjectNumber* columns
+                # TODO: Avoid explicitly naming all *ObjectNumber* columns
                 if row['Neighbors_FirstClosestObjectNumber_5']:
                     description = str(int(row['Neighbors_FirstClosestObjectNumber_5']))
 
@@ -246,12 +270,9 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
     __save__(perturbation.models.Coordinate, coordinates)
     __save__(perturbation.models.Correlation, correlations)
     __save__(perturbation.models.Edge, edges)
-    __save__(perturbation.models.Image, images)
     __save__(perturbation.models.Intensity, intensities)
     __save__(perturbation.models.Location, locations)
     __save__(perturbation.models.Match, matches)
-    __save__(perturbation.models.Quality, qualities)
-    __save__(perturbation.models.Well, wells)
     __save__(perturbation.models.Texture, textures)
     __save__(perturbation.models.Object, objects)
     __save__(perturbation.models.Neighborhood, neighborhoods)
@@ -427,18 +448,6 @@ def create_correlations(correlation_columns, match, row):
         correlations.append(correlation)
 
 
-def create_images(data, digest, descriptions, well):
-    for description in descriptions:
-        #TODO: Explain in comment why we don't check if image already exists
-        image = create_image(digest, description, well)
-
-        images.append(image)
-
-        quality = create_quality(data, description, image)
-
-        qualities.append(quality)
-
-
 def create_moments(moments, row, shape):
     for a, b in moments:
         moment = create_moment(a, b, row, shape)
@@ -446,19 +455,62 @@ def create_moments(moments, row, shape):
         moments_group.append(moment)
 
 
-def create_plates(data, digest, descriptions):
-    for description in descriptions:
-        plate = find_plate_by(plates, str(description))
+def find_images(image_descriptions, well, session):
+    images = []
 
-        if not plate:
-            plate = create_plate(description)
+    for image_description in image_descriptions:
+        image = perturbation.models.Image.find_or_create_by(
+                session=session,
+                description=image_description,
+                well=well
+        )
 
-            plates.append(plate)
+        images.append(image)
 
-        # TODO: 'Metadata_Barcode' should be gotten from a config file
-        well_descriptions = data[data['Metadata_Barcode'] == description]['Metadata_Well'].unique()
+    return images
 
-        create_wells(data, digest, plate, description, well_descriptions)
+
+def find_patterns(pattern_descriptions, session):
+    patterns = []
+
+    for pattern_description in pattern_descriptions:
+        pattern = perturbation.models.Pattern.find_or_create_by(
+                session=session,
+                description=pattern_description
+        )
+
+        patterns.append(pattern)
+
+    return patterns
+
+
+def find_plates(plate_descriptions, session):
+    plates = []
+
+    for plate_description in plate_descriptions:
+        plate = perturbation.models.Plate.find_or_create_by(
+                session=session,
+                description=plate_description
+        )
+
+        plates.append(plate)
+
+    return plates
+
+
+def find_wells(well_descriptions, plate, session):
+    wells = []
+
+    for well_description in well_descriptions:
+        well = perturbation.models.Well.find_or_create_by(
+                session=session,
+                description=well_description,
+                plate=plate
+        )
+
+        wells.append(well)
+
+    return wells
 
 
 def create_radial_distributions(channel, counts, match, row):
@@ -483,47 +535,10 @@ def create_views(sqlfile):
             engine.execute(s)
 
 
-def create_wells(data, digest, plate, plate_description, descriptions):
-    for description in descriptions:
-        well = create_well(plate, description)
-
-        wells.append(well)
-
-        # TODO: 'Metadata_Barcode' and 'Metadata_Well' should be gotten from a config file
-        image_descriptions = data[(data['Metadata_Barcode'] == plate_description) & (data['Metadata_Well'] == description)]['ImageNumber'].unique()
-
-        create_images(data, digest, image_descriptions, well)
-
-
-# def find_channel_by(dictionaries, description):
-#     for dictionary in dictionaries:
-#         if dictionary["description"] == description:
-#             return dictionary["id"]
-
-
-def find_image_by(dictionaries, description):
-    for dictionary in dictionaries:
-        if dictionary["description"] == description:
-            return dictionary["id"]
-
-
 def find_object_by(description, dictionaries, image_id):
     for dictionary in dictionaries:
         if (dictionary["description"] == description) and (dictionary["image_id"] == image_id):
             return dictionary["id"]
-
-
-def find_plate_by(dictionaries, description):
-    for dictionary in dictionaries:
-        if dictionary["description"] == description:
-            return dictionary
-
-
-# def create_channel(description):
-#     return {
-#         "description": description,
-#         "id": uuid.uuid4()
-#     }
 
 
 def create_center(row):
@@ -591,14 +606,6 @@ def create_max_intensity(channel, row):
             "abscissa": find_by('X'),
             "id": uuid.uuid4(),
             "ordinate": find_by('Y')
-    }
-
-
-def create_image(digest, description, well_dictionary):
-    return {
-            "description": '{}_{}'.format(digest, int(description)),
-            "id": uuid.uuid4(),
-            "well_id": well_dictionary["id"]
     }
 
 
@@ -687,24 +694,6 @@ def create_object(digest, description):
     }
 
 
-def create_plate(description):
-    return {
-            "description": str(description),
-            "id": uuid.uuid4()
-    }
-
-
-def create_quality(data, image_description, image):
-    # TODO: 'Metadata_*' should be gotten from a config file
-    return {
-            "id": uuid.uuid4(),
-            "image_id": image["id"],
-            "count_cell_clump": int(data.loc[data['ImageNumber'] == image_description, 'Metadata_isCellClump']),
-            "count_debris": int(data.loc[data['ImageNumber'] == image_description, 'Metadata_isDebris']),
-            "count_low_intensity": int(data.loc[data['ImageNumber'] == image_description, 'Metadata_isLowIntensity'])
-    }
-
-
 def create_radial_distribution(channel, count, match, row):
     def find_by(key):
         return row[
@@ -786,14 +775,6 @@ def create_texture(channel, match, row, scale):
             "sum_entropy": find_by('SumEntropy'),
             "sum_variance": find_by('SumVariance'),
             "variance": find_by('Variance')
-    }
-
-
-def create_well(plate_dictionary, well_description):
-    return {
-            "description": well_description,
-            "id": uuid.uuid4(),
-            "plate_id": plate_dictionary["id"]
     }
 
 
