@@ -1,3 +1,5 @@
+import click
+import collections
 import hashlib
 import os
 import pandas
@@ -70,8 +72,8 @@ def seed(directories, scoped_session):
 
         moments = find_moments(columns)
 
-        # # Populate all the tables
-        # create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales)
+        # Populate all the tables
+        create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales)
 
 
     __save__(perturbation.models.Object, objects, scoped_session)
@@ -104,69 +106,69 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
 
                 row = collections.defaultdict(lambda: None, row)
 
-                image_id = find_image_by(description='{}_{}'.format(digest, int(row['ImageNumber'])), dictionaries=images)
+    #             image_id = find_image_by(description='{}_{}'.format(digest, int(row['ImageNumber'])), dictionaries=images)
 
-                object_id = find_object_by(description=str(int(row['ObjectNumber'])), image_id=image_id, dictionaries=objects)
+    #             object_id = find_object_by(description=str(int(row['ObjectNumber'])), image_id=image_id, dictionaries=objects)
 
-                center = create_center(row)
+    #             center = create_center(row)
 
-                coordinates.append(center)
+    #             coordinates.append(center)
 
-                neighborhood = create_neighborhood(object_id, row)
+    #             neighborhood = create_neighborhood(object_id, row)
 
-                # TODO: Avoid explicitly naming all *ObjectNumber* columns
-                if row['Neighbors_FirstClosestObjectNumber_5']:
-                    description = str(int(row['Neighbors_FirstClosestObjectNumber_5']))
+    #             # TODO: Avoid explicitly naming all *ObjectNumber* columns
+    #             if row['Neighbors_FirstClosestObjectNumber_5']:
+    #                 description = str(int(row['Neighbors_FirstClosestObjectNumber_5']))
 
-                    closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
+    #                 closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
 
-                    neighborhood.update(closest_id=closest_id)
+    #                 neighborhood.update(closest_id=closest_id)
 
-                if row['Neighbors_SecondClosestObjectNumber_5']:
-                    description = str(int(row['Neighbors_SecondClosestObjectNumber_5']))
+    #             if row['Neighbors_SecondClosestObjectNumber_5']:
+    #                 description = str(int(row['Neighbors_SecondClosestObjectNumber_5']))
 
-                    second_closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
+    #                 second_closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
 
-                    neighborhood.update(second_closest_id=second_closest_id)
+    #                 neighborhood.update(second_closest_id=second_closest_id)
 
-                neighborhoods.append(neighborhood)
+    #             neighborhoods.append(neighborhood)
 
-                shape_center = create_shape_center(row)
+    #             shape_center = create_shape_center(row)
 
-                coordinates.append(shape_center)
+    #             coordinates.append(shape_center)
 
-                shape = create_shape(row, shape_center)
+    #             shape = create_shape(row, shape_center)
 
-                shapes.append(shape)
+    #             shapes.append(shape)
 
-                create_moments(moments, row, shape)
+    #             create_moments(moments, row, shape)
 
-                match = create_match(center, neighborhood, object_id, pattern, shape)
+    #             match = create_match(center, neighborhood, object_id, pattern, shape)
 
-                matches.append(match)
+    #             matches.append(match)
 
-                create_correlations(correlation_columns, match, row)
+    #             create_correlations(correlation_columns, match, row)
 
-                create_channels(channels, counts, match, row, scales)
+    #             create_channels(channels, counts, match, row, scales)
 
-        logger.debug('\tCompleted parsing {}'.format(pattern.description))
+    #     logger.debug('\tCompleted parsing {}'.format(pattern.description))
 
-    logger.debug('\tStarted committing {}'.format(os.path.basename(directory)))
+    # logger.debug('\tStarted committing {}'.format(os.path.basename(directory)))
 
-    __save__(perturbation.models.Coordinate, coordinates)
-    __save__(perturbation.models.Correlation, correlations)
-    __save__(perturbation.models.Edge, edges)
-    __save__(perturbation.models.Intensity, intensities)
-    __save__(perturbation.models.Location, locations)
-    __save__(perturbation.models.Match, matches)
-    __save__(perturbation.models.Texture, textures)
-    __save__(perturbation.models.Object, objects)
-    __save__(perturbation.models.Neighborhood, neighborhoods)
-    __save__(perturbation.models.Moment, moments_group)
-    __save__(perturbation.models.Shape, shapes)
-    __save__(perturbation.models.RadialDistribution, radial_distributions)
+    # __save__(perturbation.models.Coordinate, coordinates)
+    # __save__(perturbation.models.Correlation, correlations)
+    # __save__(perturbation.models.Edge, edges)
+    # __save__(perturbation.models.Intensity, intensities)
+    # __save__(perturbation.models.Location, locations)
+    # __save__(perturbation.models.Match, matches)
+    # __save__(perturbation.models.Texture, textures)
+    # __save__(perturbation.models.Object, objects)
+    # __save__(perturbation.models.Neighborhood, neighborhoods)
+    # __save__(perturbation.models.Moment, moments_group)
+    # __save__(perturbation.models.Shape, shapes)
+    # __save__(perturbation.models.RadialDistribution, radial_distributions)
 
-    logger.debug('\tCompleted committing {}'.format(os.path.basename(directory)))
+    # logger.debug('\tCompleted committing {}'.format(os.path.basename(directory)))
 
 
 def create_channels(channels, counts, match, row, scales):
