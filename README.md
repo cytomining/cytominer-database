@@ -11,4 +11,6 @@ A package for storing perturbation data
  - `PGPASSWORD=password psql -h localhost -p 3210 -U postgres -c "DROP DATABASE IF EXISTS testdb"`
  - `PGPASSWORD=password psql -h localhost -p 3210 -U postgres -c "CREATE DATABASE testdb"`
  - connection string is `postgresql://postgres:password@localhost:3210/testdb`
+ - `docker stop testdb`
+ - `docker rm testdb`
 

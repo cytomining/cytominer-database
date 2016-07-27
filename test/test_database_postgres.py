@@ -19,12 +19,6 @@ docker_name = 'testdb_{:04d}'.format(random.randint(0, 9999))
 @pytest.yield_fixture()
 def session_postgres():
 
-    # cmd = 'docker run --name {} -p 3210:5432 -P -e POSTGRES_PASSWORD=password -d postgres'.format(docker_name).split(' ')
-    #
-    # subprocess.check_output(cmd)
-    #
-    # time.sleep(7)
-
     cmd = 'PGPASSWORD=password psql -h localhost -p 3210 -U postgres -c "DROP DATABASE IF EXISTS testdb"'
 
     subprocess.check_output(cmd, shell=True)
@@ -40,16 +34,6 @@ def session_postgres():
     perturbation.base.Base.metadata.create_all(engine)
 
     yield session_postgres()
-
-    engine.dispose()
-
-    # cmd = 'docker stop {}'.format(docker_name).split(' ')
-    #
-    # subprocess.check_output(cmd)
-    #
-    # cmd = 'docker rm {}'.format(docker_name).split(' ')
-    #
-    # subprocess.check_output(cmd)
 
 
 @pytest.mark.skipif(True, reason="Temporarily disable")
