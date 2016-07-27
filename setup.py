@@ -54,6 +54,7 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'perturbation=perturbation:__main__',
+            'inspect=perturbation.inspect:main'
         ]
     }
 )
