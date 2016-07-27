@@ -146,7 +146,7 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
 
                 create_correlations(correlation_columns, match, row)
 
-    #             create_channels(channels, counts, match, row, scales)
+                create_channels(channels, counts, match, row, scales)
 
         logger.debug('\tCompleted parsing {}'.format(pattern.description))
 
@@ -155,7 +155,7 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
     __save__(perturbation.models.Coordinate, coordinates, session)
     __save__(perturbation.models.Correlation, correlations, session)
     # __save__(perturbation.models.Edge, edges, session)
-    # __save__(perturbation.models.Intensity, intensities, session)
+    __save__(perturbation.models.Intensity, intensities, session)
     # __save__(perturbation.models.Location, locations, session)
     __save__(perturbation.models.Match, matches, session)
     # __save__(perturbation.models.Texture, textures, session)
@@ -174,25 +174,25 @@ def create_channels(channels, counts, match, row, scales):
 
         intensities.append(intensity)
 
-        edge = create_edge(channel, match, row)
+        # edge = create_edge(channel, match, row)
 
-        edges.append(edge)
+        # edges.append(edge)
 
-        center_mass_intensity = create_center_mass_intensity(channel, row)
+        # center_mass_intensity = create_center_mass_intensity(channel, row)
 
-        coordinates.append(center_mass_intensity)
+        # coordinates.append(center_mass_intensity)
 
-        max_intensity = create_max_intensity(channel, row)
+        # max_intensity = create_max_intensity(channel, row)
 
-        coordinates.append(max_intensity)
+        # coordinates.append(max_intensity)
 
-        location = create_location(center_mass_intensity, channel, match, max_intensity)
+        # location = create_location(center_mass_intensity, channel, match, max_intensity)
 
-        locations.append(location)
+        # locations.append(location)
 
-        create_textures(channel, match, row, scales)
+        # create_textures(channel, match, row, scales)
 
-        create_radial_distributions(channel, counts, match, row)
+        # create_radial_distributions(channel, counts, match, row)
 
 
 def create_correlations(correlation_columns, match, row):
