@@ -55,7 +55,7 @@ def seed(input, output, stage, sqlfile=None):
     if stage == 'images':
         perturbation.seed_images.seed(input, scoped_session)
     elif stage == 'objects':
-        perturbation.seed_object.seed(input, scoped_session)
+        perturbation.seed_objects.seed(input, scoped_session)
     else:
         raise ValueError('Unknown stage {}'.format(stage))
 
