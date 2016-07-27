@@ -25,55 +25,53 @@ shapes = []
 textures = []
 
 
-def seed(directories, scoped_session):
+def seed(directory, scoped_session):
     """Creates backend
 
-    :param directories: top-level directory containing sub-directories, each of which have an image.csv and object.csv
+    :param directory: directory containing an image.csv and object.csv
     :return: None
     """
-    pathnames = perturbation.utils.find_directories(directories)
+    try:
+        data = pandas.read_csv(os.path.join(directory, 'image.csv'))
+    except OSError:
+        logger.debug('Empty directory {}'.format(directory))
+        return
 
-    for directory in pathnames:
-        try:
-            data = pandas.read_csv(os.path.join(directory, 'image.csv'))
-        except OSError:
-            continue
+    digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
 
-        digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
+    # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
+    data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
 
-        # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
-        data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
+    columns = data.columns
 
-        columns = data.columns
+    def get_object_numbers(s):
+        return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
 
-        def get_object_numbers(s):
-            return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
+    # TODO: Avoid explicitly naming all *ObjectNumber* columns
+    object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_5', 'Neighbors_SecondClosestObjectNumber_5']])
 
-        # TODO: Avoid explicitly naming all *ObjectNumber* columns
-        object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_5', 'Neighbors_SecondClosestObjectNumber_5']])
+    object_numbers.drop_duplicates()
 
-        object_numbers.drop_duplicates()
+    for index, object_number in object_numbers.iterrows():
+        object_dictionary = create_object(digest, object_number, scoped_session)
 
-        for index, object_number in object_numbers.iterrows():
-            object_dictionary = create_object(digest, object_number, scoped_session)
+        objects.append(object_dictionary)
 
-            objects.append(object_dictionary)
 
-        
-        patterns = scoped_session.query(perturbation.models.Pattern).all()
+    patterns = scoped_session.query(perturbation.models.Pattern).all()
 
-        channels = scoped_session.query(perturbation.models.Channel).all()
+    channels = scoped_session.query(perturbation.models.Channel).all()
 
-        correlation_columns = find_correlation_columns(channels, columns)
+    correlation_columns = find_correlation_columns(channels, columns)
 
-        scales = find_scales(columns)
+    scales = find_scales(columns)
 
-        counts = find_counts(columns)
+    counts = find_counts(columns)
 
-        moments = find_moments(columns)
+    moments = find_moments(columns)
 
-        # Populate all the tables
-        create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales, scoped_session)
+    # Populate all the tables
+    create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales, scoped_session)
 
 
 def create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales, session):

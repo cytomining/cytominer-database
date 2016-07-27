@@ -17,9 +17,10 @@ logger = logging.getLogger(__name__)
 def seed(input, output, stage, sqlfile=None):
     """Call functions to create backend
 
-    :param input: top-level directory containing sub-directories, each of which have an image.csv and object.csv
+    :param input: if stage is `images`, then top-level directory containing sub-directories, each of which have an
+    image.csv and object.csv; if stage is 'objects', then a subdirectory contain a pair of image.csv and object.csv
     :param output: name of SQLlite/PostGreSQL database
-    :param stage: images or objects
+    :param stage: `images` or `objects`
     :param sqlfile: SQL file to be executed on the backend database after it is created
     :return:
     """

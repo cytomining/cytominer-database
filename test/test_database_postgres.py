@@ -2,17 +2,14 @@
 
 """
 
-import os
 import pytest
 import sqlalchemy
 import sqlalchemy.orm
-import subprocess
 import perturbation.base
 import perturbation.database
 import perturbation.models
 import random
 import subprocess
-import time
 
 docker_name = 'testdb_{:04d}'.format(random.randint(0, 9999))
 
@@ -59,7 +56,8 @@ def test_seed_objects(session_postgres):
     subprocess.call(['./munge.sh', 'test/data'])
 
     perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'images', 'views.sql')
-    perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'objects', 'views.sql')
+    for directory in ['test/data/1', 'test/data/2', 'test/data/empty']:
+        perturbation.database.seed(directory, 'postgresql://postgres:password@localhost:3210/testdb', 'objects', 'views.sql')
 
     n_plates = 1
     n_channels = 3
