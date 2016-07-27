@@ -105,7 +105,7 @@ def test_seed_objects(session_postgres):
     assert len(session_postgres.query(perturbation.models.Well).all()) == n_wells
     assert len(session_postgres.query(perturbation.models.Image).all()) == n_images
     assert len(session_postgres.query(perturbation.models.Match).all()) == n_matches
-    # assert len(session_postgres.query(perturbation.models.Edge).all()) == n_edges
+    assert len(session_postgres.query(perturbation.models.Edge).all()) == n_edges
     assert len(session_postgres.query(perturbation.models.Intensity).all()) == n_intensities
     # assert len(session_postgres.query(perturbation.models.Texture).all()) == n_textures
     # assert len(session_postgres.query(perturbation.models.RadialDistribution).all()) == n_radial_distributions
@@ -122,8 +122,8 @@ def test_seed_objects(session_postgres):
     
     assert len(session_postgres.query(sqlalchemy.Table('view_correlations', perturbation.base.Base.metadata,
                                                        autoload_with=session_postgres.connection())).all()) == n_correlations
-    # assert len(session_postgres.query(sqlalchemy.Table('view_edges', perturbation.base.Base.metadata,
-    #                                                    autoload_with=session_postgres.connection())).all()) == n_edges
+    assert len(session_postgres.query(sqlalchemy.Table('view_edges', perturbation.base.Base.metadata,
+                                                       autoload_with=session_postgres.connection())).all()) == n_edges
     assert len(session_postgres.query(sqlalchemy.Table('view_intensities', perturbation.base.Base.metadata,
                                                        autoload_with=session_postgres.connection())).all()) == n_intensities
     # assert len(session_postgres.query(sqlalchemy.Table('view_locations', perturbation.base.Base.metadata,

@@ -154,7 +154,7 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
 
     __save__(perturbation.models.Coordinate, coordinates, session)
     __save__(perturbation.models.Correlation, correlations, session)
-    # __save__(perturbation.models.Edge, edges, session)
+    __save__(perturbation.models.Edge, edges, session)
     __save__(perturbation.models.Intensity, intensities, session)
     # __save__(perturbation.models.Location, locations, session)
     __save__(perturbation.models.Match, matches, session)
@@ -174,9 +174,9 @@ def create_channels(channels, counts, match, row, scales):
 
         intensities.append(intensity)
 
-        # edge = create_edge(channel, match, row)
+        edge = create_edge(channel, match, row)
 
-        # edges.append(edge)
+        edges.append(edge)
 
         # center_mass_intensity = create_center_mass_intensity(channel, row)
 
