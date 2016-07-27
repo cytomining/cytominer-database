@@ -164,8 +164,6 @@ def seed_plate(directories):
         # Populate all the tables
         create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales)
 
-    # __save__(perturbation.models.Channel, channels)
-
     __save__(perturbation.models.Plate, plates)
 
 
