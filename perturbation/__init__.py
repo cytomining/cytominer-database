@@ -51,6 +51,8 @@ def __main__(input, output, sqlfile, verbose, skipmunge):
     else:
         logger.debug('Skipping munge')
 
+    logger.debug('Completed munge')
+
     perturbation.database.seed(input=input, output=output, sqlfile=sqlfile)
 
     logger.debug('Finish')
