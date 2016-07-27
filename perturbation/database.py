@@ -770,8 +770,9 @@ def create_shape_center(row):
 
 def create_texture(channel, match, row, scale):
     def find_by(key):
+        template = 'Texture_{}_{}_{}' if key == "Gabor" else 'Texture_{}_{}_{}_0'
         return row[
-            'Texture_{}_{}_{}_0'.format(
+            template.format(
                     key,
                     channel.description,
                     scale
