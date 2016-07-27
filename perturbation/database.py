@@ -27,7 +27,6 @@ engine = None
 scoped_session = sqlalchemy.orm.scoped_session(Session)
 
 # initialize lists that will be used to store tables
-channels = []
 coordinates = []
 correlations = []
 edges = []
@@ -150,9 +149,11 @@ def seed_plate(directories):
 
         columns = data.columns
 
-        find_channels_1(columns, scoped_session)
+        channel_descriptions = find_channel_descriptions(columns)
 
-        correlation_columns = find_correlation_columns(columns)
+        channels = find_channels(channel_descriptions, scoped_session)
+
+        correlation_columns = find_correlation_columns(channels, columns)
 
         scales = find_scales(columns)
 
@@ -161,16 +162,17 @@ def seed_plate(directories):
         moments = find_moments(columns)
 
         # Populate all the tables
-        create_patterns(correlation_columns, counts, digest, directory, moments, patterns, scales)
+        create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales)
 
     # __save__(perturbation.models.Channel, channels)
 
     __save__(perturbation.models.Plate, plates)
 
 
-def create_patterns(correlation_columns, counts, digest, directory, moments, patterns, scales):
+def create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales):
     """Populates all the tables in the backend
 
+    :param channels:
     :param correlation_columns:
     :param counts:
     :param digest:
@@ -237,7 +239,7 @@ def create_patterns(correlation_columns, counts, digest, directory, moments, pat
 
                 create_correlations(correlation_columns, match, row)
 
-                create_channels(counts, match, row, scales)
+                create_channels(channels, counts, match, row, scales)
 
         logger.debug('\tCompleted parsing {}'.format(pattern.description))
 
@@ -262,7 +264,7 @@ def create_patterns(correlation_columns, counts, digest, directory, moments, pat
     logger.debug('\tCompleted committing {}'.format(os.path.basename(directory)))
 
 
-def find_channels(columns):
+def find_channel_descriptions(columns):
     channel_descriptions = set()
 
     for column in columns:
@@ -273,25 +275,11 @@ def find_channels(columns):
 
             channel_descriptions.add(channel_description)
 
-    for channel_description in channel_descriptions:
-        channel = find_channel_by(channels, channel_description)
-
-        if not channel:
-            channel = create_channel(channel_description)
-
-            channels.append(channel)
+    return channel_descriptions
 
 
-def find_channels_1(columns, session):
-    channel_descriptions = set()
-
-    for column in columns:
-        split_columns = column.split("_")
-
-        if split_columns[0] == "Intensity":
-            channel_description = split_columns[2]
-
-            channel_descriptions.add(channel_description)
+def find_channels(channel_descriptions, session):
+    channels = []
 
     for channel_description in channel_descriptions:
         channel = perturbation.models.Channel.find_or_create_by(
@@ -300,8 +288,10 @@ def find_channels_1(columns, session):
         )
         channels.append(channel)
 
+    return channels
 
-def find_correlation_columns(columns):
+
+def find_correlation_columns(channels, columns):
     correlation_columns = []
 
     for column in columns:
@@ -405,7 +395,7 @@ def find_scales(columns):
     return scales
 
 
-def create_channels(counts, match, row, scales):
+def create_channels(channels, counts, match, row, scales):
     for channel in channels:
         intensity = create_intensity(channel, match, row)
 
