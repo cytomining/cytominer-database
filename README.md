@@ -26,7 +26,7 @@ Second pass of creating backend
 
 ```
 DIRS=`find $DATADIR -maxdepth 1 -mindepth 1`
-parallel  --eta --joblog processing.log  perturbation {1} -o postgresql://postgres:password@localhost:3210/testdb -t objects ::: `echo $DIRS`
+parallel  --eta --joblog processing.log --max-procs -1  perturbation {1} -o postgresql://postgres:password@localhost:3210/testdb -t objects ::: `echo $DIRS`
 ```
 
 Shutdown
