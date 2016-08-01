@@ -8,6 +8,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# TODO: Move this to a JSON config file
+qualities_name_mapping = dict(
+    {'Metadata_isCellClump' : 'count_cell_clump',
+     'Metadata_isDebris' : 'count_debris',
+     'Metadata_isLowIntensity' : 'count_low_intensity',
+     'Metadata_dummy' : 'dummy'
+     })
+
 def seed(directories, scoped_session):
     """Creates backend
 
@@ -56,11 +64,11 @@ def seed(directories, scoped_session):
                     # TODO: 'Metadata_*' should be gotten from a config file
                     quality_dict = dict()
 
-                    quality_dict['count_cell_clump'] = int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isCellClump'])
-
-                    quality_dict['count_debris'] = int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isDebris'])
-
-                    quality_dict['count_low_intensity'] = int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isLowIntensity'])
+                    for (name, mapped_name) in qualities_name_mapping.items():
+                        try:
+                            quality_dict[mapped_name] = int(data.loc[data['digest_ImageNumber'] == image.description, name])
+                        except KeyError:
+                            logger.debug("key {} not found. Skipping.".format(name))
 
                     _ = find_quality(quality_dict, image, scoped_session)
 
