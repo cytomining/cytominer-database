@@ -20,19 +20,19 @@ def __version__(context, parameter, argument):
     context.exit()
 
 
-config_file = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
+config_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
 
 @click.command()
 @click.argument('input', type=click.Path(dir_okay=True, exists=True, readable=True))
 @click.help_option(help='')
-@click.option('-c', '--config', default=config_file, type=click.Path(exists=True, file_okay=True, readable=True))
+@click.option('-c', '--configfile', default=config_file_sys, type=click.Path(exists=True, file_okay=True, readable=True))
 @click.option('-d', '--skipmunge', default=False, is_flag=True)
 @click.option('-o', '--output', type=click.Path(exists=False, file_okay=True, writable=True))
 @click.option('-s', '--sqlfile', default='views.sql', type=click.Path(exists=True, file_okay=True, readable=True))
 @click.option('-t', '--stage', type=click.Choice(['images', 'objects']))
 @click.option('-v', '--verbose', default=False, is_flag=True)
 @click.option('-V', '--version', callback=__version__, expose_value=False, is_eager=True, is_flag=True)
-def __main__(input, output, sqlfile, stage, verbose, skipmunge):
+def __main__(configfile, input, output, sqlfile, stage, verbose, skipmunge):
     """
 
     :param input:
@@ -52,7 +52,7 @@ def __main__(input, output, sqlfile, stage, verbose, skipmunge):
 
     config = configparser.ConfigParser()
 
-    config.read(config_file)
+    config.read(configfile)
 
     if not skipmunge and stage == "images":
         logger.debug('Calling munge')

@@ -40,11 +40,11 @@ def session_postgres():
 def test_seed(session_postgres):
     subprocess.call(['./munge.sh', 'test/data'])
 
-    config_file = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
+    config_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
 
     config = configparser.ConfigParser()
 
-    config.read(config_file)
+    config.read(config_file_sys)
 
     perturbation.database.seed(config, 'test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'images', 'views.sql')
 
