@@ -2,6 +2,7 @@
 
 """
 
+import configparser
 import glob
 import os
 import pytest
@@ -10,6 +11,7 @@ import sqlalchemy.orm
 import perturbation.base
 import perturbation.database
 import perturbation.models
+import pkg_resources
 import random
 import subprocess
 
@@ -38,10 +40,16 @@ def session_postgres():
 def test_seed(session_postgres):
     subprocess.call(['./munge.sh', 'test/data'])
 
-    perturbation.database.seed('test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'images', 'views.sql')
+    config_file = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
+
+    config = configparser.ConfigParser()
+
+    config.read(config_file)
+
+    perturbation.database.seed(config, 'test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'images', 'views.sql')
 
     for directory in glob.glob(os.path.join('test/data', '*/')):
-        perturbation.database.seed(directory, 'postgresql://postgres:password@localhost:3210/testdb', 'objects', 'views.sql')
+        perturbation.database.seed(config, directory, 'postgresql://postgres:password@localhost:3210/testdb', 'objects', 'views.sql')
 
     n_plates = 1
     n_channels = 3

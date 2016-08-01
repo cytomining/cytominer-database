@@ -1,11 +1,9 @@
-import configparser
 import logging
 import perturbation.base
 import perturbation.models
 import perturbation.seed_images
 import perturbation.seed_objects
 import perturbation.UUID
-import pkg_resources
 import sqlalchemy
 import sqlalchemy.exc
 import sqlalchemy.ext.declarative
@@ -32,7 +30,7 @@ def setup(connection):
     return scoped_session, engine
 
 
-def seed(input, output, stage, sqlfile=None):
+def seed(config, input, output, stage, sqlfile=None):
     """Call functions to create backend
 
     :param input: if stage is `images`, then top-level directory containing sub-directories, each of which have an
@@ -42,12 +40,6 @@ def seed(input, output, stage, sqlfile=None):
     :param sqlfile: SQL file to be executed on the backend database after it is created
     :return:
     """
-    config_file = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
-
-    config = configparser.ConfigParser()
-
-    config.read(config_file)
-
     scoped_session, engine = setup(output)
 
     if stage == 'images':
