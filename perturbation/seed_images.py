@@ -1,4 +1,3 @@
-import configparser 
 import glob
 import hashlib
 import logging
@@ -6,22 +5,15 @@ import os
 import pandas
 import perturbation.models
 import perturbation.utils
-import pkg_resources
 
 logger = logging.getLogger(__name__)
 
-def seed(directories, scoped_session):
+def seed(config, directories, scoped_session):
     """Creates backend
 
     :param directories: top-level directory containing sub-directories, each of which have an image.csv and object.csv
     :return: None
     """
-
-    config_file = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
-
-    config = configparser.ConfigParser()
-
-    config.read(config_file)
 
     pathnames = perturbation.utils.find_directories(directories)
 

@@ -1,15 +1,16 @@
+import configparser
 import logging
 import perturbation.base
 import perturbation.models
 import perturbation.seed_images
 import perturbation.seed_objects
 import perturbation.UUID
+import pkg_resources
 import sqlalchemy
 import sqlalchemy.exc
 import sqlalchemy.ext.declarative
 import sqlalchemy.orm
 import sqlalchemy.types
-
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +42,11 @@ def seed(input, output, stage, sqlfile=None):
     :param sqlfile: SQL file to be executed on the backend database after it is created
     :return:
     """
+    config_file = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
+
+    config = configparser.ConfigParser()
+
+    config.read(config_file)
 
     scoped_session, engine = setup(output)
 
@@ -60,9 +66,9 @@ def seed(input, output, stage, sqlfile=None):
     logger.debug('Parsing csvs')
 
     if stage == 'images':
-        perturbation.seed_images.seed(input, scoped_session)
+        perturbation.seed_images.seed(config, input, scoped_session)
     elif stage == 'objects':
-        perturbation.seed_objects.seed(input, scoped_session)
+        perturbation.seed_objects.seed(config, input, scoped_session)
     else:
         raise ValueError('Unknown stage {}'.format(stage))
 

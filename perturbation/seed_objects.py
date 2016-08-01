@@ -25,7 +25,7 @@ shapes = []
 textures = []
 
 
-def seed(directory, scoped_session):
+def seed(config, directory, scoped_session):
     """Creates backend
 
     :param directory: directory containing an image.csv and object.csv
