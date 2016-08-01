@@ -1,20 +1,14 @@
+import configparser 
 import glob
 import hashlib
+import logging
 import os
 import pandas
 import perturbation.models
 import perturbation.utils
-import logging
+import pkg_resources
 
 logger = logging.getLogger(__name__)
-
-# TODO: Move this to a JSON config file
-qualities_name_mapping = dict(
-    {'Metadata_isCellClump' : 'count_cell_clump',
-     'Metadata_isDebris' : 'count_debris',
-     'Metadata_isLowIntensity' : 'count_low_intensity',
-     'Metadata_dummy' : 'dummy'
-     })
 
 def seed(directories, scoped_session):
     """Creates backend
@@ -22,6 +16,13 @@ def seed(directories, scoped_session):
     :param directories: top-level directory containing sub-directories, each of which have an image.csv and object.csv
     :return: None
     """
+
+    config_file = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
+
+    config = configparser.ConfigParser()
+
+    config.read(config_file)
+
     pathnames = perturbation.utils.find_directories(directories)
 
     for directory in pathnames:
@@ -37,25 +38,25 @@ def seed(directories, scoped_session):
 
         # Populate plates, wells, images, qualities
 
-        data['Metadata_Barcode'] = data['Metadata_Barcode'].astype(str)
+        data[config['metadata']['plate']] = data[config['metadata']['plate']].astype(str)
 
         data['ImageNumber'] = data['ImageNumber'].astype(str)
 
         data['digest_ImageNumber'] = data['ImageNumber'].apply(lambda x: '{}_{}'.format(digest, x))
 
         # TODO: 'Metadata_Barcode' should be gotten from a config file
-        plate_descriptions = data['Metadata_Barcode'].unique()
+        plate_descriptions = data[config['metadata']['plate']].unique()
 
         plates = find_plates(plate_descriptions, scoped_session)
 
         for plate in plates:
             # TODO: 'Metadata_Barcode' should be gotten from a config file
-            well_descriptions = data[data['Metadata_Barcode'] == plate.description]['Metadata_Well'].unique()
+            well_descriptions = data[data[config['metadata']['plate']] == plate.description][config['metadata']['well']].unique()
 
             wells = find_wells(well_descriptions, plate, scoped_session)
 
             for well in wells:
-                image_descriptions = data[(data['Metadata_Barcode'] == plate.description) & (data['Metadata_Well'] == well.description)]['digest_ImageNumber'].unique()
+                image_descriptions = data[(data[config['metadata']['plate']] == plate.description) & (data[config['metadata']['well']] == well.description)]['digest_ImageNumber'].unique()
 
                 images = find_images(image_descriptions, well, scoped_session)
 
@@ -64,9 +65,9 @@ def seed(directories, scoped_session):
                     # TODO: 'Metadata_*' should be gotten from a config file
                     quality_dict = dict()
 
-                    for (name, mapped_name) in qualities_name_mapping.items():
+                    for (name, mapped_name) in config['qualities'].items():
                         try:
-                            quality_dict[mapped_name] = int(data.loc[data['digest_ImageNumber'] == image.description, name])
+                            quality_dict[name] = int(data.loc[data['digest_ImageNumber'] == image.description, mapped_name])
                         except KeyError:
                             logger.debug("key {} not found. Skipping.".format(name))
 
