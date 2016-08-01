@@ -54,13 +54,15 @@ def seed(directories, scoped_session):
                 for image in images:
                     # TODO: Change find_or_create_by to create
                     # TODO: 'Metadata_*' should be gotten from a config file
-                    quality = perturbation.models.Quality.find_or_create_by(
-                            session=scoped_session,
-                            image=image,
-                            count_cell_clump=int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isCellClump']),
-                            count_debris=int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isDebris']),
-                            count_low_intensity=int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isLowIntensity'])
-                    )
+                    quality_dict = dict()
+
+                    quality_dict['count_cell_clump'] = int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isCellClump'])
+
+                    quality_dict['count_debris'] = int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isDebris'])
+
+                    quality_dict['count_low_intensity'] = int(data.loc[data['digest_ImageNumber'] == image.description, 'Metadata_isLowIntensity'])
+
+                    _ = find_quality(quality_dict, image, scoped_session)
 
         filenames = []
 
@@ -116,9 +118,9 @@ def find_images(image_descriptions, well, session):
 
     for image_description in image_descriptions:
         image = perturbation.models.Image.find_or_create_by(
-                session=session,
-                description=image_description,
-                well=well
+            session=session,
+            description=image_description,
+            well=well
         )
 
         images.append(image)
@@ -142,8 +144,8 @@ def find_patterns(pattern_descriptions, session):
 
     for pattern_description in pattern_descriptions:
         pattern = perturbation.models.Pattern.find_or_create_by(
-                session=session,
-                description=pattern_description
+            session=session,
+            description=pattern_description
         )
 
         patterns.append(pattern)
@@ -156,8 +158,8 @@ def find_plates(plate_descriptions, session):
 
     for plate_description in plate_descriptions:
         plate = perturbation.models.Plate.find_or_create_by(
-                session=session,
-                description=plate_description
+            session=session,
+            description=plate_description
         )
 
         plates.append(plate)
@@ -165,14 +167,24 @@ def find_plates(plate_descriptions, session):
     return plates
 
 
+def find_quality(quality_dict, image, session):
+    return perturbation.models.Quality.find_or_create_by(
+        session=session,
+        image=image,
+        count_cell_clump=quality_dict['count_cell_clump'],
+        count_debris=quality_dict['count_debris'],
+        count_low_intensity=quality_dict['count_low_intensity']
+    )
+
+
 def find_wells(well_descriptions, plate, session):
     wells = []
 
     for well_description in well_descriptions:
         well = perturbation.models.Well.find_or_create_by(
-                session=session,
-                description=well_description,
-                plate=plate
+            session=session,
+            description=well_description,
+            plate=plate
         )
 
         wells.append(well)
