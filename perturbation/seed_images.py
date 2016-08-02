@@ -61,7 +61,7 @@ def seed(config, directories, scoped_session):
                         try:
                             quality_dict[name] = int(data.loc[data['digest_ImageNumber'] == image.description, mapped_name])
                         except KeyError:
-                            logger.debug("key {} not found. Skipping.".format(name))
+                            logger.debug("Column {} not found. Skipping.".format(mapped_name))
 
                     _ = find_quality(quality_dict, image, scoped_session)
 
@@ -175,9 +175,10 @@ def find_quality(quality_dict, image, session):
     return perturbation.models.Quality.find_or_create_by(
         session=session,
         image=image,
-        count_cell_clump=quality_dict['count_cell_clump'],
-        count_debris=quality_dict['count_debris'],
-        count_low_intensity=quality_dict['count_low_intensity']
+        # TODO: Fix this hack of using default values
+        count_cell_clump=quality_dict.get('count_cell_clump', -1),
+        count_debris=quality_dict.get('count_debris', -1),
+        count_low_intensity=quality_dict.get('count_low_intensity', -1)
     )
 
 
