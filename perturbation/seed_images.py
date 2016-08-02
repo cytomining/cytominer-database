@@ -21,7 +21,7 @@ def seed(config, directories, scoped_session):
         try:
             data = pandas.read_csv(os.path.join(directory, config['filenames']['image']))
         except OSError:
-            logger.debug('image.csv not found in {}. Skipping.'.format(directory))
+            logger.debug('{} not found in {}. Skipping.'.format(config['filenames']['image'], directory))
             continue
 
         logger.debug('Parsing {}'.format(directory))
@@ -68,14 +68,17 @@ def seed(config, directories, scoped_session):
         filenames = []
 
         for filename in glob.glob(os.path.join(directory, '*.csv')):
-            if filename not in [os.path.join(directory, config['filenames']['image']), os.path.join(directory, config['filenames']['object'])]:
+            if filename not in [
+            os.path.join(directory, config['filenames']['image']),
+            os.path.join(directory, config['filenames']['object']),
+            os.path.join(directory, config['filenames']['experiment'])
+            ]:
                 filenames.append(os.path.basename(filename))
 
         pattern_descriptions = find_pattern_descriptions(filenames)
 
         _ = find_patterns(pattern_descriptions, scoped_session)
 
-        # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
         data = pandas.read_csv(os.path.join(directory, config['filenames']['reference_pattern']))
 
         columns = data.columns
