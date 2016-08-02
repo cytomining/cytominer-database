@@ -18,3 +18,5 @@ test/data/2/Nuclei.csv
 *.log
 *.so
 *~
+.ipynb_checkpoints
+*.ipynb
