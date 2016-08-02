@@ -49,7 +49,9 @@ def seed(config, directory, scoped_session):
         return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
 
     # TODO: Avoid explicitly naming all *ObjectNumber* columns
-    object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_{}'.format(config['columns']['neighborhood_scale']), 'Neighbors_SecondClosestObjectNumber_{}'.format(config['columns']['neighborhood_scale'])]])
+    neighborhood_scale = config['columns']['neighborhood_scale']
+
+    object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_{}'.format(neighborhood_scale), 'Neighbors_SecondClosestObjectNumber_{}'.format(neighborhood_scale)]])
 
     object_numbers.drop_duplicates()
 
@@ -110,18 +112,20 @@ def create_patterns(channels, config, correlation_columns, counts, digest, direc
 
                 coordinates.append(center)
 
-                neighborhood = create_neighborhood(config, object_id, row)
+                neighborhood_scale = config['columns']['neighborhood_scale']
+
+                neighborhood = create_neighborhood(object_id, neighborhood_scale, row)
 
                 # TODO: Avoid explicitly naming all *ObjectNumber* columns
-                if row['Neighbors_FirstClosestObjectNumber_{}'.format(config['columns']['neighborhood_scale'])]:
-                    description = str(int(row['Neighbors_FirstClosestObjectNumber_{}'.format(config['columns']['neighborhood_scale'])]))
+                if row['Neighbors_FirstClosestObjectNumber_{}'.format(neighborhood_scale)]:
+                    description = str(int(row['Neighbors_FirstClosestObjectNumber_{}'.format(neighborhood_scale)]))
 
                     closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
 
                     neighborhood.update(closest_id=closest_id)
 
-                if row['Neighbors_SecondClosestObjectNumber_{}'.format(config['columns']['neighborhood_scale'])]:
-                    description = str(int(row['Neighbors_SecondClosestObjectNumber_{}'.format(config['columns']['neighborhood_scale'])]))
+                if row['Neighbors_SecondClosestObjectNumber_{}'.format(neighborhood_scale)]:
+                    description = str(int(row['Neighbors_SecondClosestObjectNumber_{}'.format(neighborhood_scale)]))
 
                     second_closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
 
@@ -346,21 +350,21 @@ def create_moment(a, b, row, shape):
     }
 
 
-def create_neighborhood(config, object_id, row):
+def create_neighborhood(object_id, neighborhood_scale, row):
     return {
-            "angle_between_neighbors_5": row['Neighbors_AngleBetweenNeighbors_{}'.format(config['columns']['neighborhood_scale'])],
+            "angle_between_neighbors_{}".format(neighborhood_scale): row['Neighbors_AngleBetweenNeighbors_{}'.format(neighborhood_scale)],
             "angle_between_neighbors_adjacent": row['Neighbors_AngleBetweenNeighbors_Adjacent'],
             "closest_id": None,
-            "first_closest_distance_5": row['Neighbors_FirstClosestDistance_{}'.format(config['columns']['neighborhood_scale'])],
+            "first_closest_distance_{}".format(neighborhood_scale): row['Neighbors_FirstClosestDistance_{}'.format(neighborhood_scale)],
             "first_closest_distance_adjacent": row['Neighbors_FirstClosestDistance_Adjacent'],
             "first_closest_object_number_adjacent": row['Neighbors_FirstClosestObjectNumber_Adjacent'],
             "id": uuid.uuid4(),
-            "number_of_neighbors_5": row['Neighbors_NumberOfNeighbors_{}'.format(config['columns']['neighborhood_scale'])],
+            "number_of_neighbors_{}".format(neighborhood_scale): row['Neighbors_NumberOfNeighbors_{}'.format(neighborhood_scale)],
             "number_of_neighbors_adjacent": row['Neighbors_NumberOfNeighbors_Adjacent'],
             "object_id": object_id,
-            "percent_touching_5": row['Neighbors_PercentTouching_{}'.format(config['columns']['neighborhood_scale'])],
+            "percent_touching_{}".format(neighborhood_scale): row['Neighbors_PercentTouching_{}'.format(neighborhood_scale)],
             "percent_touching_adjacent": row['Neighbors_PercentTouching_Adjacent'],
-            "second_closest_distance_5": row['Neighbors_SecondClosestDistance_{}'.format(config['columns']['neighborhood_scale'])],
+            "second_closest_distance_{}".format(neighborhood_scale): row['Neighbors_SecondClosestDistance_{}'.format(neighborhood_scale)],
             "second_closest_distance_adjacent": row['Neighbors_SecondClosestDistance_Adjacent'],
             "second_closest_id": None,
             "second_closest_object_number_adjacent": row['Neighbors_SecondClosestObjectNumber_Adjacent']
