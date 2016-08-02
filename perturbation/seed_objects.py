@@ -34,15 +34,14 @@ def seed(config, directory, scoped_session):
     try:
         data = pandas.read_csv(os.path.join(directory, config['filenames']['image']))
     except OSError:
-        logger.debug('image.csv not found in {}. Skipping.'.format(directory))
+        logger.debug('{} not found in {}. Skipping.'.format(config['filenames']['image'], directory))
         return
 
     logger.debug('Parsing {}'.format(directory))
 
     digest = hashlib.md5(open(os.path.join(directory, config['filenames']['image']), 'rb').read()).hexdigest()
 
-    # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
-    data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
+    data = pandas.read_csv(os.path.join(directory, config['filenames']['reference_pattern']))
 
     columns = data.columns
 
@@ -50,7 +49,7 @@ def seed(config, directory, scoped_session):
         return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
 
     # TODO: Avoid explicitly naming all *ObjectNumber* columns
-    object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_5', 'Neighbors_SecondClosestObjectNumber_5']])
+    object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_{}'.format(config['columns']['neighborhood_scale']), 'Neighbors_SecondClosestObjectNumber_{}'.format(config['columns']['neighborhood_scale'])]])
 
     object_numbers.drop_duplicates()
 
@@ -73,10 +72,10 @@ def seed(config, directory, scoped_session):
     moments = find_moments(columns)
 
     # Populate all the tables
-    create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales, scoped_session)
+    create_patterns(channels, config, correlation_columns, counts, digest, directory, moments, patterns, scales, scoped_session)
 
 
-def create_patterns(channels, correlation_columns, counts, digest, directory, moments, patterns, scales, session):
+def create_patterns(channels, config, correlation_columns, counts, digest, directory, moments, patterns, scales, session):
     """Populates all the tables in the backend
 
     :param channels:
@@ -111,18 +110,18 @@ def create_patterns(channels, correlation_columns, counts, digest, directory, mo
 
                 coordinates.append(center)
 
-                neighborhood = create_neighborhood(object_id, row)
+                neighborhood = create_neighborhood(config, object_id, row)
 
                 # TODO: Avoid explicitly naming all *ObjectNumber* columns
-                if row['Neighbors_FirstClosestObjectNumber_5']:
-                    description = str(int(row['Neighbors_FirstClosestObjectNumber_5']))
+                if row['Neighbors_FirstClosestObjectNumber_{}'.format(config['columns']['neighborhood_scale'])]:
+                    description = str(int(row['Neighbors_FirstClosestObjectNumber_{}'.format(config['columns']['neighborhood_scale'])]))
 
                     closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
 
                     neighborhood.update(closest_id=closest_id)
 
-                if row['Neighbors_SecondClosestObjectNumber_5']:
-                    description = str(int(row['Neighbors_SecondClosestObjectNumber_5']))
+                if row['Neighbors_SecondClosestObjectNumber_{}'.format(config['columns']['neighborhood_scale'])]:
+                    description = str(int(row['Neighbors_SecondClosestObjectNumber_{}'.format(config['columns']['neighborhood_scale'])]))
 
                     second_closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
 
@@ -347,21 +346,21 @@ def create_moment(a, b, row, shape):
     }
 
 
-def create_neighborhood(object_id, row):
+def create_neighborhood(config, object_id, row):
     return {
-            "angle_between_neighbors_5": row['Neighbors_AngleBetweenNeighbors_5'],
+            "angle_between_neighbors_5": row['Neighbors_AngleBetweenNeighbors_{}'.format(config['columns']['neighborhood_scale'])],
             "angle_between_neighbors_adjacent": row['Neighbors_AngleBetweenNeighbors_Adjacent'],
             "closest_id": None,
-            "first_closest_distance_5": row['Neighbors_FirstClosestDistance_5'],
+            "first_closest_distance_5": row['Neighbors_FirstClosestDistance_{}'.format(config['columns']['neighborhood_scale'])],
             "first_closest_distance_adjacent": row['Neighbors_FirstClosestDistance_Adjacent'],
             "first_closest_object_number_adjacent": row['Neighbors_FirstClosestObjectNumber_Adjacent'],
             "id": uuid.uuid4(),
-            "number_of_neighbors_5": row['Neighbors_NumberOfNeighbors_5'],
+            "number_of_neighbors_5": row['Neighbors_NumberOfNeighbors_{}'.format(config['columns']['neighborhood_scale'])],
             "number_of_neighbors_adjacent": row['Neighbors_NumberOfNeighbors_Adjacent'],
             "object_id": object_id,
-            "percent_touching_5": row['Neighbors_PercentTouching_5'],
+            "percent_touching_5": row['Neighbors_PercentTouching_{}'.format(config['columns']['neighborhood_scale'])],
             "percent_touching_adjacent": row['Neighbors_PercentTouching_Adjacent'],
-            "second_closest_distance_5": row['Neighbors_SecondClosestDistance_5'],
+            "second_closest_distance_5": row['Neighbors_SecondClosestDistance_{}'.format(config['columns']['neighborhood_scale'])],
             "second_closest_distance_adjacent": row['Neighbors_SecondClosestDistance_Adjacent'],
             "second_closest_id": None,
             "second_closest_object_number_adjacent": row['Neighbors_SecondClosestObjectNumber_Adjacent']
