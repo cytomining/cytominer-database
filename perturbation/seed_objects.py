@@ -32,14 +32,14 @@ def seed(config, directory, scoped_session):
     :return: None
     """
     try:
-        data = pandas.read_csv(os.path.join(directory, 'image.csv'))
+        data = pandas.read_csv(os.path.join(directory, config['filenames']['image']))
     except OSError:
         logger.debug('image.csv not found in {}. Skipping.'.format(directory))
         return
 
     logger.debug('Parsing {}'.format(directory))
 
-    digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
+    digest = hashlib.md5(open(os.path.join(directory, config['filenames']['image']), 'rb').read()).hexdigest()
 
     # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
     data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))

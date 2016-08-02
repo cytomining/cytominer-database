@@ -19,14 +19,14 @@ def seed(config, directories, scoped_session):
 
     for directory in pathnames:
         try:
-            data = pandas.read_csv(os.path.join(directory, 'image.csv'))
+            data = pandas.read_csv(os.path.join(directory, config['filenames']['image']))
         except OSError:
             logger.debug('image.csv not found in {}. Skipping.'.format(directory))
             continue
 
         logger.debug('Parsing {}'.format(directory))
 
-        digest = hashlib.md5(open(os.path.join(directory, 'image.csv'), 'rb').read()).hexdigest()
+        digest = hashlib.md5(open(os.path.join(directory, config['filenames']['image']), 'rb').read()).hexdigest()
 
         # Populate plates, wells, images, qualities
 
@@ -68,7 +68,7 @@ def seed(config, directories, scoped_session):
         filenames = []
 
         for filename in glob.glob(os.path.join(directory, '*.csv')):
-            if filename not in [os.path.join(directory, 'image.csv'), os.path.join(directory, 'object.csv')]:
+            if filename not in [os.path.join(directory, config['filenames']['image']), os.path.join(directory, config['filenames']['object'])]:
                 filenames.append(os.path.basename(filename))
 
         pattern_descriptions = find_pattern_descriptions(filenames)
@@ -76,7 +76,7 @@ def seed(config, directories, scoped_session):
         _ = find_patterns(pattern_descriptions, scoped_session)
 
         # TODO: Read all the patterns (not just Cells.csv; note that some datasets may not have Cells as a pattern)
-        data = pandas.read_csv(os.path.join(directory, 'Cells.csv'))
+        data = pandas.read_csv(os.path.join(directory, config['filenames']['reference_pattern']))
 
         columns = data.columns
 
