@@ -57,6 +57,28 @@ datasets = [
 ]
 
 
+# datasets = [
+# {
+# "data_dir" : "test/data_b",
+# "row_counts" :
+#     {
+#         "n_plates" : 1,
+#         "n_channels" : 5,
+#         "n_patterns" : 3,
+#         "n_wells" : 2,
+#         "n_images" : 4,
+#         "n_objects" : 302,
+#         "n_bins_raddist" : 4,
+#         "n_scales_texture" : 3,
+#         "n_scales_neighborhood" : 2,
+#         "n_moments_coefs" : 30,
+#         "n_correlation_pairs" : 10
+#     }
+# }
+# ]
+
+
+#@pytest.mark.parametrize("dataset", datasets, ids=["cellpainting"])
 
 @pytest.mark.parametrize("dataset", datasets, ids=["htqc"])
 def test_seed(dataset, session_postgres):
