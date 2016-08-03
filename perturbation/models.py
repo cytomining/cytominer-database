@@ -217,8 +217,8 @@ class Neighborhood(perturbation.base.Base):
 
     __tablename__ = 'neighborhoods'
 
-    closest_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('objects.id'), index=True)
-    closest = sqlalchemy.orm.relationship('Object', foreign_keys=[closest_id])
+    first_closest_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('objects.id'), index=True)
+    first_closest = sqlalchemy.orm.relationship('Object', foreign_keys=[closest_id])
 
     object_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('objects.id'), index=True)
     object = sqlalchemy.orm.relationship('Object', foreign_keys=[object_id])
@@ -228,29 +228,21 @@ class Neighborhood(perturbation.base.Base):
 
     match = sqlalchemy.orm.relationship('Match', uselist=False)
 
-    angle_between_neighbors_5 = sqlalchemy.Column(sqlalchemy.Float)
+    angle_between_neighbors = sqlalchemy.Column(sqlalchemy.Float)
 
-    angle_between_neighbors_adjacent = sqlalchemy.Column(sqlalchemy.Float)
+    first_closest_distance = sqlalchemy.Column(sqlalchemy.Float)
 
-    first_closest_distance_5 = sqlalchemy.Column(sqlalchemy.Float)
+    first_closest_object_number = sqlalchemy.Column(sqlalchemy.Integer)
 
-    first_closest_distance_adjacent = sqlalchemy.Column(sqlalchemy.Float)
+    number_of_neighbors = sqlalchemy.Column(sqlalchemy.Integer)
 
-    first_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
+    percent_touching = sqlalchemy.Column(sqlalchemy.Float)
 
-    number_of_neighbors_5 = sqlalchemy.Column(sqlalchemy.Integer)
+    scale = sqlalchemy.Column(sqlalchemy.Integer)
 
-    number_of_neighbors_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
+    second_closest_distance = sqlalchemy.Column(sqlalchemy.Float)
 
-    percent_touching_5 = sqlalchemy.Column(sqlalchemy.Float)
-
-    percent_touching_adjacent = sqlalchemy.Column(sqlalchemy.Float)
-
-    second_closest_distance_5 = sqlalchemy.Column(sqlalchemy.Float)
-
-    second_closest_distance_adjacent = sqlalchemy.Column(sqlalchemy.Float)
-
-    second_closest_object_number_adjacent = sqlalchemy.Column(sqlalchemy.Integer)
+    second_closest_object_number = sqlalchemy.Column(sqlalchemy.Integer)
 
 
 class Object(perturbation.base.Base):

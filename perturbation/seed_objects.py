@@ -48,10 +48,14 @@ def seed(config, directory, scoped_session):
     def get_object_numbers(s):
         return data[['ImageNumber', s]].rename(columns={s: 'ObjectNumber'}).drop_duplicates()
 
-    # TODO: Avoid explicitly naming all *ObjectNumber* columns
-    neighborhood_scale = config['columns']['neighborhood_scale']
+    neighborhood_scales = find_neighborhood_scales(columns)
 
-    object_numbers = pandas.concat([get_object_numbers(s) for s in ['ObjectNumber', 'Neighbors_FirstClosestObjectNumber_{}'.format(neighborhood_scale), 'Neighbors_SecondClosestObjectNumber_{}'.format(neighborhood_scale)]])
+    object_columns = ['ObjectNumber']
+
+    for neighborhood_scale in neighborhood_scales:
+        object_columns.extend([['Neighbors_FirstClosestObjectNumber_{}'.format(neighborhood_scale), 'Neighbors_SecondClosestObjectNumber_{}'.format(neighborhood_scale)]])
+
+    object_numbers = pandas.concat([get_object_numbers(s) for s in object_columns])
 
     object_numbers.drop_duplicates()
 
@@ -67,28 +71,31 @@ def seed(config, directory, scoped_session):
 
     correlation_columns = find_correlation_columns(channels, columns)
 
-    scales = find_scales(columns)
-
     counts = find_counts(columns)
 
     moments = find_moments(columns)
 
+    texture_scales = find_texture_scales(columns)
+
     # Populate all the tables
-    create_patterns(channels, config, correlation_columns, counts, digest, directory, moments, patterns, scales, scoped_session)
+    create_patterns(channels, config, correlation_columns, counts, digest, directory, moments, neighborhood_scales, patterns, texture_scales, scoped_session)
 
 
-def create_patterns(channels, config, correlation_columns, counts, digest, directory, moments, patterns, scales, session):
+def create_patterns(channels, config, correlation_columns, counts, digest, directory, moments, neighborhood_scales, patterns, texture_scales, session):
     """Populates all the tables in the backend
 
     :param channels:
+    :param config:
     :param correlation_columns:
     :param counts:
     :param digest:
     :param directory:
     :param moments:
+    :param neighborhood_scales:
     :param objects:
     :param patterns:
-    :param scales:
+    :param session:
+    :param texture_scales:
     :return: None
     """
     logger.debug('Reading {}'.format(os.path.basename(directory)))
@@ -112,26 +119,7 @@ def create_patterns(channels, config, correlation_columns, counts, digest, direc
 
                 coordinates.append(center)
 
-                neighborhood_scale = config['columns']['neighborhood_scale']
-
-                neighborhood = create_neighborhood(object_id, neighborhood_scale, row)
-
-                # TODO: Avoid explicitly naming all *ObjectNumber* columns
-                if row['Neighbors_FirstClosestObjectNumber_{}'.format(neighborhood_scale)]:
-                    description = str(int(row['Neighbors_FirstClosestObjectNumber_{}'.format(neighborhood_scale)]))
-
-                    closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
-
-                    neighborhood.update(closest_id=closest_id)
-
-                if row['Neighbors_SecondClosestObjectNumber_{}'.format(neighborhood_scale)]:
-                    description = str(int(row['Neighbors_SecondClosestObjectNumber_{}'.format(neighborhood_scale)]))
-
-                    second_closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
-
-                    neighborhood.update(second_closest_id=second_closest_id)
-
-                neighborhoods.append(neighborhood)
+                create_neighborhoods(image_id, object_id, row, neighborhood_scales)
 
                 shape_center = create_shape_center(row)
 
@@ -149,7 +137,7 @@ def create_patterns(channels, config, correlation_columns, counts, digest, direc
 
                 create_correlations(correlation_columns, match, row)
 
-                create_channels(channels, counts, match, row, scales)
+                create_channels(channels, counts, match, row, texture_scales)
 
         logger.debug('\tCompleted parsing {}'.format(pattern.description))
 
@@ -171,7 +159,7 @@ def create_patterns(channels, config, correlation_columns, counts, digest, direc
     logger.debug('\tCompleted committing {}'.format(os.path.basename(directory)))
 
 
-def create_channels(channels, counts, match, row, scales):
+def create_channels(channels, counts, match, row, texture_scales):
     for channel in channels:
         intensity = create_intensity(channel, match, row)
 
@@ -193,7 +181,7 @@ def create_channels(channels, counts, match, row, scales):
 
         locations.append(location)
 
-        create_textures(channel, match, row, scales)
+        create_textures(channel, match, row, texture_scales)
 
         create_radial_distributions(channel, counts, match, row)
 
@@ -210,6 +198,27 @@ def create_moments(moments, row, shape):
         moment = create_moment(a, b, row, shape)
 
         moments_group.append(moment)
+
+
+def create_neighborhoods(image_id, object_id, row, scales):
+    for scale in scales:
+        neighborhood = create_neighborhood(object_id, row, scale)
+
+        if row['Neighbors_FirstClosestObjectNumber_{}'.format(scale)]:
+            description = str(int(row['Neighbors_FirstClosestObjectNumber_{}'.format(scale)]))
+
+            first_closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
+
+            neighborhood.update(closest_id=closest_id)
+
+        if row['Neighbors_SecondClosestObjectNumber_{}'.format(scale)]:
+            description = str(int(row['Neighbors_SecondClosestObjectNumber_{}'.format(scale)]))
+
+            second_closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
+
+            neighborhood.update(second_closest_id=second_closest_id)
+
+        neighborhoods.append(neighborhood)
 
 
 def create_radial_distributions(channel, counts, match, row):
@@ -350,24 +359,28 @@ def create_moment(a, b, row, shape):
     }
 
 
-def create_neighborhood(object_id, neighborhood_scale, row):
+def create_neighborhood(object_id, row, scale):
+    def find_by(key):
+        template = 'Neighbors_{}_{}'
+        return row[
+            template.format(
+                    key,
+                    scale
+            )
+        ]
     return {
-            "angle_between_neighbors_{}".format(neighborhood_scale): row['Neighbors_AngleBetweenNeighbors_{}'.format(neighborhood_scale)],
-            "angle_between_neighbors_adjacent": row['Neighbors_AngleBetweenNeighbors_Adjacent'],
-            "closest_id": None,
-            "first_closest_distance_{}".format(neighborhood_scale): row['Neighbors_FirstClosestDistance_{}'.format(neighborhood_scale)],
-            "first_closest_distance_adjacent": row['Neighbors_FirstClosestDistance_Adjacent'],
-            "first_closest_object_number_adjacent": row['Neighbors_FirstClosestObjectNumber_Adjacent'],
+            "angle_between_neighbors": find_by('AngleBetweenNeighbors'),
+            "first_closest_id": None,
+            "first_closest_distance": find_by('FirstClosestDistance'),
+            "first_closest_object_number": find_by('FirstClosestObjectNumber'),
             "id": uuid.uuid4(),
-            "number_of_neighbors_{}".format(neighborhood_scale): row['Neighbors_NumberOfNeighbors_{}'.format(neighborhood_scale)],
-            "number_of_neighbors_adjacent": row['Neighbors_NumberOfNeighbors_Adjacent'],
+            "number_of_neighbors": find_by('NumberOfNeighbors'),
             "object_id": object_id,
-            "percent_touching_{}".format(neighborhood_scale): row['Neighbors_PercentTouching_{}'.format(neighborhood_scale)],
-            "percent_touching_adjacent": row['Neighbors_PercentTouching_Adjacent'],
-            "second_closest_distance_{}".format(neighborhood_scale): row['Neighbors_SecondClosestDistance_{}'.format(neighborhood_scale)],
-            "second_closest_distance_adjacent": row['Neighbors_SecondClosestDistance_Adjacent'],
+            "percent_touching": find_by('PercentTouching'),
+            "scale": scale,
+            "second_closest_distance" : find_by('SecondClosestDistance'),
             "second_closest_id": None,
-            "second_closest_object_number_adjacent": row['Neighbors_SecondClosestObjectNumber_Adjacent']
+            "second_closest_object_number": find_by('SecondClosestObjectNumber')
     }
 
 
@@ -517,7 +530,7 @@ def find_moments(columns):
     return moments
 
 
-def find_scales(columns):
+def find_texture_scales(columns):
     scales = set()
 
     for column in columns:
@@ -525,6 +538,20 @@ def find_scales(columns):
 
         if split_columns[0] == "Texture":
             scale = split_columns[3]
+
+            scales.add(scale)
+
+    return scales
+
+
+def find_neighborhood_scales(columns):
+    scales = set()
+
+    for column in columns:
+        split_columns = column.split("_")
+
+        if split_columns[0] == "Neighbors":
+            scale = split_columns[2]
 
             scales.add(scale)
 
