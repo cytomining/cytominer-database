@@ -36,53 +36,55 @@ def session_postgres():
     yield session_postgres()
 
 
-datasets = [
-{
-"data_dir" : "test/data_a",
-"row_counts" :
-    {
-        "n_plates" : 1,
-        "n_channels" : 3,
-        "n_patterns" : 3,
-        "n_wells" : 4,
-        "n_images" : 8,
-        "n_objects" : 40,
-        "n_bins_raddist" : 4,
-        "n_scales_texture" : 3,
-        "n_scales_neighborhood" : 2,
-        "n_moments_coefs" : 30,
-        "n_correlation_pairs" : 5
-    }
-}
-]
-
-
 # datasets = [
 # {
-# "data_dir" : "test/data_b",
+# "data_dir" : "test/data_a",
 # "row_counts" :
 #     {
 #         "n_plates" : 1,
-#         "n_channels" : 5,
+#         "n_channels" : 3,
 #         "n_patterns" : 3,
-#         "n_wells" : 2,
-#         "n_images" : 4,
-#         "n_objects" : 302,
+#         "n_wells" : 4,
+#         "n_images" : 8,
+#         "n_objects" : 40,
 #         "n_bins_raddist" : 4,
 #         "n_scales_texture" : 3,
 #         "n_scales_neighborhood" : 2,
 #         "n_moments_coefs" : 30,
-#         "n_correlation_pairs" : 10
+#         "n_correlation_pairs" : 5
 #     }
-# }
+# },
+# "munge" : True
 # ]
 
 
-#@pytest.mark.parametrize("dataset", datasets, ids=["cellpainting"])
+datasets = [
+{
+"data_dir" : "test/data_b",
+"row_counts" :
+    {
+        "n_plates" : 1,
+        "n_channels" : 5,
+        "n_patterns" : 3,
+        "n_wells" : 2,
+        "n_images" : 4,
+        "n_objects" : 102 + 355 + 107 + 201,
+        "n_bins_raddist" : 4,
+        "n_scales_texture" : 3,
+        "n_scales_neighborhood" : 2,
+        "n_moments_coefs" : 30,
+        "n_correlation_pairs" : 10
+    },
+"munge" : False
+}
+]
 
-@pytest.mark.parametrize("dataset", datasets, ids=["htqc"])
+
+#@pytest.mark.parametrize("dataset", datasets, ids=["htqc"])
+@pytest.mark.parametrize("dataset", datasets, ids=["cellpainting"])
 def test_seed(dataset, session_postgres):
-    subprocess.call(['./munge.sh', dataset["data_dir"]])
+    if dataset["munge"]:
+        subprocess.call(['./munge.sh', dataset["data_dir"]])
 
     config_file = os.path.join(dataset["data_dir"], "config.ini")
 
