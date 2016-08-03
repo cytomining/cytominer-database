@@ -59,6 +59,7 @@ def test_seed(session_postgres):
     n_objects = 40
     n_bins_raddist = 4
     n_scales_texture = 3
+    n_scales_neighborhood = 2
     n_moments_coefs = 30
 
     n_matches = n_objects * n_patterns
@@ -70,7 +71,7 @@ def test_seed(session_postgres):
     n_shapes = n_matches
     n_coordinates = n_matches + n_shapes + (n_matches * n_channels * 2)
     n_moments = n_shapes * n_moments_coefs
-    n_neighborhoods = n_matches
+    n_neighborhoods = n_matches * n_scales_neighborhood
     n_correlations = n_matches * 5
 
     assert len(session_postgres.query(perturbation.models.Pattern).all()) == n_patterns

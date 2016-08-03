@@ -159,9 +159,6 @@ class Match(perturbation.base.Base):
 
     locations = sqlalchemy.orm.relationship('Location', backref='matches')
 
-    neighborhood_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('neighborhoods.id'), index=True)
-    neighborhood = sqlalchemy.orm.relationship('Neighborhood')
-
     object_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('objects.id'), index=True)
     object = sqlalchemy.orm.relationship('Object')
 
@@ -174,23 +171,6 @@ class Match(perturbation.base.Base):
     shape = sqlalchemy.orm.relationship('Shape')
 
     textures = sqlalchemy.orm.relationship('Texture', backref='matches')
-
-
-class Quality(perturbation.base.Base):
-    """
-
-    """
-
-    __tablename__ = 'quality'
-
-    image_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('images.id'), index=True)
-    image = sqlalchemy.orm.relationship('Image')
-
-    count_cell_clump = sqlalchemy.Column(sqlalchemy.Integer)
-
-    count_debris = sqlalchemy.Column(sqlalchemy.Integer)
-
-    count_low_intensity = sqlalchemy.Column(sqlalchemy.Integer)
 
 
 class Moment(perturbation.base.Base):
@@ -218,15 +198,13 @@ class Neighborhood(perturbation.base.Base):
     __tablename__ = 'neighborhoods'
 
     first_closest_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('objects.id'), index=True)
-    first_closest = sqlalchemy.orm.relationship('Object', foreign_keys=[closest_id])
+    first_closest = sqlalchemy.orm.relationship('Object', foreign_keys=[first_closest_id])
 
     object_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('objects.id'), index=True)
     object = sqlalchemy.orm.relationship('Object', foreign_keys=[object_id])
 
     second_closest_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('objects.id'), index=True)
     second_closest = sqlalchemy.orm.relationship('Object', foreign_keys=[second_closest_id])
-
-    match = sqlalchemy.orm.relationship('Match', uselist=False)
 
     angle_between_neighbors = sqlalchemy.Column(sqlalchemy.Float)
 
@@ -238,7 +216,7 @@ class Neighborhood(perturbation.base.Base):
 
     percent_touching = sqlalchemy.Column(sqlalchemy.Float)
 
-    scale = sqlalchemy.Column(sqlalchemy.Integer)
+    scale = sqlalchemy.Column(sqlalchemy.Text)
 
     second_closest_distance = sqlalchemy.Column(sqlalchemy.Float)
 
@@ -256,6 +234,8 @@ class Object(perturbation.base.Base):
     image = sqlalchemy.orm.relationship('Image')
 
     matches = sqlalchemy.orm.relationship('Match')
+
+    # neighborhoods = sqlalchemy.orm.relationship('Neighborhood')
 
     description = sqlalchemy.Column(sqlalchemy.Integer, index=True)
 
@@ -282,6 +262,23 @@ class Plate(perturbation.base.Base):
     wells = sqlalchemy.orm.relationship('Well')
 
     description = sqlalchemy.Column(sqlalchemy.String, index=True)
+
+
+class Quality(perturbation.base.Base):
+    """
+
+    """
+
+    __tablename__ = 'quality'
+
+    image_id = sqlalchemy.Column(perturbation.UUID.UUID, sqlalchemy.ForeignKey('images.id'), index=True)
+    image = sqlalchemy.orm.relationship('Image')
+
+    count_cell_clump = sqlalchemy.Column(sqlalchemy.Integer)
+
+    count_debris = sqlalchemy.Column(sqlalchemy.Integer)
+
+    count_low_intensity = sqlalchemy.Column(sqlalchemy.Integer)
 
 
 class RadialDistribution(perturbation.base.Base):

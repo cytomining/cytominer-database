@@ -20,3 +20,4 @@ test/data/2/Nuclei.csv
 *~
 .ipynb_checkpoints
 *.ipynb
+config_cellpainting.ini

@@ -53,7 +53,7 @@ def seed(config, directory, scoped_session):
     object_columns = ['ObjectNumber']
 
     for neighborhood_scale in neighborhood_scales:
-        object_columns.extend([['Neighbors_FirstClosestObjectNumber_{}'.format(neighborhood_scale), 'Neighbors_SecondClosestObjectNumber_{}'.format(neighborhood_scale)]])
+        object_columns.extend(['Neighbors_FirstClosestObjectNumber_{}'.format(neighborhood_scale), 'Neighbors_SecondClosestObjectNumber_{}'.format(neighborhood_scale)])
 
     object_numbers = pandas.concat([get_object_numbers(s) for s in object_columns])
 
@@ -131,7 +131,7 @@ def create_patterns(channels, config, correlation_columns, counts, digest, direc
 
                 create_moments(moments, row, shape)
 
-                match = create_match(center, neighborhood, object_id, pattern, shape)
+                match = create_match(center, object_id, pattern, shape)
 
                 matches.append(match)
 
@@ -209,7 +209,7 @@ def create_neighborhoods(image_id, object_id, row, scales):
 
             first_closest_id = find_object_by(description=description, image_id=image_id, dictionaries=objects)
 
-            neighborhood.update(closest_id=closest_id)
+            neighborhood.update(closest_id=first_closest_id)
 
         if row['Neighbors_SecondClosestObjectNumber_{}'.format(scale)]:
             description = str(int(row['Neighbors_SecondClosestObjectNumber_{}'.format(scale)]))
@@ -338,11 +338,10 @@ def create_location(center_mass_intensity, channel, match, max_intensity):
     }
 
 
-def create_match(center, neighborhood, object_id, pattern, shape):
+def create_match(center, object_id, pattern, shape):
     return {
             "center_id": center["id"],
             "id": uuid.uuid4(),
-            "neighborhood_id": neighborhood["id"],
             "object_id": object_id,
             "pattern_id": pattern.id,
             "shape_id": shape["id"]

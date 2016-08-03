@@ -141,34 +141,27 @@ INNER JOIN moments  ON moments.shape_id   = shapes.id
 DROP VIEW IF EXISTS "view_neighborhoods";
 CREATE VIEW "view_neighborhoods" AS
 SELECT
-  plates.description                                  AS g_plate,
-  wells.description                                   AS g_well,
-  images.description                                  AS g_image,
-  objects.description                                 AS g_object,
-  patterns.description                                AS g_pattern,
-  quality.count_cell_clump                            AS q_cell_clump,
-  quality.count_debris                                AS q_debris,
-  quality.count_low_intensity                         AS q_low_intensity,
-  neighborhoods.angle_between_neighbors_5             AS m_neighborhoods_angle_between_neighbors_5,
-  neighborhoods.angle_between_neighbors_adjacent      AS m_neighborhoods_angle_between_neighbors_adjacent,
-  neighborhoods.first_closest_distance_5              AS m_neighborhoods_first_closest_distance_5,
-  neighborhoods.first_closest_distance_adjacent       AS m_neighborhoods_first_closest_distance_adjacent,
-  neighborhoods.first_closest_object_number_adjacent  AS m_neighborhoods_first_closest_object_number_adjacent,
-  neighborhoods.number_of_neighbors_5                 AS m_neighborhoods_number_of_neighbors_5,
-  neighborhoods.number_of_neighbors_adjacent          AS m_neighborhoods_number_of_neighbors_adjacent,
-  neighborhoods.percent_touching_5                    AS m_neighborhoods_percent_touching_5,
-  neighborhoods.percent_touching_adjacent             AS m_neighborhoods_percent_touching_adjacent,
-  neighborhoods.second_closest_distance_5             AS m_neighborhoods_second_closest_distance_5,
-  neighborhoods.second_closest_distance_adjacent      AS m_neighborhoods_second_closest_distance_adjacent,
-  neighborhoods.second_closest_object_number_adjacent AS m_neighborhoods_second_closest_object_number_adjacent
+  plates.description                         AS g_plate,
+  wells.description                          AS g_well,
+  images.description                         AS g_image,
+  objects.description                        AS g_object,
+  quality.count_cell_clump                   AS q_cell_clump,
+  quality.count_debris                       AS q_debris,
+  quality.count_low_intensity                AS q_low_intensity,
+  neighborhoods.angle_between_neighbors      AS m_neighborhoods_angle_between_neighbors,
+  neighborhoods.first_closest_distance       AS m_neighborhoods_first_closest_distance,
+  neighborhoods.first_closest_object_number  AS m_neighborhoods_first_closest_object_number,
+  neighborhoods.number_of_neighbors          AS m_neighborhoods_number_of_neighbors,
+  neighborhoods.percent_touching             AS m_neighborhoods_percent_touching,
+  neighborhoods.scale                        AS p_neighborhoods_scale,
+  neighborhoods.second_closest_distance      AS m_neighborhoods_second_closest_distance,
+  neighborhoods.second_closest_object_number AS m_neighborhoods_second_closest_object_number
 FROM plates
 INNER JOIN wells         ON wells.plate_id          = plates.id
 INNER JOIN images        ON images.well_id          = wells.id
 INNER JOIN quality       ON quality.image_id        = images.id
 INNER JOIN objects       ON objects.image_id        = images.id
-INNER JOIN matches       ON matches.object_id       = objects.id
-INNER JOIN patterns      ON matches.pattern_id      = patterns.id
-INNER JOIN neighborhoods ON matches.neighborhood_id = neighborhoods.id
+INNER JOIN neighborhoods ON neighborhoods.object_id = objects.id
 ;
 
 DROP VIEW IF EXISTS "view_radial_distributions";
