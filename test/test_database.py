@@ -38,7 +38,7 @@ def session_postgres():
 
 datasets = [
 {
-"data_dir" : "test/data",
+"data_dir" : "test/data_a",
 "row_counts" :
     {
         "n_plates" : 1,
