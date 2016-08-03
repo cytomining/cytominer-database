@@ -57,7 +57,7 @@ def seed(config, directory, scoped_session):
 
     object_numbers = pandas.concat([get_object_numbers(s) for s in object_columns])
 
-    object_numbers.drop_duplicates()
+    object_numbers = object_numbers.drop_duplicates().reset_index()
 
     for index, object_number in object_numbers.iterrows():
         object_dictionary = create_object(digest, object_number, scoped_session)
@@ -203,6 +203,10 @@ def create_moments(moments, row, shape):
 def create_neighborhoods(image_id, object_id, row, scales):
     for scale in scales:
         neighborhood = create_neighborhood(object_id, row, scale)
+
+        # If the scale doesn't exist in this pattern, continue
+        if neighborhood['angle_between_neighbors'] is None:
+            continue
 
         if row['Neighbors_FirstClosestObjectNumber_{}'.format(scale)]:
             description = str(int(row['Neighbors_FirstClosestObjectNumber_{}'.format(scale)]))

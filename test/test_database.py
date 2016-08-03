@@ -15,14 +15,6 @@ import pkg_resources
 import random
 import subprocess
 
-def pytest_addoption(parser):
-    parser.addoption("--dataset", action="store", default="htqc", help="dataset to test")
-
-
-@pytest.fixture
-def selected_dataset(request):
-    return request.config.getoption("--dataset")
-
 
 @pytest.yield_fixture()
 def session_postgres():
@@ -124,7 +116,7 @@ def test_seed(selected_dataset, session_postgres):
     n_shapes = n_matches
     n_coordinates = n_matches + n_shapes + (n_matches * n_channels * 2)
     n_moments = n_shapes * n_moments_coefs
-    n_neighborhoods = n_matches * n_scales_neighborhood
+    n_neighborhoods = n_objects * n_scales_neighborhood
     n_correlations = n_matches * n_correlation_pairs
 
     assert len(session_postgres.query(perturbation.models.Pattern).all()) == n_patterns
