@@ -44,6 +44,7 @@ datasets = {
         {
             "n_plates" : 1,
             "n_channels" : 3,
+            "n_channels_raddist" : 3,
             "n_patterns" : 3,
             "n_wells" : 4,
             "n_images" : 8,
@@ -63,6 +64,7 @@ datasets = {
         {
             "n_plates" : 1,
             "n_channels" : 5,
+            "n_channels_raddist" : 4,
             "n_patterns" : 3,
             "n_wells" : 2,
             "n_images" : 4,
@@ -96,7 +98,8 @@ def test_seed(selected_dataset, session_postgres):
         perturbation.database.seed(config, directory, 'postgresql://postgres:password@localhost:3210/testdb', 'objects', 'views.sql')
 
     n_plates = dataset["row_counts"]["n_plates"]
-    n_channels = dataset["row_counts"]["n_channels" ]
+    n_channels = dataset["row_counts"]["n_channels"]
+    n_channels_raddist = dataset["row_counts"]["n_channels_raddist"]
     n_patterns = dataset["row_counts"]["n_patterns"]
     n_wells = dataset["row_counts"]["n_wells"]
     n_images = dataset["row_counts"]["n_images"]
@@ -111,7 +114,7 @@ def test_seed(selected_dataset, session_postgres):
     n_edges = n_matches * n_channels
     n_intensities = n_matches * n_channels
     n_textures = n_matches * n_channels * n_scales_texture
-    n_radial_distributions = n_matches * n_channels * n_bins_raddist
+    n_radial_distributions = n_matches * n_channels_raddist * n_bins_raddist
     n_locations = n_matches * n_channels
     n_shapes = n_matches
     n_coordinates = n_matches + n_shapes + (n_matches * n_channels * 2)

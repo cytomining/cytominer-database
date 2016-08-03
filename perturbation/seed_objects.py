@@ -204,8 +204,7 @@ def create_neighborhoods(image_id, object_id, row, scales):
     for scale in scales:
         neighborhood = create_neighborhood(object_id, row, scale)
 
-        # If the scale doesn't exist in this pattern, continue
-        if neighborhood['angle_between_neighbors'] is None:
+        if neighborhood is None:
             continue
 
         if row['Neighbors_FirstClosestObjectNumber_{}'.format(scale)]:
@@ -229,12 +228,18 @@ def create_radial_distributions(channel, counts, match, row):
     for count in counts:
         radial_distribution = create_radial_distribution(channel, count, match, row)
 
+        if radial_distribution is None:
+            continue
+
         radial_distributions.append(radial_distribution)
 
 
 def create_textures(channel, match, row, scales):
     for scale in scales:
         texture = create_texture(channel, match, row, scale)
+
+        if texture is None:
+            continue
 
         textures.append(texture)
 
@@ -371,20 +376,23 @@ def create_neighborhood(object_id, row, scale):
                     scale
             )
         ]
-    return {
-            "angle_between_neighbors": find_by('AngleBetweenNeighbors'),
-            "first_closest_id": None,
-            "first_closest_distance": find_by('FirstClosestDistance'),
-            "first_closest_object_number": find_by('FirstClosestObjectNumber'),
-            "id": uuid.uuid4(),
-            "number_of_neighbors": find_by('NumberOfNeighbors'),
-            "object_id": object_id,
-            "percent_touching": find_by('PercentTouching'),
-            "scale": scale,
-            "second_closest_distance" : find_by('SecondClosestDistance'),
-            "second_closest_id": None,
-            "second_closest_object_number": find_by('SecondClosestObjectNumber')
-    }
+    if find_by('AngleBetweenNeighbors') is None:
+        return None
+    else:
+        return {
+                "angle_between_neighbors": find_by('AngleBetweenNeighbors'),
+                "first_closest_id": None,
+                "first_closest_distance": find_by('FirstClosestDistance'),
+                "first_closest_object_number": find_by('FirstClosestObjectNumber'),
+                "id": uuid.uuid4(),
+                "number_of_neighbors": find_by('NumberOfNeighbors'),
+                "object_id": object_id,
+                "percent_touching": find_by('PercentTouching'),
+                "scale": scale,
+                "second_closest_distance" : find_by('SecondClosestDistance'),
+                "second_closest_id": None,
+                "second_closest_object_number": find_by('SecondClosestObjectNumber')
+        }
 
 
 def create_object(digest, description, session):
@@ -405,15 +413,18 @@ def create_radial_distribution(channel, count, match, row):
                     count
             )
         ]
-    return {
-            "bins": count,
-            "channel_id": channel.id,
-            "frac_at_d": find_by("FracAtD"),
-            "id": uuid.uuid4(),
-            "match_id": match["id"],
-            "mean_frac": find_by("MeanFrac"),
-            "radial_cv": find_by("RadialCV")
-    }
+    if find_by('FracAtD') is None:
+        return None
+    else:
+        return {
+                "bins": count,
+                "channel_id": channel.id,
+                "frac_at_d": find_by("FracAtD"),
+                "id": uuid.uuid4(),
+                "match_id": match["id"],
+                "mean_frac": find_by("MeanFrac"),
+                "radial_cv": find_by("RadialCV")
+        }
 
 
 def create_shape(row, shape_center):
@@ -458,26 +469,29 @@ def create_texture(channel, match, row, scale):
             )
         ]
 
-    return {
-            "angular_second_moment": find_by('AngularSecondMoment'),
-            "channel_id": channel.id,
-            "contrast": find_by('Contrast'),
-            "correlation": find_by('Correlation'),
-            "difference_entropy": find_by('DifferenceEntropy'),
-            "difference_variance": find_by('DifferenceVariance'),
-            "match_id": match["id"],
-            "scale": scale,
-            "entropy": find_by('Entropy'),
-            "gabor": find_by('Gabor'),
-            "id": uuid.uuid4(),
-            "info_meas_1": find_by('InfoMeas1'),
-            "info_meas_2": find_by('InfoMeas2'),
-            "inverse_difference_moment": find_by('InverseDifferenceMoment'),
-            "sum_average": find_by('SumAverage'),
-            "sum_entropy": find_by('SumEntropy'),
-            "sum_variance": find_by('SumVariance'),
-            "variance": find_by('Variance')
-    }
+    if find_by('AngularSecondMoment') is None:
+        return None
+    else:
+        return {
+                "angular_second_moment": find_by('AngularSecondMoment'),
+                "channel_id": channel.id,
+                "contrast": find_by('Contrast'),
+                "correlation": find_by('Correlation'),
+                "difference_entropy": find_by('DifferenceEntropy'),
+                "difference_variance": find_by('DifferenceVariance'),
+                "match_id": match["id"],
+                "scale": scale,
+                "entropy": find_by('Entropy'),
+                "gabor": find_by('Gabor'),
+                "id": uuid.uuid4(),
+                "info_meas_1": find_by('InfoMeas1'),
+                "info_meas_2": find_by('InfoMeas2'),
+                "inverse_difference_moment": find_by('InverseDifferenceMoment'),
+                "sum_average": find_by('SumAverage'),
+                "sum_entropy": find_by('SumEntropy'),
+                "sum_variance": find_by('SumVariance'),
+                "variance": find_by('Variance')
+        }
 
 
 def find_correlation_columns(channels, columns):
