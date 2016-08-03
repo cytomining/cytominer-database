@@ -15,6 +15,14 @@ import pkg_resources
 import random
 import subprocess
 
+def pytest_addoption(parser):
+    parser.addoption("--dataset", action="store", default="htqc", help="dataset to test")
+
+
+@pytest.fixture
+def selected_dataset(request):
+    return request.config.getoption("--dataset")
+
 
 @pytest.yield_fixture()
 def session_postgres():
@@ -36,53 +44,51 @@ def session_postgres():
     yield session_postgres()
 
 
-# datasets = [
-# {
-# "data_dir" : "test/data_a",
-# "row_counts" :
-#     {
-#         "n_plates" : 1,
-#         "n_channels" : 3,
-#         "n_patterns" : 3,
-#         "n_wells" : 4,
-#         "n_images" : 8,
-#         "n_objects" : 40,
-#         "n_bins_raddist" : 4,
-#         "n_scales_texture" : 3,
-#         "n_scales_neighborhood" : 2,
-#         "n_moments_coefs" : 30,
-#         "n_correlation_pairs" : 5
-#     }
-# },
-# "munge" : True
-# ]
-
-
-datasets = [
-{
-"data_dir" : "test/data_b",
-"row_counts" :
+datasets = {
+    "htqc" : 
     {
-        "n_plates" : 1,
-        "n_channels" : 5,
-        "n_patterns" : 3,
-        "n_wells" : 2,
-        "n_images" : 4,
-        "n_objects" : 40,
-        "n_bins_raddist" : 4,
-        "n_scales_texture" : 3,
-        "n_scales_neighborhood" : 2,
-        "n_moments_coefs" : 30,
-        "n_correlation_pairs" : 10
+    "data_dir" : "test/data_a",
+    "row_counts" :
+        {
+            "n_plates" : 1,
+            "n_channels" : 3,
+            "n_patterns" : 3,
+            "n_wells" : 4,
+            "n_images" : 8,
+            "n_objects" : 40,
+            "n_bins_raddist" : 4,
+            "n_scales_texture" : 3,
+            "n_scales_neighborhood" : 2,
+            "n_moments_coefs" : 30,
+            "n_correlation_pairs" : 5
+        },
+    "munge" : True
     },
-"munge" : False
+    "cellpainting" : 
+    {
+    "data_dir" : "test/data_b",
+    "row_counts" :
+        {
+            "n_plates" : 1,
+            "n_channels" : 5,
+            "n_patterns" : 3,
+            "n_wells" : 2,
+            "n_images" : 4,
+            "n_objects" : 40,
+            "n_bins_raddist" : 4,
+            "n_scales_texture" : 3,
+            "n_scales_neighborhood" : 2,
+            "n_moments_coefs" : 30,
+            "n_correlation_pairs" : 10
+        },
+    "munge" : False
+    }
 }
-]
 
 
-#@pytest.mark.parametrize("dataset", datasets, ids=["htqc"])
-@pytest.mark.parametrize("dataset", datasets, ids=["cellpainting"])
-def test_seed(dataset, session_postgres):
+def test_seed(selected_dataset, session_postgres):
+    dataset = datasets[selected_dataset]
+
     if dataset["munge"]:
         subprocess.call(['./munge.sh', dataset["data_dir"]])
 
