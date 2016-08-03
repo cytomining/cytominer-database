@@ -15,8 +15,6 @@ import pkg_resources
 import random
 import subprocess
 
-docker_name = 'testdb_{:04d}'.format(random.randint(0, 9999))
-
 @pytest.yield_fixture()
 def session_postgres():
 
@@ -61,6 +59,7 @@ def test_seed(session_postgres):
     n_scales_texture = 3
     n_scales_neighborhood = 2
     n_moments_coefs = 30
+    n_correlation_pairs = 5
 
     n_matches = n_objects * n_patterns
     n_edges = n_matches * n_channels
@@ -72,7 +71,7 @@ def test_seed(session_postgres):
     n_coordinates = n_matches + n_shapes + (n_matches * n_channels * 2)
     n_moments = n_shapes * n_moments_coefs
     n_neighborhoods = n_matches * n_scales_neighborhood
-    n_correlations = n_matches * 5
+    n_correlations = n_matches * n_correlation_pairs
 
     assert len(session_postgres.query(perturbation.models.Pattern).all()) == n_patterns
     assert len(session_postgres.query(perturbation.models.Plate).all()) == n_plates
