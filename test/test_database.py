@@ -68,7 +68,7 @@ datasets = [
         "n_patterns" : 3,
         "n_wells" : 2,
         "n_images" : 4,
-        "n_objects" : 102 + 355 + 107 + 201,
+        "n_objects" : 40,
         "n_bins_raddist" : 4,
         "n_scales_texture" : 3,
         "n_scales_neighborhood" : 2,
