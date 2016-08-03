@@ -473,7 +473,8 @@ def find_correlation_columns(channels, columns):
         a = None
         b = None
 
-        if split_columns[0] == "Correlation":
+        # TODO: This excludes RWC, K, Overlap, Manders
+        if split_columns[0] == "Correlation" and split_columns[1] == "Correlation":
             for channel in channels:
                 if channel.description == split_columns[2]:
                     a = channel
