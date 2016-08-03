@@ -15,6 +15,7 @@ import pkg_resources
 import random
 import subprocess
 
+
 @pytest.yield_fixture()
 def session_postgres():
 
@@ -35,31 +36,54 @@ def session_postgres():
     yield session_postgres()
 
 
-def test_seed(session_postgres):
-    subprocess.call(['./munge.sh', 'test/data'])
+datasets = [
+{
+"data_dir" : "test/data",
+"row_counts" :
+    {
+        "n_plates" : 1,
+        "n_channels" : 3,
+        "n_patterns" : 3,
+        "n_wells" : 4,
+        "n_images" : 8,
+        "n_objects" : 40,
+        "n_bins_raddist" : 4,
+        "n_scales_texture" : 3,
+        "n_scales_neighborhood" : 2,
+        "n_moments_coefs" : 30,
+        "n_correlation_pairs" : 5
+    }
+}
+]
 
-    config_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
+
+
+@pytest.mark.parametrize("dataset", datasets, ids=["htqc"])
+def test_seed(dataset, session_postgres):
+    subprocess.call(['./munge.sh', dataset["data_dir"]])
+
+    config_file = os.path.join(dataset["data_dir"], "config.ini")
 
     config = configparser.ConfigParser()
 
-    config.read(config_file_sys)
+    config.read(config_file)
 
-    perturbation.database.seed(config, 'test/data', 'postgresql://postgres:password@localhost:3210/testdb', 'images', 'views.sql')
+    perturbation.database.seed(config, dataset["data_dir"], 'postgresql://postgres:password@localhost:3210/testdb', 'images', 'views.sql')
 
-    for directory in glob.glob(os.path.join('test/data', '*/')):
+    for directory in glob.glob(os.path.join(dataset["data_dir"], '*/')):
         perturbation.database.seed(config, directory, 'postgresql://postgres:password@localhost:3210/testdb', 'objects', 'views.sql')
 
-    n_plates = 1
-    n_channels = 3
-    n_patterns = 3
-    n_wells = 4
-    n_images = 8
-    n_objects = 40
-    n_bins_raddist = 4
-    n_scales_texture = 3
-    n_scales_neighborhood = 2
-    n_moments_coefs = 30
-    n_correlation_pairs = 5
+    n_plates = dataset["row_counts"]["n_plates"]
+    n_channels = dataset["row_counts"]["n_channels" ]
+    n_patterns = dataset["row_counts"]["n_patterns"]
+    n_wells = dataset["row_counts"]["n_wells"]
+    n_images = dataset["row_counts"]["n_images"]
+    n_objects = dataset["row_counts"]["n_objects"]
+    n_bins_raddist = dataset["row_counts"]["n_bins_raddist"]
+    n_scales_texture = dataset["row_counts"]["n_scales_texture"]
+    n_scales_neighborhood = dataset["row_counts"]["n_scales_neighborhood"]
+    n_moments_coefs = dataset["row_counts"]["n_moments_coefs"]
+    n_correlation_pairs = dataset["row_counts"]["n_correlation_pairs"]
 
     n_matches = n_objects * n_patterns
     n_edges = n_matches * n_channels
