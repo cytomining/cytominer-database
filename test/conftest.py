@@ -45,8 +45,8 @@ def session(request):
 
     engine = sqlalchemy.create_engine(connection_string)
 
-    session_instance = sqlalchemy.orm.sessionmaker(bind=engine)
+    session_generator = sqlalchemy.orm.sessionmaker(bind=engine)
 
     perturbation.base.Base.metadata.create_all(engine)
 
-    return session_instance()
+    return session_generator()

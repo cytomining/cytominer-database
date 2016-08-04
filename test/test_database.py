@@ -72,10 +72,12 @@ def test_seed(selected_dataset, session):
 
     config.read(config_file)
 
-    perturbation.database.seed(config, dataset["data_dir"], "postgresql://postgres:password@localhost:3210/testdb", "images", "views.sql")
+    connection_string = "postgresql://postgres:password@localhost:3210/testdb"
+
+    perturbation.database.seed(config=config, input=dataset["data_dir"], output=connection_string, stage="images", sqlfile="views.sql")
 
     for directory in glob.glob(os.path.join(dataset["data_dir"], "*/")):
-        perturbation.database.seed(config, directory, "postgresql://postgres:password@localhost:3210/testdb", "objects", "views.sql")
+        perturbation.database.seed(config=config, input=directory, output=connection_string, stage="objects", sqlfile="views.sql")
 
     n_plates = dataset["row_counts"]["n_plates"]
     n_channels = dataset["row_counts"]["n_channels"]

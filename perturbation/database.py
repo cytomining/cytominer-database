@@ -30,11 +30,11 @@ def setup(connection):
     return scoped_session, engine
 
 
-def seed(config, input, output, stage, sqlfile=None):
+def seed(config, input, output, session=None, stage="images", sqlfile=None):
     """Call functions to create backend
 
     :param input: if stage is `images`, then top-level directory containing sub-directories, each of which have an
-    image.csv and object.csv; if stage is 'objects', then a subdirectory contain a pair of image.csv and object.csv
+    image.csv and object.csv; if stage is "objects", then a subdirectory contain a pair of image.csv and object.csv
     :param output: name of SQLlite/PostGreSQL database
     :param stage: `images` or `objects`
     :param sqlfile: SQL file to be executed on the backend database after it is created
@@ -42,7 +42,7 @@ def seed(config, input, output, stage, sqlfile=None):
     """
     scoped_session, engine = setup(output)
 
-    if stage == 'images':
+    if stage == "images":
 
         Base = perturbation.base.Base
 
@@ -50,19 +50,19 @@ def seed(config, input, output, stage, sqlfile=None):
 
         Base.metadata.create_all(engine)
 
-        logger.debug('Parsing SQL file')
+        logger.debug("Parsing SQL file")
 
         if sqlfile:
             create_views(sqlfile, engine)
 
-    logger.debug('Parsing csvs')
+    logger.debug("Parsing csvs")
 
-    if stage == 'images':
+    if stage == "images":
         perturbation.seed_images.seed(config, input, scoped_session)
-    elif stage == 'objects':
+    elif stage == "objects":
         perturbation.seed_objects.seed(config, input, scoped_session)
     else:
-        raise ValueError('Unknown stage {}'.format(stage))
+        raise ValueError("Unknown stage {}".format(stage))
 
 
 def create_views(sqlfile, engine):
