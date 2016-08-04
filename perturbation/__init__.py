@@ -47,7 +47,7 @@ def __main__(configfile, input, output, sqlfile, stage, verbose, skipmunge):
 
     import json
 
-    with open("logging_config.json") as f:
+    with open(pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "logging_config.json")) as f:
         logging.config.dictConfig(json.load(f))
 
     logger = logging.getLogger(__name__)
