@@ -14,27 +14,7 @@ import perturbation.models
 import pkg_resources
 import random
 import subprocess
-
-
-@pytest.yield_fixture()
-def session_postgres():
-
-    cmd = 'PGPASSWORD=password psql -h localhost -p 3210 -U postgres -c "DROP DATABASE IF EXISTS testdb"'
-
-    subprocess.check_output(cmd, shell=True)
-
-    cmd = 'PGPASSWORD=password psql -h localhost -p 3210 -U postgres -c "CREATE DATABASE testdb"'
-
-    subprocess.check_output(cmd, shell=True)
-
-    engine = sqlalchemy.create_engine('postgresql://postgres:password@localhost:3210/testdb')
-
-    session_postgres = sqlalchemy.orm.sessionmaker(bind=engine)
-
-    perturbation.base.Base.metadata.create_all(engine)
-
-    yield session_postgres()
-
+ 
 
 datasets = {
     "htqc" : 
@@ -80,11 +60,11 @@ datasets = {
 }
 
 
-def test_seed(selected_dataset, session_postgres):
+def test_seed(selected_dataset, session):
     dataset = datasets[selected_dataset]
 
     if dataset["munge"]:
-        subprocess.call(['./munge.sh', dataset["data_dir"]])
+        subprocess.call(["./munge.sh", dataset["data_dir"]])
 
     config_file = os.path.join(dataset["data_dir"], "config.ini")
 
@@ -92,10 +72,10 @@ def test_seed(selected_dataset, session_postgres):
 
     config.read(config_file)
 
-    perturbation.database.seed(config, dataset["data_dir"], 'postgresql://postgres:password@localhost:3210/testdb', 'images', 'views.sql')
+    perturbation.database.seed(config, dataset["data_dir"], "postgresql://postgres:password@localhost:3210/testdb", "images", "views.sql")
 
-    for directory in glob.glob(os.path.join(dataset["data_dir"], '*/')):
-        perturbation.database.seed(config, directory, 'postgresql://postgres:password@localhost:3210/testdb', 'objects', 'views.sql')
+    for directory in glob.glob(os.path.join(dataset["data_dir"], "*/")):
+        perturbation.database.seed(config, directory, "postgresql://postgres:password@localhost:3210/testdb", "objects", "views.sql")
 
     n_plates = dataset["row_counts"]["n_plates"]
     n_channels = dataset["row_counts"]["n_channels"]
@@ -122,43 +102,43 @@ def test_seed(selected_dataset, session_postgres):
     n_neighborhoods = n_objects * n_scales_neighborhood
     n_correlations = n_matches * n_correlation_pairs
 
-    assert len(session_postgres.query(perturbation.models.Pattern).all()) == n_patterns
-    assert len(session_postgres.query(perturbation.models.Plate).all()) == n_plates
-    assert len(session_postgres.query(perturbation.models.Channel).all()) == n_channels
-    assert len(session_postgres.query(perturbation.models.Well).all()) == n_wells
-    assert len(session_postgres.query(perturbation.models.Image).all()) == n_images
-    assert len(session_postgres.query(perturbation.models.Match).all()) == n_matches
-    assert len(session_postgres.query(perturbation.models.Edge).all()) == n_edges
-    assert len(session_postgres.query(perturbation.models.Intensity).all()) == n_intensities
-    assert len(session_postgres.query(perturbation.models.Texture).all()) == n_textures
-    assert len(session_postgres.query(perturbation.models.RadialDistribution).all()) == n_radial_distributions
-    assert len(session_postgres.query(perturbation.models.Shape).all()) == n_shapes
-    assert len(session_postgres.query(perturbation.models.Location).all()) == n_locations
-    assert len(session_postgres.query(perturbation.models.Coordinate).all()) == n_coordinates
-    assert len(session_postgres.query(perturbation.models.Moment).all()) == n_moments
-    assert len(session_postgres.query(perturbation.models.Neighborhood).all()) == n_neighborhoods
-    assert len(session_postgres.query(perturbation.models.Correlation).all()) == n_correlations
+    assert len(session.query(perturbation.models.Pattern).all()) == n_patterns
+    assert len(session.query(perturbation.models.Plate).all()) == n_plates
+    assert len(session.query(perturbation.models.Channel).all()) == n_channels
+    assert len(session.query(perturbation.models.Well).all()) == n_wells
+    assert len(session.query(perturbation.models.Image).all()) == n_images
+    assert len(session.query(perturbation.models.Match).all()) == n_matches
+    assert len(session.query(perturbation.models.Edge).all()) == n_edges
+    assert len(session.query(perturbation.models.Intensity).all()) == n_intensities
+    assert len(session.query(perturbation.models.Texture).all()) == n_textures
+    assert len(session.query(perturbation.models.RadialDistribution).all()) == n_radial_distributions
+    assert len(session.query(perturbation.models.Shape).all()) == n_shapes
+    assert len(session.query(perturbation.models.Location).all()) == n_locations
+    assert len(session.query(perturbation.models.Coordinate).all()) == n_coordinates
+    assert len(session.query(perturbation.models.Moment).all()) == n_moments
+    assert len(session.query(perturbation.models.Neighborhood).all()) == n_neighborhoods
+    assert len(session.query(perturbation.models.Correlation).all()) == n_correlations
     
-    correlations = session_postgres.query(perturbation.models.Correlation)
+    correlations = session.query(perturbation.models.Correlation)
     
     assert correlations.filter(perturbation.models.Correlation.match is None).all() == []
     
-    assert len(session_postgres.query(sqlalchemy.Table('view_correlations', perturbation.base.Base.metadata,
-                                                       autoload_with=session_postgres.connection())).all()) == n_correlations
-    assert len(session_postgres.query(sqlalchemy.Table('view_edges', perturbation.base.Base.metadata,
-                                                       autoload_with=session_postgres.connection())).all()) == n_edges
-    assert len(session_postgres.query(sqlalchemy.Table('view_intensities', perturbation.base.Base.metadata,
-                                                       autoload_with=session_postgres.connection())).all()) == n_intensities
-    assert len(session_postgres.query(sqlalchemy.Table('view_locations', perturbation.base.Base.metadata,
-                                                       autoload_with=session_postgres.connection())).all()) == n_locations
-    assert len(session_postgres.query(sqlalchemy.Table('view_moments', perturbation.base.Base.metadata,
-                                                       autoload_with=session_postgres.connection())).all()) == n_moments
-    assert len(session_postgres.query(sqlalchemy.Table('view_neighborhoods', perturbation.base.Base.metadata,
-                                                       autoload_with=session_postgres.connection())).all()) == n_neighborhoods
-    assert len(session_postgres.query(sqlalchemy.Table('view_radial_distributions', perturbation.base.Base.metadata,
-                                                       autoload_with=session_postgres.connection())).all()) == n_radial_distributions
-    assert len(session_postgres.query(sqlalchemy.Table('view_shapes', perturbation.base.Base.metadata,
-                                                       autoload_with=session_postgres.connection())).all()) == n_shapes
-    assert len(session_postgres.query(sqlalchemy.Table('view_textures', perturbation.base.Base.metadata,
-                                                       autoload_with=session_postgres.connection())).all()) == n_textures
+    assert len(session.query(sqlalchemy.Table("view_correlations", perturbation.base.Base.metadata,
+                                                       autoload_with=session.connection())).all()) == n_correlations
+    assert len(session.query(sqlalchemy.Table("view_edges", perturbation.base.Base.metadata,
+                                                       autoload_with=session.connection())).all()) == n_edges
+    assert len(session.query(sqlalchemy.Table("view_intensities", perturbation.base.Base.metadata,
+                                                       autoload_with=session.connection())).all()) == n_intensities
+    assert len(session.query(sqlalchemy.Table("view_locations", perturbation.base.Base.metadata,
+                                                       autoload_with=session.connection())).all()) == n_locations
+    assert len(session.query(sqlalchemy.Table("view_moments", perturbation.base.Base.metadata,
+                                                       autoload_with=session.connection())).all()) == n_moments
+    assert len(session.query(sqlalchemy.Table("view_neighborhoods", perturbation.base.Base.metadata,
+                                                       autoload_with=session.connection())).all()) == n_neighborhoods
+    assert len(session.query(sqlalchemy.Table("view_radial_distributions", perturbation.base.Base.metadata,
+                                                       autoload_with=session.connection())).all()) == n_radial_distributions
+    assert len(session.query(sqlalchemy.Table("view_shapes", perturbation.base.Base.metadata,
+                                                       autoload_with=session.connection())).all()) == n_shapes
+    assert len(session.query(sqlalchemy.Table("view_textures", perturbation.base.Base.metadata,
+                                                       autoload_with=session.connection())).all()) == n_textures
 
