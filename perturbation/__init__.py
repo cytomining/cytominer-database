@@ -58,7 +58,7 @@ def __main__(configfile, input, output, sqlfile, stage, verbose, skipmunge):
 
     if not skipmunge and stage == "images":
         logger.debug('Calling munge')
-        subprocess.call(['./munge.sh', input])
+        subprocess.call([pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "munge.sh"), input])
         logger.debug('Completed munge')
     else:
         logger.debug('Skipping munge')
