@@ -30,7 +30,7 @@ def setup(connection):
     return scoped_session, engine
 
 
-def seed(config, input, output, session=None, stage="images", sqlfile=None):
+def seed(config, input, output=None, session=None, stage="images", sqlfile=None):
     """Call functions to create backend
 
     :param input: if stage is `images`, then top-level directory containing sub-directories, each of which have an
@@ -40,7 +40,14 @@ def seed(config, input, output, session=None, stage="images", sqlfile=None):
     :param sqlfile: SQL file to be executed on the backend database after it is created
     :return:
     """
-    scoped_session, engine = setup(output)
+    assert (session is not None) != (output is not None)
+
+    if session is None:
+        scoped_session, engine = setup(output)
+    else:
+        scoped_session = session
+
+        engine = scoped_session.connection().engine
 
     if stage == "images":
 
