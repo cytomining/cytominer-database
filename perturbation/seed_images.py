@@ -30,32 +30,32 @@ def seed(config, directories, scoped_session):
 
         # Populate plates, wells, images, qualities
 
-        data[config['metadata']['plate']] = data[config['metadata']['plate']].astype(str)
+        data[config["metadata"]["plate"]] = data[config["metadata"]["plate"]].astype(str)
 
-        data['ImageNumber'] = data['ImageNumber'].astype(str)
+        data["ImageNumber"] = data["ImageNumber"].astype(str)
 
-        data['digest_ImageNumber'] = data['ImageNumber'].apply(lambda x: '{}_{}'.format(digest, x))
+        data["digest_ImageNumber"] = data["ImageNumber"].apply(lambda x: "{}_{}".format(digest, x))
 
-        plate_descriptions = data[config['metadata']['plate']].unique()
+        plate_descriptions = data[config["metadata"]["plate"]].unique()
 
         plates = find_plates(plate_descriptions, scoped_session)
 
         for plate in plates:
-            well_descriptions = data[data[config['metadata']['plate']] == plate.description][config['metadata']['well']].unique()
+            well_descriptions = data[data[config["metadata"]["plate"]] == plate.description][config["metadata"]["well"]].unique()
 
             wells = find_wells(well_descriptions, plate, scoped_session)
 
             for well in wells:
-                image_descriptions = data[(data[config['metadata']['plate']] == plate.description) & (data[config['metadata']['well']] == well.description)]['digest_ImageNumber'].unique()
+                image_descriptions = data[(data[config["metadata"]["plate"]] == plate.description) & (data[config["metadata"]["well"]] == well.description)]["digest_ImageNumber"].unique()
 
                 images = find_images(image_descriptions, well, scoped_session)
 
                 for image in images:
                     quality_dict = dict()
 
-                    for (name, mapped_name) in config['qualities'].items():
+                    for (name, mapped_name) in config["qualities"].items():
                         try:
-                            quality_dict[name] = int(data.loc[data['digest_ImageNumber'] == image.description, mapped_name])
+                            quality_dict[name] = int(data.loc[data["digest_ImageNumber"] == image.description, mapped_name])
                         except KeyError:
                             logger.debug("Column {} not found. Skipping.".format(mapped_name))
 
@@ -75,7 +75,7 @@ def seed(config, directories, scoped_session):
 
         _ = find_patterns(pattern_descriptions, scoped_session)
 
-        data = pandas.read_csv(os.path.join(directory, config['filenames']['reference_pattern']))
+        data = pandas.read_csv(os.path.join(directory, config["filenames"]["reference_pattern"]))
 
         columns = data.columns
 
