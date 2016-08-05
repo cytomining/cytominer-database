@@ -30,14 +30,16 @@ def test_seed(dataset):
 
         perturbation.ingest.seed(config=config, input=dataset["data_dir"], output="sqlite:///{}".format(str(sqlite_file)))
 
-        image_csv = os.path.join(temp_dir, config["filenames"]["image"])
+        table_key = "image"
 
-        image_table_name = config["filenames"]["image"].split(".")[0]
+        csv_filename = os.path.join(temp_dir, config["filenames"][table_key])
 
-        odo.odo("sqlite:///{}::{}".format(str(sqlite_file), image_table_name), image_csv)
+        table_name = config["filenames"][table_key].split(".")[0]
 
-        image_df = pd.read_csv(image_csv)
+        odo.odo("sqlite:///{}::{}".format(str(sqlite_file), table_name), csv_filename)
 
-        assert image_df.shape[0] == dataset["ingest"]["{}_nrows".format(image_table_name)]
+        df = pd.read_csv(csv_filename)
 
-        assert image_df.shape[1] == dataset["ingest"]["{}_ncols".format(image_table_name)]
+        assert df.shape[0] == dataset["ingest"]["{}_nrows".format(table_name)]
+
+        assert df.shape[1] == dataset["ingest"]["{}_ncols".format(table_name)]
