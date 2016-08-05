@@ -38,6 +38,7 @@ def preprocess_csv(input, output, table_name, table_number):
 
 
 def into(csv_filename, output, table_name, table_number):
+
     with tempfile.TemporaryDirectory() as temp_dir:
         processed_csv_filename = os.path.join(temp_dir, os.path.basename(csv_filename))
 
@@ -49,19 +50,20 @@ def into(csv_filename, output, table_name, table_number):
 def seed(config, input, output):
     """Call functions to create backend
 
+    :param config
+    :param input
+    :param output
+    :return: None
     """
-    logger.debug(input)
-    logger.debug(output)
 
     pathnames = perturbation.utils.find_directories(input)
 
     for directory in pathnames:
         try:
-            image_csv = os.path.join(directory, config["filenames"]["image"])
+            pattern_csvs, image_csv = perturbation.utils.validate_csvs(config, directory)
 
-            assert os.path.isfile(image_csv)
-        except AssertionError:
-            logger.debug("{} not found in {}. Skipping.".format(config["filenames"]["image"], directory))
+        except OSError as e:
+            logger.warning(e)
 
             continue
 
@@ -73,18 +75,11 @@ def seed(config, input, output):
 
         into(csv_filename=image_csv, output=output, table_name=image_table_name, table_number=table_number)
 
-        for filename in glob.glob(os.path.join(directory, '*.csv')):
-            if filename not in [
-            os.path.join(directory, config['filenames']['image']),
-            os.path.join(directory, config['filenames']['object']),
-            os.path.join(directory, config['filenames']['experiment'])
-            ]:
-                pattern_csv = filename
+        for pattern_csv in pattern_csvs:
 
                 pattern = os.path.basename(pattern_csv).split('.')[0]
 
                 into(csv_filename=pattern_csv, output=output, table_name=pattern, table_number=table_number)
-
 
 import click
 import configparser
