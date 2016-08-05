@@ -30,16 +30,18 @@ def test_seed(dataset):
 
         perturbation.ingest.seed(config=config, input=dataset["data_dir"], output="sqlite:///{}".format(str(sqlite_file)))
 
-        table_key = "image"
+        for (k, v) in dict({"cells" : "Cells.csv", "cytoplasm" : "Cytoplasm.csv", "nuclei" : "Nuclei.csv"}).items():
+            config["filenames"][k] = v
 
-        csv_filename = os.path.join(temp_dir, config["filenames"][table_key])
+        for table_key in ["image", "cells", "cytoplasm", "nuclei"]:
+            csv_filename = os.path.join(temp_dir, config["filenames"][table_key])
 
-        table_name = config["filenames"][table_key].split(".")[0]
+            table_name = config["filenames"][table_key].split(".")[0]
 
-        odo.odo("sqlite:///{}::{}".format(str(sqlite_file), table_name), csv_filename)
+            odo.odo("sqlite:///{}::{}".format(str(sqlite_file), table_name), csv_filename)
 
-        df = pd.read_csv(csv_filename)
+            df = pd.read_csv(csv_filename)
 
-        assert df.shape[0] == dataset["ingest"]["{}_nrows".format(table_name)]
+            assert df.shape[0] == dataset["ingest"]["{}_nrows".format(table_name)]
 
-        assert df.shape[1] == dataset["ingest"]["{}_ncols".format(table_name)]
+            assert df.shape[1] == dataset["ingest"]["{}_ncols".format(table_name)]
