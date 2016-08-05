@@ -10,7 +10,7 @@ import tempfile
 logger = logging.getLogger(__name__)
 
 
-def append_table_number(input, output, table_number):
+def preprocess_csv(input, output, table_name, table_number):
     with tempfile.NamedTemporaryFile() as temp_file:
 
         nrows = sum(1 for line in open(input)) - 1
@@ -32,13 +32,11 @@ def append_table_number(input, output, table_number):
 
 def into(csv_filename, output, table_name, table_number):
     with tempfile.TemporaryDirectory() as temp_dir:
-        appended_csv_filename = os.path.join(temp_dir, os.path.basename(csv_filename))
+        processed_csv_filename = os.path.join(temp_dir, os.path.basename(csv_filename))
 
-        append_table_number(csv_filename, appended_csv_filename, table_number)
+        preprocess_csv(csv_filename, processed_csv_filename, table_name=table_name, table_number=table_number)
 
-        # logger.debug("Ingesting {} into {}::{} with table_number={}".format(appended_csv_filename, output, table_name, table_number))
-
-        odo.odo(appended_csv_filename, "{}::{}".format(output, table_name), has_header=True, delimiter=",")
+        odo.odo(processed_csv_filename, "{}::{}".format(output, table_name), has_header=True, delimiter=",")
 
 
 def seed(config, input, output):
