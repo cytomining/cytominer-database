@@ -1,4 +1,3 @@
-import glob
 import hashlib
 import logging
 import os
@@ -19,14 +18,18 @@ def seed(config, directories, scoped_session):
 
     for directory in pathnames:
         try:
-            data = pandas.read_csv(os.path.join(directory, config['filenames']['image']))
-        except OSError:
-            logger.debug('{} not found in {}. Skipping.'.format(config['filenames']['image'], directory))
+            pattern_csvs, image_csv = perturbation.utils.validate_csvs(config, directory)
+
+        except OSError as e:
+            logger.warning(e)
+
             continue
 
-        logger.debug('Parsing {}'.format(directory))
+        data = pandas.read_csv(image_csv)
 
-        digest = hashlib.md5(open(os.path.join(directory, config['filenames']['image']), 'rb').read()).hexdigest()
+        logger.debug("Parsing {}".format(directory))
+
+        digest = hashlib.md5(open(image_csv, "rb").read()).hexdigest()
 
         # Populate plates, wells, images, qualities
 
@@ -61,17 +64,7 @@ def seed(config, directories, scoped_session):
 
                     _ = find_quality(quality_dict, image, scoped_session)
 
-        filenames = []
-
-        for filename in glob.glob(os.path.join(directory, '*.csv')):
-            if filename not in [
-            os.path.join(directory, config['filenames']['image']),
-            os.path.join(directory, config['filenames']['object']),
-            os.path.join(directory, config['filenames']['experiment'])
-            ]:
-                filenames.append(os.path.basename(filename))
-
-        pattern_descriptions = find_pattern_descriptions(filenames)
+        pattern_descriptions = find_pattern_descriptions([os.path.basename(filename) for filename in pattern_csvs])
 
         _ = find_patterns(pattern_descriptions, scoped_session)
 

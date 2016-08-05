@@ -32,10 +32,14 @@ def seed(config, directory, scoped_session):
     :return: None
     """
     try:
-        data = pandas.read_csv(os.path.join(directory, config['filenames']['image']))
-    except OSError:
-        logger.debug('{} not found in {}. Skipping.'.format(config['filenames']['image'], directory))
-        return
+        _, image_csv = perturbation.utils.validate_csvs(config, directory)
+
+    except OSError as e:
+        logger.warning(e)
+
+        return 
+
+    data = pandas.read_csv(image_csv)
 
     logger.debug('Parsing {}'.format(directory))
 
@@ -63,7 +67,6 @@ def seed(config, directory, scoped_session):
         object_dictionary = create_object(digest, object_number, scoped_session)
 
         objects.append(object_dictionary)
-
 
     patterns = scoped_session.query(perturbation.models.Pattern).all()
 
