@@ -9,8 +9,8 @@ import tempfile
 
 logger = logging.getLogger(__name__)
 
-def append_table_number(input, output, table_number):
 
+def append_table_number(input, output, table_number):
     with tempfile.NamedTemporaryFile() as temp_file:
 
         nrows = sum(1 for line in open(input)) - 1
@@ -29,17 +29,8 @@ def append_table_number(input, output, table_number):
 
         subprocess.check_output(cmd, shell=True)
 
-        # cmd = "cp {} {}".format(input, output)
-
-        # subprocess.check_output(cmd, shell=True)
-
-        # cmd = "cp {} {}".format(temp_file.name, "~/Desktop")
-
-        # subprocess.check_output(cmd, shell=True)
-
 
 def into(csv_filename, output, table_name, table_number):
-
     with tempfile.TemporaryDirectory() as temp_dir:
         appended_csv_filename = os.path.join(temp_dir, os.path.basename(csv_filename))
 
@@ -87,6 +78,58 @@ def seed(config, input, output):
 
                 into(csv_filename=pattern_csv, output=output, table_name=pattern, table_number=table_number)
 
+
+import click
+import configparser
+import pkg_resources
+import subprocess
+import logging
+import logging.config
+
+
+config_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
+
+@click.command()
+@click.argument('input', type=click.Path(dir_okay=True, exists=True, readable=True))
+@click.help_option(help='')
+@click.option('-c', '--configfile', default=config_file_sys, type=click.Path(exists=True, file_okay=True, readable=True))
+@click.option('-d', '--skipmunge', default=False, is_flag=True)
+@click.option('-o', '--output', type=click.Path(exists=False, file_okay=True, writable=True))
+@click.option('-v', '--verbose', default=False, is_flag=True)
+def main(configfile, input, output, verbose, skipmunge):
+    """
+
+    :param configfile:
+    :param input:
+    :param output:
+    :param skipmunge:
+    :param verbose:
+
+    :return:
+
+    """
+
+    import json
+
+    with open(pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "logging_config.json")) as f:
+        logging.config.dictConfig(json.load(f))
+
+    logger = logging.getLogger(__name__)
+
+    config = configparser.ConfigParser()
+
+    config.read(configfile)
+
+    if not skipmunge:
+        logger.debug('Calling munge')
+        subprocess.call([pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "munge.sh"), input])
+        logger.debug('Completed munge')
+    else:
+        logger.debug('Skipping munge')
+
+    perturbation.ingest.seed(config=config, input=input, output=output)
+
+    logger.debug('Finish')
 
 
 
