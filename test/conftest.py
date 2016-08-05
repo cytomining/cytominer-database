@@ -73,10 +73,12 @@ def dataset(request):
                     {
                         "image_nrows" : 8,
                         "image_ncols" : 229,
-                        "object_nrows" : 40,
-                        "cells_ncols" : 294,
-                        "cytoplasm_ncols" : 279,
-                        "nuclei_ncols" : 287
+                        "Cells_nrows" : 40,
+                        "Cells_ncols" : 294,
+                        "Cytoplasm_nrows" : 40,
+                        "Cytoplasm_ncols" : 279,
+                        "Nuclei_nrows" : 40,
+                        "Nuclei_ncols" : 287
                     },
                 "munge" : True
                 }
@@ -101,12 +103,14 @@ def dataset(request):
                     },
                 "ingest" :
                     {
-                        "image_nrows" : 4,
-                        "image_ncols" : 6,
-                        "object_nrows" : 40,
-                        "cells_ncols" : 586,
-                        "cytoplasm_ncols" : 572,
-                        "nuclei_ncols" : 595
+                        "Image_nrows" : 4,
+                        "Image_ncols" : 6,
+                        "Cells_nrows" : 40,
+                        "Cells_ncols" : 586,
+                        "Cytoplasm_nrows" : 40,
+                        "Cytoplasm_ncols" : 572,
+                        "Nuclei_nrows" : 40,
+                        "Nuclei_ncols" : 595
                     },
                 "munge" : False
                 }        
