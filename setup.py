@@ -44,6 +44,7 @@ setuptools.setup(
     install_requires=[
         'click',
         'csvkit',
+        'odo',
         'pandas',
         'psycopg2',
         'pytest',
@@ -53,6 +54,7 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'perturbation=perturbation:__main__',
+            'ingest=perturbation.ingest:main',
             'inspect=perturbation.inspect:main'
         ]
     }

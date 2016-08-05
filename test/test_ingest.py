@@ -2,21 +2,26 @@
 
 """
 
-def test_seed(dataset):
-	assert 1 == 1
+import configparser
+import glob
+import os
+import perturbation.ingest
+import pytest
+import subprocess
 
-    # dataset = datasets[selected_dataset]
 
-    # if dataset["munge"]:
-    #     subprocess.call(["./munge.sh", dataset["data_dir"]])
+def test_seed(dataset, tmpdir):
+    assert 1 == 1
 
-    # config_file = os.path.join(dataset["data_dir"], "config.ini")
+    if dataset["munge"]:
+        subprocess.call(["./munge.sh", dataset["data_dir"]])
 
-    # config = configparser.ConfigParser()
+    config_file = os.path.join(dataset["data_dir"], "config.ini")
 
-    # config.read(config_file)
+    config = configparser.ConfigParser()
 
-    # perturbation.ingest.seed(config=config, input=dataset["data_dir"], session=session, stage="images", sqlfile="views.sql")
+    config.read(config_file)
 
-    # for directory in glob.glob(os.path.join(dataset["data_dir"], "*/")):
-    #     perturbation.database.seed(config=config, input=directory, session=session, stage="objects", sqlfile="views.sql")
+    sqlite_file = tmpdir.mkdir("test").join("test.db")
+
+    perturbation.ingest.seed(config=config, input=dataset["data_dir"], output="sqlite:///{}".format(str(sqlite_file)))
