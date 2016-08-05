@@ -36,7 +36,7 @@ def into(csv_filename, output, table_name, table_number):
 
         append_table_number(csv_filename, appended_csv_filename, table_number)
 
-        logger.debug("Ingesting {} into {}::{} with table_number={}".format(appended_csv_filename, output, table_name, table_number))
+        # logger.debug("Ingesting {} into {}::{} with table_number={}".format(appended_csv_filename, output, table_name, table_number))
 
         odo.odo(appended_csv_filename, "{}::{}".format(output, table_name), has_header=True, delimiter=",")
 
@@ -59,6 +59,8 @@ def seed(config, input, output):
             logger.debug("{} not found in {}. Skipping.".format(config["filenames"]["image"], directory))
 
             continue
+
+        logger.debug('Parsing {}'.format(directory))
 
         table_number = hashlib.md5(open(image_csv, 'rb').read()).hexdigest()
 

@@ -36,13 +36,11 @@ def seed(config, directories, scoped_session):
 
         data['digest_ImageNumber'] = data['ImageNumber'].apply(lambda x: '{}_{}'.format(digest, x))
 
-        # TODO: 'Metadata_Barcode' should be gotten from a config file
         plate_descriptions = data[config['metadata']['plate']].unique()
 
         plates = find_plates(plate_descriptions, scoped_session)
 
         for plate in plates:
-            # TODO: 'Metadata_Barcode' should be gotten from a config file
             well_descriptions = data[data[config['metadata']['plate']] == plate.description][config['metadata']['well']].unique()
 
             wells = find_wells(well_descriptions, plate, scoped_session)
@@ -53,8 +51,6 @@ def seed(config, directories, scoped_session):
                 images = find_images(image_descriptions, well, scoped_session)
 
                 for image in images:
-                    # TODO: Change find_or_create_by to create
-                    # TODO: 'Metadata_*' should be gotten from a config file
                     quality_dict = dict()
 
                     for (name, mapped_name) in config['qualities'].items():
