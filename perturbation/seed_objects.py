@@ -28,7 +28,9 @@ textures = []
 def seed(config, directory, scoped_session):
     """Creates backend
 
+    :param config:
     :param directory: directory containing an image.csv and object.csv
+    :param scoped_session:
     :return: None
     """
     try:
@@ -37,7 +39,7 @@ def seed(config, directory, scoped_session):
     except OSError as e:
         logger.warning(e)
 
-        return 
+        return
 
     data = pandas.read_csv(image_csv)
 
