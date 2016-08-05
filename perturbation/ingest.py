@@ -9,14 +9,18 @@ import tempfile
 
 logger = logging.getLogger(__name__)
 
+def append_table_number(input, output, table_number):
+    cmd = "cp {} {}".format(csv_filename, appended_csv_filename)
+
+    subprocess.check_output(cmd, shell=True)
+
+
 def into(csv_filename, output, table_name, table_number):
 
     with tempfile.TemporaryDirectory() as temp_dir:
         appended_csv_filename = os.path.join(temp_dir, os.path.basename(csv_filename))
 
-        cmd = "cp {} {}".format(csv_filename, appended_csv_filename)
-
-        subprocess.check_output(cmd, shell=True)
+        append_table_number(csv_filename, appended_csv_filename, table_number)
 
         logger.debug("Ingesting {} into {}::{} with table_number={}".format(appended_csv_filename, output, table_name, table_number))
 
