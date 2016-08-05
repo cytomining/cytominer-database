@@ -69,6 +69,15 @@ def dataset(request):
                         "n_moments_coefs" : 30,
                         "n_correlation_pairs" : 5
                     },
+                "ingest" :
+                    {
+                        "image_nrows" : 8,
+                        "image_ncols" : 229,
+                        "object_nrows" : 40,
+                        "cells_ncols" : 294,
+                        "cytoplasm_ncols" : 279,
+                        "nuclei_ncols" : 287
+                    },
                 "munge" : True
                 }
 
@@ -89,6 +98,15 @@ def dataset(request):
                         "n_scales_neighborhood" : 2,
                         "n_moments_coefs" : 30,
                         "n_correlation_pairs" : 10
+                    },
+                "ingest" :
+                    {
+                        "image_nrows" : 4,
+                        "image_ncols" : 6,
+                        "object_nrows" : 40,
+                        "cells_ncols" : 586,
+                        "cytoplasm_ncols" : 572,
+                        "nuclei_ncols" : 595
                     },
                 "munge" : False
                 }        

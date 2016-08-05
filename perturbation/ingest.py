@@ -18,7 +18,7 @@ def into(csv_filename, output, table_name, table_number):
 
         subprocess.check_output(cmd, shell=True)
 
-        print("Ingesting {} into {}::{} with table_number={}".format(appended_csv_filename, output, table_name, table_number))
+        logger.debug("Ingesting {} into {}::{} with table_number={}".format(appended_csv_filename, output, table_name, table_number))
 
         odo.odo(appended_csv_filename, "{}::{}".format(output, table_name), has_header=True, delimiter=",")
 
@@ -44,7 +44,9 @@ def seed(config, input, output):
 
         table_number = hashlib.md5(open(image_csv, 'rb').read()).hexdigest()
 
-        into(csv_filename=image_csv, output=output, table_name="image", table_number=table_number)
+        image_table_name = config["filenames"]["image"].split(".")[0]
+
+        into(csv_filename=image_csv, output=output, table_name=image_table_name, table_number=table_number)
 
         for filename in glob.glob(os.path.join(directory, '*.csv')):
             if filename not in [
