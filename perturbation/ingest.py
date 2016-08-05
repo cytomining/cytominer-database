@@ -10,9 +10,32 @@ import tempfile
 logger = logging.getLogger(__name__)
 
 def append_table_number(input, output, table_number):
-    cmd = "cp {} {}".format(csv_filename, appended_csv_filename)
 
-    subprocess.check_output(cmd, shell=True)
+    with tempfile.NamedTemporaryFile() as temp_file:
+
+        nrows = sum(1 for line in open(input)) - 1
+
+        cmd = "echo 'TableNumber' >> {}".format(temp_file.name)
+
+        subprocess.check_output(cmd, shell=True)
+
+        tmpl = "{}\\n%.0s".format(table_number)
+
+        cmd = "printf '{0}' {{1..{1}}} >> {2}".format(tmpl, nrows, temp_file.name)
+
+        subprocess.check_output(cmd, shell=True)
+
+        cmd = "paste -d',' {} {} > {}".format(temp_file.name, input, output)
+
+        subprocess.check_output(cmd, shell=True)
+
+        # cmd = "cp {} {}".format(input, output)
+
+        # subprocess.check_output(cmd, shell=True)
+
+        # cmd = "cp {} {}".format(temp_file.name, "~/Desktop")
+
+        # subprocess.check_output(cmd, shell=True)
 
 
 def into(csv_filename, output, table_name, table_number):
