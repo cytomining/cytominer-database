@@ -1,12 +1,16 @@
-import glob
+import click
+import configparser
 import hashlib
 import logging
-import odo 
+import logging.config
+import odo
 import os
 import perturbation.utils
+import pkg_resources
 import platform
 import subprocess
 import tempfile
+
 
 logger = logging.getLogger(__name__)
 
@@ -80,13 +84,6 @@ def seed(config, input, output):
                 pattern = os.path.basename(pattern_csv).split('.')[0]
 
                 into(csv_filename=pattern_csv, output=output, table_name=pattern, table_number=table_number)
-
-import click
-import configparser
-import pkg_resources
-import subprocess
-import logging
-import logging.config
 
 
 config_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
