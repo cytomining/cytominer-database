@@ -30,6 +30,7 @@ def validate_csvs(config, directory):
     filesize_checks = dict({(filename, os.stat(filename).st_size > 0) for filename in [*pattern_csvs, image_csv]})
 
     if not all(filesize_checks.values()):
-        raise OSError("Some files were empty. Skipping {}.".format(directory))
+        empty_files = ",".join([os.path.basename(filename) for (filename, valid) in filesize_checks.items() if not valid])
+        raise OSError("Some files were empty: {}. Skipping {}.".format(empty_files, directory))
 
     return pattern_csvs, image_csv

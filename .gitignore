@@ -6,9 +6,12 @@ __pycache__
 build
 dist
 .cache
-Cells.csv
-Cytoplasm.csv
-Nuclei.csv
+test/data_a/1/Cells.csv
+test/data_a/1/Cytoplasm.csv
+test/data_a/1/Nuclei.csv
+test/data_a/2/Cells.csv
+test/data_a/2/Cytoplasm.csv
+test/data_a/2/Nuclei.csv
 .DS_Store
 .python-version
 *.c
