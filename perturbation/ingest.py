@@ -4,6 +4,7 @@ import logging
 import odo 
 import os
 import perturbation.utils
+import platform
 import subprocess
 import tempfile
 
@@ -26,6 +27,12 @@ def preprocess_csv(input, output, table_name, table_number):
         subprocess.check_output(cmd, shell=True)
 
         cmd = "paste -d',' {} {} > {}".format(temp_file.name, input, output)
+
+        subprocess.check_output(cmd, shell=True)
+
+        sed_cmd = "gsed" if platform.system() == "Darwin" else "sed"
+
+        cmd = "{sed} -r -i '1{{s/^/{pattern}_/g;s/,/,{pattern}_/g;s/{pattern}_ImageNumber/ImageNumber/1;s/{pattern}_ObjectNumber/ObjectNumber/1;s/{pattern}_TableNumber/TableNumber/1}}' {filename}".format(filename=output, pattern=table_name, sed=sed_cmd)
 
         subprocess.check_output(cmd, shell=True)
 
