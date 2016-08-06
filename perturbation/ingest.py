@@ -1,3 +1,7 @@
+"""
+
+"""
+
 import click
 import configparser
 import hashlib
@@ -16,6 +20,16 @@ logger = logging.getLogger(__name__)
 
 
 def preprocess_csv(input, output, table_name, table_number):
+    """
+
+    :param input:
+    :param output:
+    :param table_name:
+    :param table_number:
+
+    :return:
+
+    """
     with tempfile.NamedTemporaryFile() as temp_file:
 
         nrows = sum(1 for line in open(input)) - 1
@@ -42,6 +56,16 @@ def preprocess_csv(input, output, table_name, table_number):
 
 
 def into(csv_filename, output, table_name, table_number):
+    """
+
+    :param csv_filename:
+    :param output:
+    :param table_name:
+    :param table_number:
+
+    :return:
+
+    """
 
     with tempfile.TemporaryDirectory() as temp_dir:
         processed_csv_filename = os.path.join(temp_dir, os.path.basename(csv_filename))
@@ -52,12 +76,15 @@ def into(csv_filename, output, table_name, table_number):
 
 
 def seed(config, input, output):
-    """Call functions to create backend
+    """
+    Call functions to create backend
 
-    :param config
-    :param input
-    :param output
-    :return: None
+    :param config:
+    :param input:
+    :param output:
+
+    :return:
+
     """
 
     pathnames = perturbation.utils.find_directories(input)

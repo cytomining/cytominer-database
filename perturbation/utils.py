@@ -3,6 +3,13 @@ import os
 
 
 def find_directories(directory):
+    """
+
+    :param directory:
+
+    :return:
+
+    """
     directories = set()
 
     filenames = glob.glob(os.path.join(directory, '*/'))
@@ -16,6 +23,14 @@ def find_directories(directory):
 
 
 def validate_csvs(config, directory):
+    """
+
+    :param config:
+    :param directory:
+
+    :return:
+
+    """
     image_csv = os.path.join(directory, config["filenames"]["image"])
 
     if not os.path.isfile(image_csv):

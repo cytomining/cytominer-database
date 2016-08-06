@@ -1,11 +1,15 @@
+"""
+
+"""
+
 import click
 import collections
 import hashlib
+import logging
 import os
 import pandas
 import perturbation.models
 import perturbation.utils
-import logging
 import uuid
 
 logger = logging.getLogger(__name__)
@@ -31,7 +35,9 @@ def seed(config, directory, scoped_session):
     :param config:
     :param directory: directory containing an image.csv and object.csv
     :param scoped_session:
+
     :return: None
+
     """
     try:
         _, image_csv = perturbation.utils.validate_csvs(config, directory)
@@ -87,7 +93,8 @@ def seed(config, directory, scoped_session):
 
 
 def create_patterns(channels, config, correlation_columns, counts, digest, directory, moments, neighborhood_scales, patterns, texture_scales, session):
-    """Populates all the tables in the backend
+    """
+    Populates all the tables in the backend
 
     :param channels:
     :param config:
@@ -97,12 +104,14 @@ def create_patterns(channels, config, correlation_columns, counts, digest, direc
     :param directory:
     :param moments:
     :param neighborhood_scales:
-    :param objects:
     :param patterns:
-    :param session:
     :param texture_scales:
-    :return: None
+    :param session:
+
+    :return:
+
     """
+
     logger.debug('Reading {}'.format(os.path.basename(directory)))
 
     for pattern in patterns:
@@ -596,7 +605,9 @@ def __save__(table, records, session):
     :param table: table class
     :param records: records to insert in the table
     :param session: session
+
     :return:
+    
     """
     logger.debug('\tStarted saving: {}'.format(str(table.__tablename__)))
 

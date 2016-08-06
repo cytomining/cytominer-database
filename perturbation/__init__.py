@@ -4,11 +4,12 @@
 
 import click
 import configparser
+import json
+import logging
+import logging.config
 import perturbation.database
 import pkg_resources
 import subprocess
-import logging
-import logging.config
 
 
 def __version__(context, parameter, argument):
@@ -37,16 +38,17 @@ sql_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("
 def __main__(configfile, input, output, sqlfile, stage, verbose, skipmunge):
     """
 
+    :param configfile:
     :param input:
     :param output:
+    :param sqlfile:
+    :param stage:
     :param verbose:
+    :param skipmunge:
 
     :return:
 
     """
-
-    import json
-
     with open(pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "logging_config.json")) as f:
         logging.config.dictConfig(json.load(f))
 

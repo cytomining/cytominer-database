@@ -1,3 +1,7 @@
+"""
+
+"""
+
 import logging
 import perturbation.base
 import perturbation.models
@@ -15,6 +19,11 @@ logger = logging.getLogger(__name__)
 
 def setup(connection):
     """
+
+    :param connection:
+
+    :return:
+
     """
 
     Session = sqlalchemy.orm.sessionmaker()
@@ -33,12 +42,16 @@ def setup(connection):
 def seed(config, input, output=None, session=None, stage="images", sqlfile=None):
     """Call functions to create backend
 
+    :param config:
     :param input: if stage is `images`, then top-level directory containing sub-directories, each of which have an
     image.csv and object.csv; if stage is "objects", then a subdirectory contain a pair of image.csv and object.csv
     :param output: name of SQLlite/PostGreSQL database
+    :param session:
     :param stage: `images` or `objects`
     :param sqlfile: SQL file to be executed on the backend database after it is created
+
     :return:
+
     """
     assert (session is not None) != (output is not None)
 
@@ -73,6 +86,14 @@ def seed(config, input, output=None, session=None, stage="images", sqlfile=None)
 
 
 def create_views(sqlfile, engine):
+    """
+
+    :param sqlfile:
+    :param engine:
+
+    :return:
+
+    """
     with open(sqlfile) as f:
         import sqlparse
 

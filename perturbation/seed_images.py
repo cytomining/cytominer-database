@@ -1,3 +1,7 @@
+"""
+
+"""
+
 import hashlib
 import logging
 import os
@@ -8,10 +12,14 @@ import perturbation.utils
 logger = logging.getLogger(__name__)
 
 def seed(config, directories, scoped_session):
-    """Creates backend
+    """
 
+    :param config:
     :param directories: top-level directory containing sub-directories, each of which have an image.csv and object.csv
-    :return: None
+    :param scoped_session:
+
+    :return:
+
     """
 
     pathnames = perturbation.utils.find_directories(directories)
