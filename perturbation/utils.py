@@ -27,10 +27,15 @@ def validate_csvs(config, directory):
         os.path.join(directory, config['filenames']['experiment'])
     ]]
 
-    filesize_checks = dict({(filename, os.stat(filename).st_size > 0) for filename in [*pattern_csvs, image_csv]})
+    def is_valid(f):
+        nrows = sum(1 for line in open(f)) - 1
+        file_size = os.stat(f).st_size
+        return (file_size > 0) & (nrows >= 1)
 
-    if not all(filesize_checks.values()):
-        empty_files = ",".join([os.path.basename(filename) for (filename, valid) in filesize_checks.items() if not valid])
-        raise OSError("Some files were empty: {}. Skipping {}.".format(empty_files, directory))
+    file_checks = dict({(filename, is_valid(filename)) for filename in [*pattern_csvs, image_csv]})
+
+    if not all(file_checks.values()):
+        invalid_files = ",".join([os.path.basename(filename) for (filename, valid) in file_checks.items() if not valid])
+        raise OSError("Some files were invalid: {}. Skipping {}.".format(invalid_files, directory))
 
     return pattern_csvs, image_csv
