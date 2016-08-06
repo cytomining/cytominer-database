@@ -1,6 +1,12 @@
-import glob
-import os
+"""
+"""
 
+import glob
+import logging
+import os
+import subprocess
+
+logger = logging.getLogger(__name__)
 
 def find_directories(directory):
     """
@@ -22,7 +28,37 @@ def find_directories(directory):
     return directories
 
 
-def validate_csvs(config, directory):
+def validate_csv(csvfile):
+    """
+
+    :param csvfile:
+
+    :return:
+
+    """
+    cmd = "csvclean -n {}".format(csvfile)
+
+    try:
+        csvcheck = subprocess.check_output(cmd, shell=True)
+
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            return False
+
+        elif e.returncode == 127:
+            logger.warning("csvclean not found. Validation will not be rigorous.")
+            
+        else:
+            raise subprocess.CalledProcessError(e.returncode, e.cmd)
+
+    nrows = sum(1 for line in open(csvfile)) - 1
+
+    file_size = os.stat(csvfile).st_size
+
+    return (file_size > 0) & (nrows >= 1) & (csvcheck == b'No errors.\n')
+
+
+def validate_csv_set(config, directory):
     """
 
     :param config:
@@ -42,12 +78,7 @@ def validate_csvs(config, directory):
         os.path.join(directory, config['filenames']['experiment'])
     ]]
 
-    def is_valid(f):
-        nrows = sum(1 for line in open(f)) - 1
-        file_size = os.stat(f).st_size
-        return (file_size > 0) & (nrows >= 1)
-
-    file_checks = dict({(filename, is_valid(filename)) for filename in [*pattern_csvs, image_csv]})
+    file_checks = dict({(filename, validate_csv(filename)) for filename in [*pattern_csvs, image_csv]})
 
     if not all(file_checks.values()):
         invalid_files = ",".join([os.path.basename(filename) for (filename, valid) in file_checks.items() if not valid])

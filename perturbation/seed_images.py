@@ -26,7 +26,7 @@ def seed(config, directories, scoped_session):
 
     for directory in pathnames:
         try:
-            pattern_csvs, image_csv = perturbation.utils.validate_csvs(config, directory)
+            pattern_csvs, image_csv = perturbation.utils.validate_csv_set(config, directory)
 
         except OSError as e:
             logger.warning(e)

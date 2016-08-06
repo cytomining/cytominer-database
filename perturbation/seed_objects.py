@@ -40,7 +40,7 @@ def seed(config, directory, scoped_session):
 
     """
     try:
-        _, image_csv = perturbation.utils.validate_csvs(config, directory)
+        _, image_csv = perturbation.utils.validate_csv_set(config, directory)
 
     except OSError as e:
         logger.warning(e)
@@ -607,7 +607,7 @@ def __save__(table, records, session):
     :param session: session
 
     :return:
-    
+
     """
     logger.debug('\tStarted saving: {}'.format(str(table.__tablename__)))
 
