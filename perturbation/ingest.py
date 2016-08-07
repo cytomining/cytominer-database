@@ -30,29 +30,17 @@ def preprocess_csv(input, output, table_name, table_number):
     :return:
 
     """
-    with tempfile.NamedTemporaryFile() as temp_file:
+    with open(input) as fin, open(output, "w") as fout:
+            for i, line in enumerate(fin.readlines()):
+                if i == 0:
+                    line = ",".join(["{}_{}".format(table_name, s) if s not in ["ImageNumber", "ObjectNumber"] else s for s in line.split(",")])
 
-        nrows = sum(1 for line in open(input)) - 1
+                    line = "TableNumber," + line
 
-        cmd = "echo 'TableNumber' >> {}".format(temp_file.name)
+                else:
+                    line = str(table_number) + "," + line
 
-        subprocess.check_output(cmd, shell=True)
-
-        tmpl = "{}\\n%.0s".format(table_number)
-
-        cmd = "printf '{0}' {{1..{1}}} >> {2}".format(tmpl, nrows, temp_file.name)
-
-        subprocess.check_output(cmd, shell=True)
-
-        cmd = "paste -d',' {} {} > {}".format(temp_file.name, input, output)
-
-        subprocess.check_output(cmd, shell=True)
-
-        sed_cmd = "gsed" if platform.system() == "Darwin" else "sed"
-
-        cmd = "{sed} -r -i '1{{s/^/{pattern}_/g;s/,/,{pattern}_/g;s/{pattern}_ImageNumber/ImageNumber/1;s/{pattern}_ObjectNumber/ObjectNumber/1;s/{pattern}_TableNumber/TableNumber/1}}' {filename}".format(filename=output, pattern=table_name, sed=sed_cmd)
-
-        subprocess.check_output(cmd, shell=True)
+                fout.write(line)
 
 
 def into(csv_filename, output, table_name, table_number):
