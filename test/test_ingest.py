@@ -12,8 +12,6 @@ import tempfile
 
 
 def test_seed(dataset):
-    assert 1 == 1
-
     if dataset["munge"]:
         subprocess.call(["./munge.sh", dataset["data_dir"]])
 
@@ -24,7 +22,6 @@ def test_seed(dataset):
     config.read(config_file)
 
     with tempfile.TemporaryDirectory() as temp_dir:
-
         sqlite_file = os.path.join(temp_dir, "test.db")
 
         perturbation.ingest.seed(config=config, input=dataset["data_dir"], output="sqlite:///{}".format(str(sqlite_file)))
