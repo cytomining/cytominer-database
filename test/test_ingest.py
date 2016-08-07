@@ -44,3 +44,6 @@ def test_seed(dataset):
             assert df.shape[0] == dataset["ingest"]["{}_nrows".format(table_name)]
 
             assert df.shape[1] == dataset["ingest"]["{}_ncols".format(table_name)] + 1
+
+            if table_key != "image":
+                df.groupby(["TableNumber", "ImageNumber"]).size().sum() == dataset["ingest"]["{}_nrows".format(table_name)]
