@@ -75,7 +75,7 @@ def seed(config, input, output):
 
     """
 
-    pathnames = perturbation.utils.find_directories(input)
+    pathnames = sorted(list(perturbation.utils.find_directories(input)))
 
     for directory in pathnames:
         try:
