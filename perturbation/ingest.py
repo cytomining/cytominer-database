@@ -102,11 +102,13 @@ def seed(config, input, output):
 
 
 config_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config/config_htqc.ini")
+logging_config_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config/logging_config.json")
 
 @click.command()
 @click.argument('input', type=click.Path(dir_okay=True, exists=True, readable=True))
 @click.help_option(help='')
 @click.option('-c', '--configfile', default=config_file_sys, type=click.Path(exists=True, file_okay=True, readable=True))
+@click.option('-l', '--loggingconfigfile', default=logging_config_file_sys, type=click.Path(exists=True, file_okay=True, readable=True))
 @click.option('-d', '--skipmunge', default=False, is_flag=True)
 @click.option('-o', '--output', type=click.Path(exists=False, file_okay=True, writable=True))
 @click.option('-v', '--verbose', default=False, is_flag=True)
@@ -125,7 +127,7 @@ def main(configfile, input, output, verbose, skipmunge):
 
     import json
 
-    with open(pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config/logging_config.json")) as f:
+    with open(loggingconfigfile) as f:
         logging.config.dictConfig(json.load(f))
 
     logger = logging.getLogger(__name__)
