@@ -101,7 +101,7 @@ def seed(config, input, output):
                 into(csv_filename=pattern_csv, output=output, table_name=pattern, table_number=table_number)
 
 
-config_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
+config_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config/config_htqc.ini")
 
 @click.command()
 @click.argument('input', type=click.Path(dir_okay=True, exists=True, readable=True))
@@ -125,7 +125,7 @@ def main(configfile, input, output, verbose, skipmunge):
 
     import json
 
-    with open(pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "logging_config.json")) as f:
+    with open(pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config/logging_config.json")) as f:
         logging.config.dictConfig(json.load(f))
 
     logger = logging.getLogger(__name__)
