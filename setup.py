@@ -41,9 +41,6 @@ setuptools.setup(
             'test'
         ]
     ),
-    package_data={
-    'perturbation': ['config/*'],
-    },
     include_package_data=True,
     install_requires=[
         'click',
