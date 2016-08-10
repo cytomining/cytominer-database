@@ -112,7 +112,7 @@ logging_config_file_sys = pkg_resources.resource_filename(pkg_resources.Requirem
 @click.option('-d', '--skipmunge', default=False, is_flag=True)
 @click.option('-o', '--output', type=click.Path(exists=False, file_okay=True, writable=True))
 @click.option('-v', '--verbose', default=False, is_flag=True)
-def main(configfile, input, output, verbose, skipmunge):
+def main(configfile, input, loggingconfigfile, output, verbose, skipmunge):
     """
 
     :param configfile:
