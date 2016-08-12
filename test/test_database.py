@@ -17,8 +17,12 @@ import subprocess
  
 
 def test_seed(dataset, session):
+
+    munge_file = pkg_resources.resource_filename(__name__, "../perturbation/scripts/munge.sh")
+    sql_file_sys = pkg_resources.resource_filename(__name__, "../perturbation/config/views.sql")
+
     if dataset["munge"]:
-        subprocess.call(["./munge.sh", dataset["data_dir"]])
+        subprocess.call([munge_file, dataset["data_dir"]])
 
     config_file = os.path.join(dataset["data_dir"], "config.ini")
 
@@ -26,10 +30,10 @@ def test_seed(dataset, session):
 
     config.read(config_file)
 
-    perturbation.database.seed(config=config, input=dataset["data_dir"], session=session, stage="images", sqlfile="views.sql")
+    perturbation.database.seed(config=config, input=dataset["data_dir"], session=session, stage="images", sqlfile=sql_file_sys)
 
     for directory in glob.glob(os.path.join(dataset["data_dir"], "*/")):
-        perturbation.database.seed(config=config, input=directory, session=session, stage="objects", sqlfile="views.sql")
+        perturbation.database.seed(config=config, input=directory, session=session, stage="objects", sqlfile=sql_file_sys)
 
     n_plates = dataset["row_counts"]["n_plates"]
     n_channels = dataset["row_counts"]["n_channels"]

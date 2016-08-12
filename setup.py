@@ -37,7 +37,7 @@ setuptools.setup(
         'test': Test
     },
     package_data={
-        'perturbation' :['config/*.ini', 'config/*.json', 'scripts/*.sh'],
+        'perturbation' :['config/*.ini', 'config/*.json', 'config/*.sql', 'scripts/*.sh'],
     },
     packages=setuptools.find_packages(
         exclude=[

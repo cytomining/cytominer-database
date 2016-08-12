@@ -7,13 +7,16 @@ import odo
 import os
 import pandas as pd
 import perturbation.ingest
+import pkg_resources
 import subprocess
 import tempfile
 
 
 def test_seed(dataset):
+    munge_file = pkg_resources.resource_filename(__name__, "../perturbation/scripts/munge.sh")
+
     if dataset["munge"]:
-        subprocess.call(["./munge.sh", dataset["data_dir"]])
+        subprocess.call([munge_file, dataset["data_dir"]])
 
     config_file = os.path.join(dataset["data_dir"], "config.ini")
 

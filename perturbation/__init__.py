@@ -21,9 +21,10 @@ def __version__(context, parameter, argument):
     context.exit()
 
 
-config_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config.ini")
-
-sql_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "views.sql")
+config_file_sys = pkg_resources.resource_filename(__name__, "config/config_htqc.ini")
+logging_config_file_sys = pkg_resources.resource_filename(__name__, "config/logging_config.json")
+munge_file = pkg_resources.resource_filename(__name__, "scripts/munge.sh")
+sql_file_sys = pkg_resources.resource_filename(__name__, "sql_file_sys/views.sql")
 
 @click.command()
 @click.argument('input', type=click.Path(dir_okay=True, exists=True, readable=True))

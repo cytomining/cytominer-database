@@ -104,6 +104,7 @@ def seed(config, input, output):
 config_file_sys = pkg_resources.resource_filename(__name__, "config/config_htqc.ini")
 logging_config_file_sys = pkg_resources.resource_filename(__name__, "config/logging_config.json")
 munge_file = pkg_resources.resource_filename(__name__, "scripts/munge.sh")
+
 @click.command()
 @click.argument('input', type=click.Path(dir_okay=True, exists=True, readable=True))
 @click.help_option(help='')
