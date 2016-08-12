@@ -101,9 +101,9 @@ def seed(config, input, output):
                 into(csv_filename=pattern_csv, output=output, table_name=pattern, table_number=table_number)
 
 
-config_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config/config_htqc.ini")
-logging_config_file_sys = pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "config/logging_config.json")
-
+config_file_sys = pkg_resources.resource_filename(__name__, "config/config_htqc.ini")
+logging_config_file_sys = pkg_resources.resource_filename(__name__, "config/logging_config.json")
+munge_file = pkg_resources.resource_filename(__name__, "scripts/munge.sh")
 @click.command()
 @click.argument('input', type=click.Path(dir_okay=True, exists=True, readable=True))
 @click.help_option(help='')
@@ -138,7 +138,7 @@ def main(configfile, input, loggingconfigfile, output, verbose, skipmunge):
 
     if not skipmunge:
         logger.debug('Calling munge')
-        subprocess.call([pkg_resources.resource_filename(pkg_resources.Requirement.parse("perturbation"), "munge.sh"), input])
+        subprocess.call([munge_file, input])
         logger.debug('Completed munge')
     else:
         logger.debug('Skipping munge')

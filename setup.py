@@ -36,6 +36,9 @@ setuptools.setup(
     cmdclass={
         'test': Test
     },
+    package_data={
+        'perturbation' :['config/*.ini', 'scripts/*.sh'],
+    },
     packages=setuptools.find_packages(
         exclude=[
             'test'
