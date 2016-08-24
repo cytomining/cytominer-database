@@ -27,7 +27,7 @@ def test_seed(dataset):
     with tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test.db")
 
-        perturbation.ingest.seed(config=config, input=dataset["data_dir"], output="sqlite:///{}".format(str(sqlite_file)))
+        perturbation.ingest.seed(config=config, source=dataset["data_dir"], target="sqlite:///{}".format(str(sqlite_file)))
 
         for (k, v) in dict({"cells" : "Cells.csv", "cytoplasm" : "Cytoplasm.csv", "nuclei" : "Nuclei.csv"}).items():
             config["filenames"][k] = v

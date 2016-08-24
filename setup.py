@@ -31,13 +31,26 @@ class Test(setuptools.command.test.test):
 setuptools.setup(
     name='perturbation',
     version='0.0.0',
-    author='Allen Goodman',
-    author_email='allen.goodman@icloud.com',
+    author=[
+        'Allen Goodman',
+        "Claire McQuin",
+        "Shantanu Singh"
+    ],
+    author_email=[
+        "allen.goodman@icloud.com",
+        "mcquincl@gmail.com",
+        "shsingh@broadinstitute.org"
+    ],
     cmdclass={
         'test': Test
     },
     package_data={
-        'perturbation' :['config/*.ini', 'config/*.json', 'config/*.sql', 'scripts/*.sh'],
+        'perturbation': [
+            'config/*.ini',
+            'config/*.json',
+            'config/*.sql',
+            'scripts/*.sh'
+        ],
     },
     packages=setuptools.find_packages(
         exclude=[
@@ -58,7 +71,7 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'perturbation=perturbation:__main__',
-            'ingest=perturbation.ingest:main',
+            'ingest=perturbation.ingest:__main__',
             'inspect=perturbation.inspect:main'
         ]
     }

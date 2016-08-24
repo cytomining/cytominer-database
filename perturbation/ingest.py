@@ -4,150 +4,127 @@
 
 import click
 import configparser
+import csv
 import hashlib
-import logging
-import logging.config
 import odo
 import os
 import perturbation.utils
 import pkg_resources
-import platform
 import subprocess
 import tempfile
 
 
-logger = logging.getLogger(__name__)
+def __format__(name, header):
+    if header in ["ImageNumber", "ObjectNumber"]:
+        return header
+
+    return "{}_{}".format(name, header)
 
 
-def preprocess_csv(input, output, table_name, table_number):
+def into(input, output, name, identifier):
     """
 
     :param input:
     :param output:
-    :param table_name:
-    :param table_number:
-
-    :return:
-
-    """
-    with open(input) as fin, open(output, "w") as fout:
-            for i, line in enumerate(fin.readlines()):
-                if i == 0:
-                    line = ",".join(["{}_{}".format(table_name, s) if s not in ["ImageNumber", "ObjectNumber"] else s for s in line.split(",")])
-
-                    line = "TableNumber," + line
-
-                else:
-                    line = str(table_number) + "," + line
-
-                fout.write(line)
-
-
-def into(csv_filename, output, table_name, table_number):
-    """
-
-    :param csv_filename:
-    :param output:
-    :param table_name:
-    :param table_number:
+    :param name:
+    :param identifier:
 
     :return:
 
     """
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        processed_csv_filename = os.path.join(temp_dir, os.path.basename(csv_filename))
+    with tempfile.TemporaryDirectory() as directory:
+        source = os.path.join(directory, os.path.basename(input))
 
-        preprocess_csv(csv_filename, processed_csv_filename, table_name=table_name, table_number=table_number)
+        with open(input, "r") as fin, open(source, "w") as fout:
+            reader = csv.reader(fin)
+            writer = csv.writer(fout)
 
-        odo.odo(processed_csv_filename, "{}::{}".format(output, table_name), has_header=True, delimiter=",")
+            headers = next(reader)
+            headers = [__format__(name, header) for header in headers]
+            headers = ["TableNumber"] + headers
+
+            writer.writerow(headers)
+
+            [writer.writerow([identifier] + row) for row in reader]
+
+        odo.odo(source, "{}::{}".format(output, name), has_header=True, delimiter=",")
 
 
-def seed(config, input, output):
+def seed(source, target, config):
     """
     Call functions to create backend
 
     :param config:
-    :param input:
-    :param output:
+    :param source:
+    :param target:
 
     :return:
 
     """
 
-    pathnames = sorted(list(perturbation.utils.find_directories(input)))
+    directories = sorted(list(perturbation.utils.find_directories(source)))
 
-    for directory in pathnames:
+    for directory in directories:
         try:
-            pattern_csvs, image_csv = perturbation.utils.validate_csv_set(config, directory)
-
-        except OSError as e:
-            logger.warning(e)
+            patterns, image = perturbation.utils.validate_csv_set(config, directory)
+        except IOError:
+            click.echo("file doesn't exist")
 
             continue
 
-        logger.debug('Parsing {}'.format(directory))
+        with open(image, "rb") as document:
+            identifier = hashlib.md5(document.read()).hexdigest()
 
-        table_number = hashlib.md5(open(image_csv, 'rb').read()).hexdigest()
+        name, _ = os.path.splitext(config["filenames"]["image"])
 
-        image_table_name = config["filenames"]["image"].split(".")[0]
+        into(input=image, output=target, name=name, identifier=identifier)
 
-        into(csv_filename=image_csv, output=output, table_name=image_table_name, table_number=table_number)
+        for pattern in patterns:
+            name, _ = os.path.splitext(os.path.basename(pattern))
 
-        for pattern_csv in pattern_csvs:
+            into(input=pattern, output=target, name=name, identifier=identifier)
 
-                pattern = os.path.basename(pattern_csv).split('.')[0]
-
-                into(csv_filename=pattern_csv, output=output, table_name=pattern, table_number=table_number)
-
-
-config_file_sys = pkg_resources.resource_filename(__name__, "config/config_htqc.ini")
-logging_config_file_sys = pkg_resources.resource_filename(__name__, "config/logging_config.json")
-munge_file = pkg_resources.resource_filename(__name__, "scripts/munge.sh")
 
 @click.command()
-@click.argument('input', type=click.Path(dir_okay=True, exists=True, readable=True))
-@click.help_option(help='')
-@click.option('-c', '--configfile', default=config_file_sys, type=click.Path(exists=True, file_okay=True, readable=True))
-@click.option('-l', '--loggingconfigfile', default=logging_config_file_sys, type=click.Path(exists=True, file_okay=True, readable=True))
-@click.option('-d', '--skipmunge', default=False, is_flag=True)
-@click.option('-o', '--output', type=click.Path(exists=False, file_okay=True, writable=True))
-@click.option('-v', '--verbose', default=False, is_flag=True)
-def main(configfile, input, loggingconfigfile, output, verbose, skipmunge):
+@click.argument(
+    "source",
+    type=click.Path(exists=True)
+)
+@click.option(
+    "-c",
+    "--config",
+    default=pkg_resources.resource_filename(__name__, os.path.join("config", "config_htqc.ini")),
+    type=click.Path(exists=True)
+)
+@click.option(
+    "--munge/--no-munge",
+    default=True
+)
+@click.option(
+    "-o",
+    "--target",
+    type=click.Path(writable=True)
+)
+@click.version_option(
+    version=pkg_resources.get_distribution("perturbation").version
+)
+def __main__(config, source, target, munge):
     """
 
-    :param configfile:
-    :param input:
-    :param output:
-    :param skipmunge:
-    :param verbose:
+    :param config:
+    :param source:
+    :param target:
+    :param munge:
 
     :return:
 
     """
 
-    import json
+    if munge:
+        subprocess.call([pkg_resources.resource_filename(__name__, os.path.join("scripts", "munge.sh")), source])
 
-    with open(loggingconfigfile) as f:
-        logging.config.dictConfig(json.load(f))
+    seed(source, target, configparser.ConfigParser().read(config))
 
-    logger = logging.getLogger(__name__)
-
-    config = configparser.ConfigParser()
-
-    config.read(configfile)
-
-    if not skipmunge:
-        logger.debug('Calling munge')
-        subprocess.call([munge_file, input])
-        logger.debug('Completed munge')
-    else:
-        logger.debug('Skipping munge')
-
-    perturbation.ingest.seed(config=config, input=input, output=output)
-
-    logger.debug('Finish')
-
-
-
-
+if __name__ == "__main__":
+    __main__()
