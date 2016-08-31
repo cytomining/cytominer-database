@@ -1,6 +1,6 @@
 # perturbation
 
-[![Build Status](https://travis-ci.org/0x00B1/persistence.svg?branch=master)](https://travis-ci.org/0x00B1/persistence)
+[![Build Status](https://travis-ci.org/0x00b1/persistence.svg?branch=master)](https://travis-ci.org/0x00b1/persistence)
 
 A package for storing perturbation data
 
