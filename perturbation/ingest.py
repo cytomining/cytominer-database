@@ -68,8 +68,8 @@ def seed(source, target, config):
     for directory in directories:
         try:
             patterns, image = perturbation.utils.validate_csv_set(config, directory)
-        except IOError:
-            click.echo("file doesn't exist")
+        except IOError as e:
+            click.echo(e)
 
             continue
 
@@ -93,7 +93,7 @@ def seed(source, target, config):
 )
 @click.option(
     "-c",
-    "--config",
+    "--config_file",
     default=pkg_resources.resource_filename(__name__, os.path.join("config", "config_htqc.ini")),
     type=click.Path(exists=True)
 )
@@ -109,10 +109,10 @@ def seed(source, target, config):
 @click.version_option(
     version=pkg_resources.get_distribution("perturbation").version
 )
-def __main__(config, source, target, munge):
+def __main__(config_file, source, target, munge):
     """
 
-    :param config:
+    :param config_file:
     :param source:
     :param target:
     :param munge:
@@ -124,7 +124,11 @@ def __main__(config, source, target, munge):
     if munge:
         subprocess.call([pkg_resources.resource_filename(__name__, os.path.join("scripts", "munge.sh")), source])
 
-    seed(source, target, configparser.ConfigParser().read(config))
+    config = configparser.ConfigParser()
+
+    config.read(config_file)
+
+    seed(source, target, config)
 
 if __name__ == "__main__":
     __main__()
