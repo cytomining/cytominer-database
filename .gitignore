@@ -11,3 +11,6 @@ test/data_a/2/Nuclei.csv
 doc/_build/
 doc/_static/
 doc/_templates/
+doc_old/
+perturbation/__pycache__/
+test/__pycache__/
