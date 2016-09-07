@@ -63,16 +63,11 @@ setuptools.setup(
         'csvkit',
         'odo',
         'pandas',
-        'psycopg2',
-        'pytest',
-        'sqlalchemy',
-        'sqlparse'
+        'pytest'
     ],
     entry_points={
         'console_scripts': [
-            'perturbation=perturbation:__main__',
             'ingest=perturbation.ingest:__main__',
-            'inspect=perturbation.inspect:main'
         ]
     }
 )

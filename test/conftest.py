@@ -1,9 +1,6 @@
 
 import pytest
 import subprocess
-import perturbation.base
-import sqlalchemy
-import sqlalchemy.orm
 
 def pytest_addoption(parser):
     parser.addoption("--dataset", action="store", default="htqc", help="dataset to test")
