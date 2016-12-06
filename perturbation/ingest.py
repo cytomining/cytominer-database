@@ -12,7 +12,7 @@ import perturbation.utils
 import pkg_resources
 import subprocess
 import tempfile
-
+import sqlalchemy
 
 def __format__(name, header):
     if header in ["ImageNumber", "ObjectNumber"]:
@@ -78,7 +78,12 @@ def seed(source, target, config):
 
         name, _ = os.path.splitext(config["filenames"]["image"])
 
-        into(input=image, output=target, name=name, identifier=identifier)
+        try:
+            into(input=image, output=target, name=name, identifier=identifier)
+        except sqlalchemy.exc.DatabaseError as e:
+            click.echo(e)
+
+            continue
 
         for pattern in patterns:
             name, _ = os.path.splitext(os.path.basename(pattern))
