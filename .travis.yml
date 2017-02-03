@@ -2,28 +2,28 @@ sudo: required
 addons:
   apt:
     packages:
-        - cython
-        - python-numpy
-        - python-pandas
+      - cython
+      - python-numpy
+      - python-pandas
 cache:
-    - pip
+  - pip
 install:
-    - pip install cython
-    - pip install -e .
+  - pip install cython
+  - pip install -e .
 language:
-    - python
+  - python
 python:
-    - 3.5
+  - 3.5
 services:
-    - docker
+  - docker
 before_script:
-    - docker run --name testdb -p 3210:5432 -P -e POSTGRES_PASSWORD=password -d postgres
-    - sleep 5
+  - docker run --name testdb -p 3210:5432 -P -e POSTGRES_PASSWORD=password -d postgres
+  - sleep 5
 script:
-    - python setup.py test
+  - python setup.py test
 after_script:
-    - docker stop testdb
-    - docker rm testdb
+  - docker stop testdb
+  - docker rm testdb
 deploy:
   provider: pypi
   user: shntnu
