@@ -29,7 +29,7 @@ class Test(setuptools.command.test.test):
 
 
 setuptools.setup(
-    name='perturbation',
+    name='cytominer-database',
     version='0.0.0',
     author=[
         'Allen Goodman',
