@@ -52,8 +52,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'perturbation'
-copyright = '2016, Claire McQuin, Allen Goodman, Shantanu Singh'
+project = 'cytominer_database'
+copyright = '2017, Claire McQuin, Allen Goodman, Shantanu Singh'
 author = 'Claire McQuin, Allen Goodman, Shantanu Singh'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -263,7 +263,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'perturbation.tex', 'perturbation Documentation',
+    (master_doc, 'cytominer_database.tex', 'cytominer_database Documentation',
      'Claire McQuin, Allen Goodman, Shantanu Singh', 'manual'),
 ]
 
@@ -305,7 +305,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'perturbation', 'perturbation Documentation',
+    (master_doc, 'cytominer_database', 'cytominer_database Documentation',
      [author], 1)
 ]
 
@@ -320,8 +320,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'perturbation', 'perturbation Documentation',
-     author, 'perturbation', 'One line description of project.',
+    (master_doc, 'cytominer_database', 'cytominer_database Documentation',
+     author, 'cytominer_database', 'One line description of project.',
      'Miscellaneous'),
 ]
 
