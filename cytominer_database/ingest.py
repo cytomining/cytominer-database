@@ -8,7 +8,7 @@ import csv
 import hashlib
 import odo
 import os
-import perturbation.utils
+import cytominer_database.utils
 import pkg_resources
 import subprocess
 import tempfile
@@ -63,11 +63,11 @@ def seed(source, target, config):
 
     """
 
-    directories = sorted(list(perturbation.utils.find_directories(source)))
+    directories = sorted(list(cytominer_database.utils.find_directories(source)))
 
     for directory in directories:
         try:
-            patterns, image = perturbation.utils.validate_csv_set(config, directory)
+            patterns, image = cytominer_database.utils.validate_csv_set(config, directory)
         except IOError as e:
             click.echo(e)
 
@@ -112,7 +112,7 @@ def seed(source, target, config):
     type=click.Path(writable=True)
 )
 @click.version_option(
-    version=pkg_resources.get_distribution("perturbation").version
+    version=pkg_resources.get_distribution("cytominer_database").version
 )
 def __main__(config_file, source, target, munge):
     """

@@ -6,14 +6,14 @@ import configparser
 import odo
 import os
 import pandas as pd
-import perturbation.ingest
+import cytominer_database.ingest
 import pkg_resources
 import subprocess
 import tempfile
 
 
 def test_seed(dataset):
-    munge_file = pkg_resources.resource_filename(__name__, "../perturbation/scripts/munge.sh")
+    munge_file = pkg_resources.resource_filename(__name__, "../cytominer_database/scripts/munge.sh")
 
     if dataset["munge"]:
         subprocess.call([munge_file, dataset["data_dir"]])
@@ -27,7 +27,7 @@ def test_seed(dataset):
     with tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test.db")
 
-        perturbation.ingest.seed(config=config, source=dataset["data_dir"], target="sqlite:///{}".format(str(sqlite_file)))
+        cytominer_database.ingest.seed(config=config, source=dataset["data_dir"], target="sqlite:///{}".format(str(sqlite_file)))
 
         for (k, v) in dict({"cells": "Cells.csv", "cytoplasm": "Cytoplasm.csv", "nuclei": "Nuclei.csv"}).items():
             config["filenames"][k] = v

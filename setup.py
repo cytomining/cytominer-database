@@ -45,7 +45,7 @@ setuptools.setup(
         'test': Test
     },
     package_data={
-        'perturbation': [
+        'cytominer_database': [
             'config/*.ini',
             'config/*.json',
             'config/*.sql',
@@ -67,7 +67,7 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            'ingest=perturbation.ingest:__main__',
+            'cytominer-database=cytominer_database.ingest:__main__',
         ]
     }
 )

@@ -12,5 +12,6 @@ doc/_build/
 doc/_static/
 doc/_templates/
 doc_old/
-perturbation/__pycache__/
+cytominer_database/__pycache__/
 test/__pycache__/
+cytominer_database/*.pyc
