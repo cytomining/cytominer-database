@@ -44,7 +44,7 @@ task() {
 
         csvcut -c ${joined} -C 2 -x ${object_csv} | tail -n +2 > ${patterns_directory}/${pattern}.csv
 
-        csvjoin ${images_objects} ${patterns_directory}/${pattern}.csv > ${directory}/${pattern}.csv
+        paste -d , ${images_objects} ${patterns_directory}/${pattern}.csv > ${directory}/${pattern}.csv
     done
 
     rm -rf ${patterns_directory}
