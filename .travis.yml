@@ -14,16 +14,8 @@ language:
   - python
 python:
   - 3.5
-services:
-  - docker
-before_script:
-  - docker run --name testdb -p 3210:5432 -P -e POSTGRES_PASSWORD=password -d postgres
-  - sleep 5
 script:
   - python setup.py test
-after_script:
-  - docker stop testdb
-  - docker rm testdb
 deploy:
   provider: pypi
   user: shntnu
