@@ -9,11 +9,11 @@ import subprocess
 logger = logging.getLogger(__name__)
 
 def find_directories(directory):
-    """
+    """List subdirectories.
 
-    :param directory:
+    :param directory: directory
 
-    :return:
+    :return: list of subdirectories of ``directory``
 
     """
     directories = set()
@@ -29,11 +29,16 @@ def find_directories(directory):
 
 
 def validate_csv(csvfile):
-    """
+    """Validate CSV file.
 
-    :param csvfile:
+    The CSV file typically corresponds to either a measurement made on a compartment, e.g. Cells.csv, or on an image,
+    e.g. Image.csv. The validation performed is generic - it simply checks for malformed CSV files.
 
-    :return:
+    This uses csvclean to check for validity of a CSV file.
+
+    :param csvfile: CSV file to validate
+
+    :return: True if valid, False otherwise.
 
     """
     cmd = "csvclean -n {}".format(csvfile)
@@ -59,12 +64,16 @@ def validate_csv(csvfile):
 
 
 def validate_csv_set(config, directory):
-    """
+    """Validate a set of CSV files.
 
-    :param config:
-    :param directory:
+    This function validates a set of CSV files in a directory. These CSV files  correspond to measurements
+    made on different compartment, e.g. Cells.csv, Cytoplasm.csv, Nuclei.csv. An Image.csv file, corresponding to
+    measurements made on the whole image, along with metadata, is also typically present.
 
-    :return:
+    :param config: configuration file - this contains the set of CSV files to validate.
+    :param directory: directory containing the CSV files.
+
+    :return: a tuple where the first element is the list of pattern CSV files, the second is the image CSV file.
 
     """
     image_csv = os.path.join(directory, config["filenames"]["image"])
