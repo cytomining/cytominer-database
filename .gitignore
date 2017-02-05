@@ -15,3 +15,4 @@ doc_old/
 cytominer_database/__pycache__/
 test/__pycache__/
 cytominer_database/*.pyc
+.python-version
