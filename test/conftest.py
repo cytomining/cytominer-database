@@ -5,12 +5,45 @@ import subprocess
 def pytest_addoption(parser):
     parser.addoption("--dataset", action="store", default="htqc", help="dataset to test")
 
+    parser.addoption("--engine", action="store", default="postgres", help="database engine", choices=["sqlite", "postgres"])
+
 
 def pytest_generate_tests(metafunc):
+    if "session" in metafunc.fixturenames:
+        assert metafunc.config.option.engine in ["postgres", "sqlite"]
+
+        metafunc.parametrize("session", [metafunc.config.option.engine], indirect=True)
+
     if "dataset" in metafunc.fixturenames:
         assert metafunc.config.option.dataset in ["htqc", "cellpainting"]
 
         metafunc.parametrize("dataset", [metafunc.config.option.dataset], indirect=True)
+
+
+@pytest.fixture
+def session(request):
+    if request.param == "postgres":
+        cmd = 'PGPASSWORD=password psql -h localhost -p 3210 -U postgres -c "DROP DATABASE IF EXISTS testdb"'
+
+        subprocess.check_output(cmd, shell=True)
+
+        cmd = 'PGPASSWORD=password psql -h localhost -p 3210 -U postgres -c "CREATE DATABASE testdb"'
+
+        subprocess.check_output(cmd, shell=True)
+
+        connection_string = "postgresql://postgres:password@localhost:3210/testdb"
+
+    elif request.param == "sqlite":
+        connection_string = "sqlite:////tmp/example.sqlite"
+
+    else:
+        raise ValueError("No such engine: {}".format(request.param))
+
+    engine = sqlalchemy.create_engine(connection_string)
+
+    session_generator = sqlalchemy.orm.sessionmaker(bind=engine)
+
+    return session_generator()
 
 
 @pytest.fixture
