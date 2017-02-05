@@ -5,6 +5,9 @@ addons:
       - cython
       - python-numpy
       - python-pandas
+      - sqlite3      
+    sources:
+      - travis-ci/sqlite3
 cache:
   - pip
 install:
@@ -14,8 +17,6 @@ language:
   - python
 python:
   - 3.5
-services:
-  - docker
 script:
   - python setup.py test
 deploy:
