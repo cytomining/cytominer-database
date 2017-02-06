@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # cytominer_database documentation build configuration file, created by
-# sphinx-quickstart on Mon Feb  6 15:07:00 2017.
+# sphinx-quickstart on Mon Feb  6 15:52:01 2017.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -17,9 +17,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
 
 
 # -- General configuration ------------------------------------------------
