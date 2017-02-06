@@ -67,7 +67,7 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            'cytominer-database=cytominer_database.ingest:__main__',
+            'ingest=cytominer_database.ingest:__main__',
         ]
     }
 )
