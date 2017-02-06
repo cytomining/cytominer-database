@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# cytominer-database documentation build configuration file, created by
-# sphinx-quickstart on Sun Feb  5 18:10:36 2017.
+# cytominer_database documentation build configuration file, created by
+# sphinx-quickstart on Mon Feb  6 15:07:00 2017.
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -31,7 +31,8 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc']
+extensions = ['sphinx.ext.autodoc',
+    'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -46,7 +47,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'cytominer-database'
+project = 'cytominer_database'
 copyright = '2017, Claire McQuin,Allen Goodman,Shantanu Singh'
 author = 'Claire McQuin,Allen Goodman,Shantanu Singh'
 
@@ -100,7 +101,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'cytominer-databasedoc'
+htmlhelp_basename = 'cytominer_databasedoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -127,7 +128,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'cytominer-database.tex', 'cytominer-database Documentation',
+    (master_doc, 'cytominer_database.tex', 'cytominer\\_database Documentation',
      'Claire McQuin,Allen Goodman,Shantanu Singh', 'manual'),
 ]
 
@@ -137,7 +138,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'cytominer-database', 'cytominer-database Documentation',
+    (master_doc, 'cytominer_database', 'cytominer_database Documentation',
      [author], 1)
 ]
 
@@ -148,8 +149,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'cytominer-database', 'cytominer-database Documentation',
-     author, 'cytominer-database', 'One line description of project.',
+    (master_doc, 'cytominer_database', 'cytominer_database Documentation',
+     author, 'cytominer_database', 'One line description of project.',
      'Miscellaneous'),
 ]
 

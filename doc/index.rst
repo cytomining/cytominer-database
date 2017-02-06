@@ -1,9 +1,9 @@
-.. cytominer-database documentation master file, created by
-   sphinx-quickstart on Sun Feb  5 18:10:36 2017.
+.. cytominer_database documentation master file, created by
+   sphinx-quickstart on Mon Feb  6 15:07:00 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to cytominer-database's documentation!
+Welcome to cytominer_database's documentation!
 ==============================================
 
 .. toctree::

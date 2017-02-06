@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=cytominer-database
+set SPHINXPROJ=cytominer_database
 
 if "%1" == "" goto help
 
