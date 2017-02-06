@@ -54,7 +54,8 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(
         exclude=[
-            'test'
+            'test',
+            'doc'
         ]
     ),
     include_package_data=True,
@@ -69,5 +70,7 @@ setuptools.setup(
         'console_scripts': [
             'ingest=cytominer_database.ingest:__main__',
         ]
-    }
+    },
+    license='BSD',
+    url='https://github.com/cytomining/cytominer-database'
 )
