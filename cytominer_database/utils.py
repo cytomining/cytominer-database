@@ -87,7 +87,9 @@ def validate_csv_set(config, directory):
         os.path.join(directory, config['filenames']['experiment'])
     ]]
 
-    file_checks = dict({(filename, validate_csv(filename)) for filename in [*pattern_csvs, image_csv]})
+    filenames = pattern_csvs + [image_csv]
+
+    file_checks = dict({(filename, validate_csv(filename)) for filename in filenames})
 
     if not all(file_checks.values()):
         invalid_files = ",".join([os.path.basename(filename) for (filename, valid) in file_checks.items() if not valid])
