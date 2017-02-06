@@ -154,7 +154,7 @@ def seed(source, target, config):
     type=click.Path(writable=True)
 )
 @click.version_option(
-    version=pkg_resources.get_distribution("cytominer_database").version
+    version=pkg_resources.require("cytominer_database")[0].version
 )
 def __main__(config_file, source, target, munge):
     """
