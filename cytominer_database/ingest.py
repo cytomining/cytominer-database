@@ -1,4 +1,4 @@
-"""ingest - mechanism to ingest CSV files into a database.
+"""``ingest`` - mechanism to ingest CSV files into a database.
 
     In morphological profiling experiments, a CellProfiler pipeline is often run in parallel across multiple images and
     produces a set of CSV files. For example, imaging a 384-well plate, with 9 sites per well, produces 384 * 9 images;
@@ -6,10 +6,10 @@
     contains one CSV file per compartment (e.g. Cells.csv, Cytoplasm.csv, Nuclei.csv) and one CSV file for per-image
     measurements (e.g. Image.csv).
 
-    ingest can be used to read all these CSV files into a database backend. SQLite is the recommended engine, but ingest
+    ``ingest`` can be used to read all these CSV files into a database backend. SQLite is the recommended engine, but ingest
     will likely also work with PostgreSQL and MySQL.
 
-    ingest assumes a directory structure like shown below:
+    ``ingest`` assumes a directory structure like shown below:
 
     | plate_a/
     |   set_1/
@@ -31,7 +31,7 @@
 
     :Example:
 
-        $ ingest plate_a -o sqlite:///plate_a.sqlite -c ingest_config.ini
+        ``$ ingest plate_a -o sqlite:///plate_a.sqlite -c ingest_config.ini``
 
 
 """
