@@ -11,31 +11,23 @@
 
     ingest assumes a directory structure like shown below:
 
-    plate_a
-    ├── set_1
-    │   ├── file_1.csv
-    │       └── file_2.csv
-    │   .
-    │   .
-    │   .
-    │   └── file_n.csv
-    ├── set_2
-    │   ├── file_1.csv
-    │   └── file_2.csv
-    │   .
-    │   .
-    │   .
-    │   └── file_n.csv
-    .
-    .
-    .
-    └── set_m
-        ├── file_1.csv
-        └── file_2.csv
-        .
-        .
-        .
-        └── file_n.csv
+    | plate_a/
+    |   set_1/
+    |       file_1.csv
+    |       file_2.csv
+    |       ...
+    |       file_n.csv
+    |   set_2/
+    |       file_1.csv
+    |       file_2.csv
+    |       ...
+    |       file_n.csv
+    |   ...
+    |   set_m/
+    |       file_1.csv
+    |       file_2.csv
+    |       ...
+    |       file_n.csv
 
     :Example:
 
