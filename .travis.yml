@@ -30,6 +30,6 @@ deploy:
     password:
       secure: CpXjKwUeDNx2GsvZwL13TmrMhv2JuapqPcsq+OhUL/1odXTmBi0iCsEUQE3XXbAJfZC7phpLLOnwqsVZZKyWGgbMovJJEL/APB2xNqsPFggO0jY/ql8Av/2xkMfR5monAtSyDYBDytb+c5JLv+qyHt4+XfpK3goxGyWXJt8DpcbRdujFMpC2hL5PDoyJEOoccTC8UCf9CMAQoyRkfiyXYe4DPL3J2rxquIs5gMFthISO9Hvjup1ABebuIqBkYufxRyLfv4lENpqUfgOlJN3N0RbhMwo/EqHsnkkjT7FoAzSvcfQLVGQJSdlumxSZf4H34EkAgXiXuxgOfjo1rT2umtr0fcqvjklbm0rjJMKfj3CM09rtwZT9GlyBCe1+fgHGoz/MuMOFpA2dTiUnGl12pFfBYow4hQ5kvu4FWstMLQydlwouTNK+FNQNy+bPr+kfsEeY7aDu8eRwnZ29pWCFgWP/yWeCLwfEEVPVT74xktYnZrdWUZYDgrUpKwZ/YW6bO62ndE/KzIwb8UFVW4DCFAv93BOlDE85Ah5IOOOjvrsw5/8m1DdTr9x1TzHG6R8xUoVgd0+3ky8HS/5WUZvB9iTgJYbw1SmzRJ14o9Or2yApLMOiIAUlFQSphB2mpI8ajW8QunLTIxmSFrnGKvryDv2sFSjUAKAaxjyfsIimJwM=
   - provider: script
-      script: curl -X POST https://readthedocs.org/build/cytominer-database
-      on:
-        tags: true
+    script: curl -X POST https://readthedocs.org/build/cytominer-database
+    on:
+      tags: true
