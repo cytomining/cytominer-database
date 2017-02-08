@@ -18,6 +18,7 @@ def dataset(request):
     if request.param == "htqc":
         return  {
                 "data_dir": "test/data_a",
+                "munged_dir": "test/data_a_munged",
                 "row_counts":
                     {
                         "n_plates": 1,

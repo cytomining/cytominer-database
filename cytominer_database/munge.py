@@ -12,13 +12,15 @@ def munge(config, source, target=None):
     """
 
     :param config: Configuration file.
-    :param source: Directory containing subdirectories that contain CSV files.
+    :param source: Directory containing subdirectories that contain an object CSV file.
     :param target: Output directory. If not specified, then it is same as``source``.
 
-    :return:
+    :return: list of subdirectories that have an object CSV file.
 
     """
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
+
+    valid_directories = [] # list of subdirectories that have an object CSV file.
 
     for directory in directories:
         try:
@@ -29,18 +31,23 @@ def munge(config, source, target=None):
 
             continue
 
+        valid_directories.append(directory)
+
         target_directory = directory.replace(source, target)
 
         os.mkdir(target_directory)
 
         for compartment_name in set(obj.columns.get_level_values(0).tolist()) - {'Image'}:
 
-            compartment = pandas.concat([obj['Image'], obj[compartment_name].rename(
-                columns=lambda x: (compartment_name + '_' + x) if x != 'ObjectNumber' else x)], axis=1)
+            # select columns of the compartment
+            compartment = pandas.concat([obj['Image'], obj[compartment_name]], axis=1)
 
-            compartment['ObjectNumber'] = compartment[compartment_name + '_' + 'Number_Object_Number']
+            # Create a new column
+            compartment['ObjectNumber'] = compartment['Number_Object_Number']
 
             cols = compartment.columns.tolist()
+
+            # Move ImageNumber and ObjectNumber to the front
 
             cols.insert(0, cols.pop(cols.index('ObjectNumber')))
 
@@ -49,3 +56,5 @@ def munge(config, source, target=None):
             compartment = compartment.ix[:, cols]
 
             compartment.to_csv(os.path.join(target_directory, compartment_name + '.csv'), index=False)
+
+    return valid_directories
