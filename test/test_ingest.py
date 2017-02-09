@@ -12,14 +12,14 @@ import tempfile
 
 
 def test_seed(dataset):
-    if dataset["munge"]:
-        cytominer_database.munge(dataset["data_dir"])
-
     config_file = os.path.join(dataset["data_dir"], "config.ini")
 
     config = configparser.ConfigParser()
 
     config.read(config_file)
+
+    if dataset["munge"]:
+        cytominer_database.munge.munge(dataset["data_dir"])
 
     with tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test.db")

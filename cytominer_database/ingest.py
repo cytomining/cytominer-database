@@ -161,12 +161,12 @@ def __main__(config_file, source, target, munge):
 
     """
 
-    if munge:
-        cytominer_database.munge(source)
-
     config = configparser.ConfigParser()
 
     config.read(config_file)
+
+    if munge:
+        cytominer_database.munge.munge(config=config, source=source)
 
     seed(source, target, config)
 

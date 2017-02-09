@@ -24,7 +24,9 @@ def test_munge(dataset):
 
         for directory in valid_directories:
             for csv_filename in ["Cells.csv",  "Cytoplasm.csv", "Nuclei.csv"]:
-                input_csv = pd.read_csv(os.path.join(directory, csv_filename))
+                input_csv = pd.read_csv(os.path.join(directory.replace(dataset["data_dir"],
+                                                                       temp_dir),
+                                                     csv_filename))
 
                 output_csv = pd.read_csv(os.path.join(directory.replace(dataset["data_dir"],
                                                                         dataset["munged_dir"]),

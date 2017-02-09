@@ -18,6 +18,10 @@ def munge(config, source, target=None):
     :return: list of subdirectories that have an object CSV file.
 
     """
+
+    if not target:
+        target = source
+
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
 
     valid_directories = [] # list of subdirectories that have an object CSV file.
@@ -35,7 +39,8 @@ def munge(config, source, target=None):
 
         target_directory = directory.replace(source, target)
 
-        os.mkdir(target_directory)
+        if not os.path.exists(target_directory):
+            os.makedirs(target_directory)
 
         for compartment_name in set(obj.columns.get_level_values(0).tolist()) - {'Image'}:
 
