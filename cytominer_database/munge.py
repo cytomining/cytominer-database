@@ -5,7 +5,7 @@
 import click
 import cytominer_database.utils
 import os
-import pandas
+import pandas as pd
 
 
 def munge(config, source, target=None):
@@ -24,7 +24,7 @@ def munge(config, source, target=None):
 
     for directory in directories:
         try:
-            obj = pandas.read_csv(os.path.join(directory, config["filenames"]["object"]), header=[0, 1])
+            obj = pd.read_csv(os.path.join(directory, config["filenames"]["object"]), header=[0, 1])
 
         except IOError as e:
             click.echo(e)
@@ -40,7 +40,7 @@ def munge(config, source, target=None):
         for compartment_name in set(obj.columns.get_level_values(0).tolist()) - {'Image'}:
 
             # select columns of the compartment
-            compartment = pandas.concat([obj['Image'], obj[compartment_name]], axis=1)
+            compartment = pd.concat([obj['Image'], obj[compartment_name]], axis=1)
 
             # Create a new column
             compartment['ObjectNumber'] = compartment['Number_Object_Number']

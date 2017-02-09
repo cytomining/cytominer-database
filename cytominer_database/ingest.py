@@ -43,8 +43,8 @@ import hashlib
 import odo
 import os
 import cytominer_database.utils
+import cytominer_database.munge
 import pkg_resources
-import subprocess
 import tempfile
 import sqlalchemy
 
@@ -90,7 +90,7 @@ def seed(source, target, config):
     Call functions to create backend
 
     :param config: Configuration file.
-    :param source: Directory containing subdirectories which contain CSV files.
+    :param source: Directory containing subdirectories that contain CSV files.
     :param target: Connection string for the database.
 
     :return:
@@ -152,18 +152,17 @@ def __main__(config_file, source, target, munge):
     """
 
     :param config_file: Configuration file.
-    :param source: Directory containing subdirectories which contain CSV files.
+    :param source: Directory containing subdirectories that contain CSV files.
     :param target: Connection string for the database.
-    :param munge: True if the CSV files for individual compartments have been merged into a single CSV file. In this
-    case, the CSV will be split into one CSV per compartment.
-
+    :param munge: True if the CSV files for individual compartments have been merged into a single CSV file.
+    If True, the CSV will be split into one CSV per compartment.
 
     :return:
 
     """
 
     if munge:
-        subprocess.call([pkg_resources.resource_filename(__name__, os.path.join("scripts", "munge.sh")), source])
+        cytominer_database.munge(source)
 
     config = configparser.ConfigParser()
 

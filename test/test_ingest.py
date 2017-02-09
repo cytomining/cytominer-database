@@ -7,16 +7,13 @@ import odo
 import os
 import pandas as pd
 import cytominer_database.ingest
-import pkg_resources
-import subprocess
+import cytominer_database.munge
 import tempfile
 
 
 def test_seed(dataset):
-    munge_file = pkg_resources.resource_filename(__name__, "../cytominer_database/scripts/munge.sh")
-
     if dataset["munge"]:
-        subprocess.call([munge_file, dataset["data_dir"]])
+        cytominer_database.munge(dataset["data_dir"])
 
     config_file = os.path.join(dataset["data_dir"], "config.ini")
 

@@ -3,7 +3,6 @@
 """
 
 import configparser
-import odo
 import os
 import pandas as pd
 import cytominer_database.munge
