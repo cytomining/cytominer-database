@@ -19,7 +19,7 @@ def test_seed(dataset):
     config.read(config_file)
 
     if dataset["munge"]:
-        cytominer_database.munge.munge(dataset["data_dir"])
+        cytominer_database.munge.munge(config, dataset["data_dir"])
 
     with tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test.db")
