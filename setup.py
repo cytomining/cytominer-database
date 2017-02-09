@@ -48,8 +48,7 @@ setuptools.setup(
         'cytominer_database': [
             'config/*.ini',
             'config/*.json',
-            'config/*.sql',
-            'scripts/*.sh'
+            'config/*.sql'
         ],
     },
     packages=setuptools.find_packages(
