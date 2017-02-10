@@ -66,9 +66,9 @@ def validate_csv(csvfile):
 def validate_csv_set(config, directory):
     """Validate a set of CSV files.
 
-    This function validates a set of CSV files in a directory. These CSV files  correspond to measurements
-    made on different compartment, e.g. Cells.csv, Cytoplasm.csv, Nuclei.csv. An Image.csv file, corresponding to
-    measurements made on the whole image, along with metadata, is also typically present.
+    This function validates a set of CSV files in a directory. These CSV files correspond to measurements
+    made on different cellular compartments, e.g. Cells.csv, Cytoplasm.csv, Nuclei.csv. An Image.csv file,
+    corresponding to measurements made on the whole image, along with metadata, is also typically present.
 
     :param config: configuration file - this contains the set of CSV files to validate.
     :param directory: directory containing the CSV files.
