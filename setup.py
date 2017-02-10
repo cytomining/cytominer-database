@@ -65,11 +65,11 @@ setuptools.setup(
     ),
     include_package_data=True,
     install_requires=[
-        'click',
-        'csvkit',
-        'odo',
-        'pandas',
-        'pytest'
+        'click>=6.7',
+        'csvkit>=1.0.1',
+        'odo>=0.5.0',
+        'pandas>=0.19.2',
+        'pytest>=3.0.6'
     ],
     entry_points={
         'console_scripts': [
