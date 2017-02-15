@@ -65,6 +65,7 @@ setuptools.setup(
     include_package_data=True,
     install_requires=[
         'click>=6.7',
+        'configparser>=3.5.0',
         'csvkit>=1.0.1',
         'odo>=0.5.0',
         'pandas>=0.19.2',
