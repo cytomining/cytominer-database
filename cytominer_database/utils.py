@@ -52,7 +52,7 @@ def validate_csv(csvfile):
 
         elif e.returncode == 127:
             logger.warning("csvclean not found. Validation will not be rigorous.")
-            
+
         else:
             raise subprocess.CalledProcessError(e.returncode, e.cmd)
 
@@ -60,7 +60,7 @@ def validate_csv(csvfile):
 
     file_size = os.stat(csvfile).st_size
 
-    return (file_size > 0) & (nrows >= 1) & (csvcheck == b'No errors.\n')
+    return (file_size > 0) & (nrows >= 1) & (csvcheck.strip() == b'No errors.')
 
 
 def validate_csv_set(config, directory):
