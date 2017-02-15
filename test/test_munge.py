@@ -2,9 +2,11 @@
 
 """
 
+import backports.tempfile
 import configparser
 import os
 import pandas as pd
+import pandas.util.testing
 import cytominer_database.munge
 import tempfile
 
@@ -19,7 +21,7 @@ def test_munge(dataset):
 
     config.read(config_file)
 
-    with tempfile.TemporaryDirectory() as temp_dir:
+    with backports.tempfile.TemporaryDirectory() as temp_dir:
         valid_directories = cytominer_database.munge.munge(config=config, source=dataset["data_dir"], target=temp_dir)
 
         for directory in valid_directories:
@@ -32,5 +34,4 @@ def test_munge(dataset):
                                                                         dataset["munged_dir"]),
                                                       csv_filename))
 
-                assert (input_csv == output_csv).all().all()
-
+                pandas.util.testing.assert_frame_equal(input_csv, output_csv)
