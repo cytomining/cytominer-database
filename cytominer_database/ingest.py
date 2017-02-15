@@ -36,6 +36,7 @@
 
 """
 
+import backports.tempfile
 import click
 import configparser
 import csv
@@ -67,7 +68,7 @@ def into(input, output, name, identifier):
 
     """
 
-    with tempfile.TemporaryDirectory() as directory:
+    with backports.tempfile.TemporaryDirectory() as directory:
         source = os.path.join(directory, os.path.basename(input))
 
         with open(input, "r") as fin, open(source, "w") as fout:

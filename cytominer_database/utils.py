@@ -79,7 +79,7 @@ def validate_csv_set(config, directory):
     image_csv = os.path.join(directory, config["filenames"]["image"])
 
     if not os.path.isfile(image_csv):
-        raise OSError("{} not found in {}. Skipping.".format(config["filenames"]["image"], directory))
+        raise IOError("{} not found in {}. Skipping.".format(config["filenames"]["image"], directory))
 
     pattern_csvs = [filename for filename in glob.glob(os.path.join(directory, '*.csv')) if filename not in [
         os.path.join(directory, config['filenames']['image']),
@@ -93,6 +93,6 @@ def validate_csv_set(config, directory):
 
     if not all(file_checks.values()):
         invalid_files = ",".join([os.path.basename(filename) for (filename, valid) in file_checks.items() if not valid])
-        raise OSError("Some files were invalid: {}. Skipping {}.".format(invalid_files, directory))
+        raise IOError("Some files were invalid: {}. Skipping {}.".format(invalid_files, directory))
 
     return pattern_csvs, image_csv

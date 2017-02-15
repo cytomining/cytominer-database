@@ -2,6 +2,7 @@
 
 """
 
+import backports.tempfile
 import configparser
 import odo
 import os
@@ -21,7 +22,7 @@ def test_seed(dataset):
     if dataset["munge"]:
         cytominer_database.munge.munge(config, dataset["data_dir"])
 
-    with tempfile.TemporaryDirectory() as temp_dir:
+    with backports.tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test.db")
 
         cytominer_database.ingest.seed(config=config, source=dataset["data_dir"], target="sqlite:///{}".format(str(sqlite_file)))
