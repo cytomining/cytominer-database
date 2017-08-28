@@ -1,6 +1,8 @@
 sudo: required
 before_install:
   - sudo apt-get -qq update
+before_script:
+  - sudo apt-get -qq update
 addons:
   apt:
     packages:
