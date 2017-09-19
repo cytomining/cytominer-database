@@ -114,7 +114,7 @@ def seed(source, target, config):
         name, _ = os.path.splitext(config["filenames"]["image"])
 
         try:
-            into(input=image, output=target, name=name, identifier=identifier)
+            into(input=image, output=target, name=name.capitalize(), identifier=identifier)
         except sqlalchemy.exc.DatabaseError as e:
             click.echo(e)
 
@@ -123,7 +123,7 @@ def seed(source, target, config):
         for pattern in patterns:
             name, _ = os.path.splitext(os.path.basename(pattern))
 
-            into(input=pattern, output=target, name=name, identifier=identifier)
+            into(input=pattern, output=target, name=name.capitalize(), identifier=identifier)
 
 
 @click.command()
