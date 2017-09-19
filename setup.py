@@ -1,31 +1,4 @@
 import setuptools
-import setuptools.command.test
-import sys
-
-
-class Test(setuptools.command.test.test):
-    user_options = [
-        ("pytest-args=", "a", "Arguments to pass to py.test")
-    ]
-
-    def initialize_options(self):
-        setuptools.command.test.test.initialize_options(self)
-
-        self.pytest_args = []
-
-    def finalize_options(self):
-        setuptools.command.test.test.finalize_options(self)
-
-        self.test_args = []
-
-        self.test_suite = True
-
-    def run_tests(self):
-        import pytest
-
-        errno = pytest.main(self.pytest_args)
-
-        sys.exit(errno)
 
 
 setuptools.setup(
@@ -41,9 +14,6 @@ setuptools.setup(
         "mcquincl@gmail.com",
         "shsingh@broadinstitute.org"
     ],
-    cmdclass={
-        'test': Test
-    },
     long_description="cytomining-database provides mechanisms to import CSV "
                      "files generated in a morphological profiling experiment "
                      "into a database backend. "
@@ -58,7 +28,7 @@ setuptools.setup(
     },
     packages=setuptools.find_packages(
         exclude=[
-            'test',
+            'tests',
             'doc'
         ]
     ),

@@ -17,8 +17,8 @@ def pytest_generate_tests(metafunc):
 def dataset(request):
     if request.param == "htqc":
         return  {
-                "data_dir": "test/data_a",
-                "munged_dir": "test/data_a_munged",
+                "data_dir": "tests/data_a",
+                "munged_dir": "tests/data_a_munged",
                 "row_counts":
                     {
                         "n_plates": 1,
@@ -50,7 +50,7 @@ def dataset(request):
 
     elif request.param == "cellpainting":
         return  {
-                "data_dir": "test/data_b",
+                "data_dir": "tests/data_b",
                 "row_counts":
                     {
                         "n_plates": 1,
@@ -78,7 +78,7 @@ def dataset(request):
                         "Nuclei_ncols": 595
                     },
                 "munge": False
-                }        
+                }
 
     else:
         raise ValueError("No such dataset: {}".format(request.param))

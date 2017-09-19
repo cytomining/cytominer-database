@@ -5,7 +5,7 @@ addons:
       - cython
       - python-numpy
       - python-pandas
-      - sqlite3      
+      - sqlite3
     sources:
       - travis-ci/sqlite3
 cache:
@@ -19,7 +19,7 @@ python:
   - 2.7
   - 3.5
 script:
-  - python setup.py test
+  - pytest
 deploy:
   - provider: pypi
     user: shntnu
