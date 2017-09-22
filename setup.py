@@ -16,7 +16,7 @@ setuptools.setup(
     ],
     extras_require={
         "test": [
-            "pytest>=3.0.6"
+            "pytest>=3.2.2"
         ]
     },
     long_description="cytominer-database provides mechanisms to import CSV "
@@ -42,9 +42,9 @@ setuptools.setup(
         'backports.tempfile>=1.0rc1',
         'click>=6.7',
         'configparser>=3.5.0',
-        'csvkit>=1.0.1',
+        'csvkit>=1.0.2',
         'odo>=0.5.0',
-        'pandas>=0.19.2'
+        'pandas>=0.20.3'
     ],
     entry_points={
         'console_scripts': [
