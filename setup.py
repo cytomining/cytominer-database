@@ -14,7 +14,12 @@ setuptools.setup(
         "mcquincl@gmail.com",
         "shsingh@broadinstitute.org"
     ],
-    long_description="cytomining-database provides mechanisms to import CSV "
+    extras_require={
+        "test": [
+            "pytest>=3.0.6"
+        ]
+    },
+    long_description="cytominer-database provides mechanisms to import CSV "
                      "files generated in a morphological profiling experiment "
                      "into a database backend. "
                      "Please refer to the online documentation at "
@@ -39,8 +44,7 @@ setuptools.setup(
         'configparser>=3.5.0',
         'csvkit>=1.0.1',
         'odo>=0.5.0',
-        'pandas>=0.19.2',
-        'pytest>=3.0.6'
+        'pandas>=0.19.2'
     ],
     entry_points={
         'console_scripts': [
