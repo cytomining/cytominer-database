@@ -15,6 +15,9 @@ setuptools.setup(
         "shsingh@broadinstitute.org"
     ],
     extras_require={
+        "doc": [
+            "sphinx>=1.6.3"
+        ],
         "test": [
             "pytest>=3.2.2"
         ]
