@@ -9,10 +9,10 @@ import pandas as pd
 
 
 def munge(config, source, target=None):
-    """ Searches ``source`` for directories containing a CSV file corresponding to 
+    """ Searches ``source`` for directories containing a CSV file corresponding to
     per-object measurements, then splits the CSV file into one CSV file per compartment.
-    For instance, the CSV file may comprise of measurements combined across Cells, 
-    Cytoplasm, and Nuclei. ``munge`` will split this CSV file into 3 CSV files: 
+    For instance, the CSV file may comprise of measurements combined across Cells,
+    Cytoplasm, and Nuclei. ``munge`` will split this CSV file into 3 CSV files:
     Cells.csv, Cytoplasm.csv, and Nuclei.csv.
 
     :param config: Configuration file.
@@ -64,7 +64,7 @@ def munge(config, source, target=None):
 
             cols.insert(0, cols.pop(cols.index('ImageNumber')))
 
-            compartment = compartment.ix[:, cols]
+            compartment = compartment.loc[:, cols]
 
             compartment.to_csv(os.path.join(target_directory, compartment_name + '.csv'), index=False)
 
