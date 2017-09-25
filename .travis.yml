@@ -22,10 +22,10 @@ script:
   - pytest
 deploy:
   - provider: pypi
+    distributions: "sdist bdist_wheel"
     user: shntnu
     on:
       tags: true
-      distributions: "sdist bdist_wheel"
       repo: cytomining/cytominer-database
     skip_cleanup: true
     password:
