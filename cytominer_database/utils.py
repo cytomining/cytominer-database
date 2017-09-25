@@ -1,12 +1,14 @@
-"""
-"""
-
+import csv
 import glob
 import logging
 import os
-import subprocess
+import tempfile
+
+import csvkit.utilities.csvclean
+
 
 logger = logging.getLogger(__name__)
+
 
 def find_directories(directory):
     """List subdirectories.
@@ -41,26 +43,27 @@ def validate_csv(csvfile):
     :return: True if valid, False otherwise.
 
     """
-    cmd = "csvclean -n {}".format(csvfile)
+    if os.stat(csvfile).st_size == 0:
+        return False
 
-    try:
-        csvcheck = subprocess.check_output(cmd, shell=True)
+    with open(csvfile, "r") as csvfd:
+        reader = csv.reader(csvfd)
 
-    except subprocess.CalledProcessError as e:
-        if e.returncode == 1:
-            return False
+        nrows = sum(1 for _ in reader) - 1  # exclude header
 
-        elif e.returncode == 127:
-            logger.warning("csvclean not found. Validation will not be rigorous.")
-            
-        else:
-            raise subprocess.CalledProcessError(e.returncode, e.cmd)
+    if nrows < 1:
+        return False
 
-    nrows = sum(1 for line in open(csvfile)) - 1
+    with tempfile.TemporaryFile(mode="w+") as tmpfile:
+        csvclean = csvkit.utilities.csvclean.CSVClean(args=["-n", csvfile], output_file=tmpfile)
 
-    file_size = os.stat(csvfile).st_size
+        csvclean.run()
 
-    return (file_size > 0) & (nrows >= 1) & (csvcheck == b'No errors.\n')
+        tmpfile.seek(0)
+
+        csvcheck = tmpfile.read().strip()
+
+    return csvcheck == "No errors."
 
 
 def validate_csv_set(config, directory):
