@@ -164,7 +164,8 @@ def __main__(config_file, source, target, munge):
 
     config = configparser.ConfigParser()
 
-    config.read(config_file)
+    with open(config_file, "r") as config_fd:
+        config.read(config_fd)
 
     if munge:
         cytominer_database.munge.munge(config=config, source=source)
