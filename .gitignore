@@ -1,4 +1,5 @@
 *.egg-info
+*.pyc
 *.sqlite
 .idea
 .cache
@@ -14,5 +15,4 @@ doc/_templates/
 doc_old/
 cytominer_database/__pycache__/
 tests/__pycache__/
-cytominer_database/*.pyc
 .python-version

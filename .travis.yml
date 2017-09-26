@@ -2,17 +2,13 @@ sudo: required
 addons:
   apt:
     packages:
-      - cython
-      - python-numpy
-      - python-pandas
       - sqlite3
     sources:
       - travis-ci/sqlite3
 cache:
   - pip
 install:
-  - pip install cython
-  - pip install -e .
+  - pip install --upgrade --editable .[dev]
 language:
   - python
 python:
@@ -22,10 +18,10 @@ script:
   - pytest
 deploy:
   - provider: pypi
+    distributions: "sdist bdist_wheel"
     user: shntnu
     on:
       tags: true
-      distributions: "sdist bdist_wheel"
       repo: cytomining/cytominer-database
     skip_cleanup: true
     password:

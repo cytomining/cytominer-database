@@ -14,12 +14,14 @@ setuptools.setup(
         "mcquincl@gmail.com",
         "shsingh@broadinstitute.org"
     ],
+    entry_points="""
+    [console_scripts]
+    cytominer-database=cytominer_database.command:command
+    """,
     extras_require={
-        "doc": [
+        "dev": [
+            "pytest>=3.2.2",
             "sphinx>=1.6.3"
-        ],
-        "test": [
-            "pytest>=3.2.2"
         ]
     },
     long_description="cytominer-database provides mechanisms to import CSV "
@@ -46,14 +48,10 @@ setuptools.setup(
         'click>=6.7',
         'configparser>=3.5.0',
         'csvkit>=1.0.2',
+        'networkx<2.0',  # TODO: https://github.com/blaze/odo/issues/579 -- remove dependency when resolved
         'odo>=0.5.0',
         'pandas>=0.20.3'
     ],
-    entry_points={
-        'console_scripts': [
-            'ingest=cytominer_database.ingest:__main__',
-        ]
-    },
     license='BSD',
     url='https://github.com/cytomining/cytominer-database'
 )
