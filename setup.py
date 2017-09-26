@@ -15,12 +15,10 @@ setuptools.setup(
         "shsingh@broadinstitute.org"
     ],
     extras_require={
-        "doc": [
-            "sphinx>=1.6.4",
+        "dev": [
+            "pytest>=3.2.2",
+            "sphinx>=1.6.3",
             "sphinx_rtd_theme>=0.2.5b1"
-        ],
-        "test": [
-            "pytest>=3.2.2"
         ]
     },
     long_description="cytominer-database provides mechanisms to import CSV "
@@ -47,6 +45,7 @@ setuptools.setup(
         'click>=6.7',
         'configparser>=3.5.0',
         'csvkit>=1.0.2',
+        'networkx<2.0',  # TODO: https://github.com/blaze/odo/issues/579 -- remove dependency when resolved
         'odo>=0.5.0',
         'pandas>=0.20.3'
     ],
