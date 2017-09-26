@@ -14,10 +14,15 @@ setuptools.setup(
         "mcquincl@gmail.com",
         "shsingh@broadinstitute.org"
     ],
+    entry_points="""
+    [console_scripts]
+    cytominer-database=cytominer_database.command:command
+    """,
     extras_require={
         "dev": [
             "pytest>=3.2.2",
-            "sphinx>=1.6.3"
+            "sphinx>=1.6.3",
+            "sphinx_rtd_theme>=0.2.5b1"
         ]
     },
     long_description="cytominer-database provides mechanisms to import CSV "
@@ -48,11 +53,6 @@ setuptools.setup(
         'odo>=0.5.0',
         'pandas>=0.20.3'
     ],
-    entry_points={
-        'console_scripts': [
-            'ingest=cytominer_database.ingest:__main__',
-        ]
-    },
     license='BSD',
     url='https://github.com/cytomining/cytominer-database'
 )

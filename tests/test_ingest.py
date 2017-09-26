@@ -17,7 +17,8 @@ def test_seed(dataset):
 
     config = configparser.ConfigParser()
 
-    config.read(config_file)
+    with open(config_file, "r") as config_fd:
+        config.read_file(config_fd)
 
     if dataset["munge"]:
         cytominer_database.munge.munge(config, dataset["data_dir"])

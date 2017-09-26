@@ -19,7 +19,8 @@ def test_munge(dataset):
 
     config = configparser.ConfigParser()
 
-    config.read(config_file)
+    with open(config_file, mode="r") as config_fd:
+        config.read_file(config_fd)
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
         valid_directories = cytominer_database.munge.munge(config=config, source=dataset["data_dir"], target=temp_dir)
