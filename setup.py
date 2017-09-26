@@ -21,7 +21,8 @@ setuptools.setup(
     extras_require={
         "dev": [
             "pytest>=3.2.2",
-            "sphinx>=1.6.3"
+            "sphinx>=1.6.3",
+            "sphinx_rtd_theme>=0.2.5b1"
         ]
     },
     long_description="cytominer-database provides mechanisms to import CSV "
