@@ -31,7 +31,7 @@
 
     :Example:
 
-        ``$ ingest plate_a -o sqlite:///plate_a.sqlite -c ingest_config.ini``
+        ``$ cytominer-database ingest plate_a sqlite:///plate_a.sqlite -c ingest_config.ini``
 """
 
 import csv

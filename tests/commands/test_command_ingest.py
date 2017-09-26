@@ -18,14 +18,14 @@ def runner():
 def test_help(runner):
     result = runner.invoke(cytominer_database.command.command, ["ingest", "--help"])
 
-    assert "ingest [OPTIONS] SOURCE" in result.output
+    assert "ingest [OPTIONS] SOURCE TARGET" in result.output
 
 
 def test_run(dataset, runner):
     config_file = os.path.join(dataset["data_dir"], "config.ini")
 
     opts = [
-        "ingest", dataset["data_dir"],
+        "ingest",
         "--config-file", config_file
     ]
 
@@ -34,10 +34,12 @@ def test_run(dataset, runner):
     else:
         opts += ["--no-munge"]
 
+    opts += [dataset["data_dir"]]
+
     with backports.tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test.db")
 
-        opts += ["--target", "sqlite:///{}".format(sqlite_file)]
+        opts += ["sqlite:///{}".format(sqlite_file)]
 
         result = runner.invoke(cytominer_database.command.command, opts)
 

@@ -13,11 +13,17 @@ import cytominer_database.munge
 Import CSV files into a database.
 
 SOURCE is a directory containing subdirectories that contain CSV files.
+
+TARGET is a connection string for the database.
 """
 )
 @click.argument(
     "source",
     type=click.Path(exists=True)
+)
+@click.argument(
+    "target",
+    type=click.Path(writable=True)
 )
 @click.option(
     "-c",
@@ -38,13 +44,7 @@ have been merged into a single CSV file. If True,
 the CSV will be split into one CSV per compartment.
 """
 )
-@click.option(  # TODO: Is this an argument/required?
-    "-o",
-    "--target",
-    help="Connection string for the database.",
-    type=click.Path(writable=True)
-)
-def command(source, config_file, munge, target):
+def command(source, target, config_file, munge):
     config = configparser.ConfigParser()
 
     config.read(config_file)
