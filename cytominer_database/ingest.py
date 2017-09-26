@@ -31,23 +31,20 @@
 
     :Example:
 
-        ``$ ingest plate_a -o sqlite:///plate_a.sqlite -c ingest_config.ini``
-
-
+        ``$ cytominer-database ingest plate_a sqlite:///plate_a.sqlite -c ingest_config.ini``
 """
+
+import csv
+import hashlib
+import os
 
 import backports.tempfile
 import click
-import configparser
-import csv
-import hashlib
 import odo
-import os
+import sqlalchemy.exc
+
 import cytominer_database.utils
-import cytominer_database.munge
-import pkg_resources
-import tempfile
-import sqlalchemy
+
 
 def __format__(name, header):
     if header in ["ImageNumber", "ObjectNumber"]:
@@ -124,52 +121,3 @@ def seed(source, target, config):
             name, _ = os.path.splitext(os.path.basename(pattern))
 
             into(input=pattern, output=target, name=name.capitalize(), identifier=identifier)
-
-
-@click.command()
-@click.argument(
-    "source",
-    type=click.Path(exists=True)
-)
-@click.option(
-    "-c",
-    "--config_file",
-    default=pkg_resources.resource_filename(__name__, os.path.join("config", "config_htqc.ini")),
-    type=click.Path(exists=True)
-)
-@click.option(
-    "--munge/--no-munge",
-    default=True
-)
-@click.option(
-    "-o",
-    "--target",
-    type=click.Path(writable=True)
-)
-@click.version_option(
-    version=pkg_resources.require("cytominer_database")[0].version
-)
-def __main__(config_file, source, target, munge):
-    """
-
-    :param config_file: Configuration file.
-    :param source: Directory containing subdirectories that contain CSV files.
-    :param target: Connection string for the database.
-    :param munge: True if the CSV files for individual compartments have been merged into a single CSV file.
-    If True, the CSV will be split into one CSV per compartment.
-
-    :return:
-
-    """
-
-    config = configparser.ConfigParser()
-
-    config.read(config_file)
-
-    if munge:
-        cytominer_database.munge.munge(config=config, source=source)
-
-    seed(source, target, config)
-
-if __name__ == "__main__":
-    __main__()
