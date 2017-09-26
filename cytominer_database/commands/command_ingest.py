@@ -48,7 +48,7 @@ def command(source, target, config_file, munge):
     config = configparser.ConfigParser()
 
     with open(config_file, "r") as config_fd:
-        config.read(config_fd)
+        config.read_file(config_fd)
 
     if munge:
         cytominer_database.munge.munge(config=config, source=source)
