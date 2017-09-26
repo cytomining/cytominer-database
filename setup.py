@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name='cytominer_database',
-    version='0.0.0',
+    version='0.0.1b1',
     author=[
         'Allen Goodman',
         "Claire McQuin",
