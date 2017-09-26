@@ -1,0 +1,15 @@
+environment:
+  # https://www.appveyor.com/docs/build-environment/#python
+  matrix:
+    - PYTHON: "C:\\Python27"
+    - PYTHON: "C:\\Python36"
+    - PYTHON: "C:\\Python27-x64"
+    - PYTHON: "C:\\Python36-x64"
+
+install:
+   - "%PYTHON%\\python.exe -m pip install --upgrade --editable .[dev]"
+
+build: off
+
+test_script:
+  - "%PYTHON%\\python.exe -m pytest"
