@@ -15,11 +15,9 @@ setuptools.setup(
         "shsingh@broadinstitute.org"
     ],
     extras_require={
-        "doc": [
+        "dev": [
+            "pytest>=3.2.2",
             "sphinx>=1.6.3"
-        ],
-        "test": [
-            "pytest>=3.2.2"
         ]
     },
     long_description="cytominer-database provides mechanisms to import CSV "

@@ -8,7 +8,7 @@ addons:
 cache:
   - pip
 install:
-  - pip install --upgrade --editable .[test]
+  - pip install --upgrade --editable .[dev]
 language:
   - python
 python:
