@@ -16,7 +16,8 @@ setuptools.setup(
     ],
     extras_require={
         "doc": [
-            "sphinx>=1.6.3"
+            "sphinx>=1.6.4",
+            "sphinx_rtd_theme>=0.2.5b1"
         ],
         "test": [
             "pytest>=3.2.2"
