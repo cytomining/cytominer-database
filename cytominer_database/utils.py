@@ -44,7 +44,7 @@ def validate_csv(csvfile):
     cmd = "csvclean -n {}".format(csvfile)
 
     try:
-        csvcheck = subprocess.check_output(cmd, shell=True)
+        csvcheck = subprocess.check_output(cmd, shell=True).strip()
 
     except subprocess.CalledProcessError as e:
         if e.returncode == 1:
@@ -60,7 +60,7 @@ def validate_csv(csvfile):
 
     file_size = os.stat(csvfile).st_size
 
-    return (file_size > 0) & (nrows >= 1) & (csvcheck == b'No errors.\n')
+    return (file_size > 0) & (nrows >= 1) & (csvcheck == b'No errors.')
 
 
 def validate_csv_set(config, directory):
