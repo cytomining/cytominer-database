@@ -3,17 +3,9 @@ import setuptools
 
 setuptools.setup(
     name='cytominer_database',
-    version='0.0.1b1',
-    author=[
-        'Allen Goodman',
-        "Claire McQuin",
-        "Shantanu Singh"
-    ],
-    author_email=[
-        "allen.goodman@icloud.com",
-        "mcquincl@gmail.com",
-        "shsingh@broadinstitute.org"
-    ],
+    version='0.0.1b2',
+    author="Shantanu Singh",
+    author_email="shsingh@broadinstitute.org",
     entry_points="""
     [console_scripts]
     cytominer-database=cytominer_database.command:command
