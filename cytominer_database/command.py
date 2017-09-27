@@ -1,10 +1,16 @@
 import os
 import sys
+import warnings
 
 import click
 
 
 class Command(click.MultiCommand):
+    def __init__(self):
+        super(Command, self).__init__()
+
+        warnings.simplefilter(action="ignore", category=FutureWarning)
+
     def list_commands(self, context):
         rv = []
 
