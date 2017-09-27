@@ -7,7 +7,7 @@ with open("requirements_doc.txt", "r") as f:
 
 setuptools.setup(
     name='cytominer_database',
-    version='0.0.1b2',
+    version='0.0.1b3',
     author="Shantanu Singh",
     author_email="shsingh@broadinstitute.org",
     entry_points="""
