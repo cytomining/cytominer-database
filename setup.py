@@ -1,6 +1,10 @@
 import setuptools
 
 
+with open("requirements_doc.txt", "r") as f:
+    doc_requirements = f.read().splitlines()
+
+
 setuptools.setup(
     name='cytominer_database',
     version='0.0.1b2',
@@ -13,9 +17,7 @@ setuptools.setup(
     extras_require={
         "dev": [
             "pytest>=3.2.2",
-            "sphinx>=1.6.3",
-            "sphinx_rtd_theme>=0.2.5b1"
-        ]
+        ] + doc_requirements
     },
     long_description="cytominer-database provides mechanisms to import CSV "
                      "files generated in a morphological profiling experiment "
