@@ -47,7 +47,8 @@ def test_run(dataset, runner):
 
         config = configparser.ConfigParser()
 
-        config.read(config_file)
+        with open(config_file, "r") as config_fd:
+            config.read_file(config_fd)
 
         for (k, v) in dict({"cells": "Cells.csv", "cytoplasm": "Cytoplasm.csv", "nuclei": "Nuclei.csv"}).items():
             config["filenames"][k] = v
