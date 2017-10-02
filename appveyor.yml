@@ -7,7 +7,7 @@ environment:
     - PYTHON: "C:\\Python36-x64"
 
 install:
-   - "%PYTHON%\\python.exe -m pip install --upgrade --editable .[dev]"
+   - "%PYTHON%\\python.exe -m pip install --upgrade -r requirements.txt"
 
 build: off
 
