@@ -1,7 +1,3 @@
-"""
-
-"""
-
 import os
 
 import click
@@ -11,8 +7,10 @@ import cytominer_database.utils
 
 
 def munge(config, source, target=None):
-    """ Searches ``source`` for directories containing a CSV file corresponding to
+    """
+    Searches ``source`` for directories containing a CSV file corresponding to
     per-object measurements, then splits the CSV file into one CSV file per compartment.
+
     For instance, the CSV file may comprise of measurements combined across Cells,
     Cytoplasm, and Nuclei. ``munge`` will split this CSV file into 3 CSV files:
     Cells.csv, Cytoplasm.csv, and Nuclei.csv.
@@ -25,6 +23,17 @@ def munge(config, source, target=None):
 
     :return: list of subdirectories that have an object CSV file.
 
+    Example::
+
+        import configparser
+        import cytominer_database.munge
+
+        config = configparser.ConfigParser()
+
+        with open(config_file, "r") as config_fd:
+            config.read_file(config_fd)
+
+        cytominer_database.munge.munge(source, target, config)
     """
 
     if not target:
@@ -32,7 +41,7 @@ def munge(config, source, target=None):
 
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
 
-    valid_directories = [] # list of subdirectories that have an object CSV file.
+    valid_directories = []  # list of subdirectories that have an object CSV file.
 
     for directory in directories:
         try:
