@@ -3,9 +3,13 @@ import glob
 import logging
 import os
 import tempfile
+import warnings
 
 import csvkit.utilities.csvclean
 
+# csvkit (or a dependency of csvkit) mucks with warning levels.
+# reset warnings to default after importing csvkit.
+warnings.resetwarnings()
 
 logger = logging.getLogger(__name__)
 

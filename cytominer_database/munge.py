@@ -2,10 +2,12 @@
 
 """
 
-import click
-import cytominer_database.utils
 import os
+
+import click
 import pandas as pd
+
+import cytominer_database.utils
 
 
 def munge(config, source, target=None):
