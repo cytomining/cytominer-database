@@ -5,9 +5,10 @@ cytominer-database is a package for storing morphological profiling data.
 
 .. toctree::
     :maxdepth: 2
-    :caption: Reference:
+    :caption: Table of Contents:
 
-    cytominer_database
+    configuration
+    reference
 
 
 
