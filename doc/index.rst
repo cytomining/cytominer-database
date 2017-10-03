@@ -1,16 +1,13 @@
-.. cytominer_database documentation master file, created by
-   sphinx-quickstart on Mon Feb  6 15:52:01 2017.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+cytominer-database
+==================
 
-Welcome to cytominer_database's documentation!
-==============================================
+cytominer-database is a package for storing morphological profiling data.
 
 .. toctree::
     :maxdepth: 2
-    :caption: Contents:
+    :caption: Reference:
 
-    modules
+    cytominer_database
 
 
 

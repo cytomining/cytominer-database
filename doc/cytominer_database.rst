@@ -1,30 +1,7 @@
-cytominer_database package
-==========================
+cytominer_database
+==================
 
-Submodules
-----------
-
-cytominer_database.ingest module
---------------------------------
-
-.. automodule:: cytominer_database.ingest
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-cytominer_database.utils module
--------------------------------
-
-.. automodule:: cytominer_database.utils
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: cytominer_database
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. toctree::
+    ingest
+    munge
+    utils
