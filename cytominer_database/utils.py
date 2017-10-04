@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 def find_directories(directory):
-    """List subdirectories.
+    """
+    List subdirectories.
 
     :param directory: directory
 
@@ -35,7 +36,8 @@ def find_directories(directory):
 
 
 def validate_csv(csvfile):
-    """Validate CSV file.
+    """
+    Validate a CSV file.
 
     The CSV file typically corresponds to either a measurement made on a compartment, e.g. Cells.csv, or on an image,
     e.g. Image.csv. The validation performed is generic - it simply checks for malformed CSV files.
@@ -71,7 +73,8 @@ def validate_csv(csvfile):
 
 
 def validate_csv_set(config, directory):
-    """Validate a set of CSV files.
+    """
+    Validate a set of CSV files.
 
     This function validates a set of CSV files in a directory. These CSV files correspond to measurements
     made on different cellular compartments, e.g. Cells.csv, Cytoplasm.csv, Nuclei.csv. An Image.csv file,
