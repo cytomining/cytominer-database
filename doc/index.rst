@@ -1,7 +1,4 @@
-cytominer-database
-==================
-
-cytominer-database is a package for storing morphological profiling data.
+.. include:: ../README.rst
 
 .. toctree::
     :maxdepth: 2
