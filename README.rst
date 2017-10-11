@@ -2,11 +2,11 @@ cytominer-database
 ==================
 
 .. image:: https://travis-ci.org/cytomining/cytominer-database.svg?branch=master
-    :target: https://travis-ci.org/cytomining/cytominer-databas
+    :target: https://travis-ci.org/cytomining/cytominer-database
     :alt: Build Status
 
-.. image:: https://readthedocs.org/projects/cytominer-database/badge/?version=stable
-    :target: http://cytominer-database.readthedocs.io/en/stable/?badge=stable
+.. image:: https://readthedocs.org/projects/cytominer-database/badge/?version=latest
+    :target: http://cytominer-database.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
 .. image:: https://gemnasium.com/badges/github.com/cytomining/cytominer-database.svg
