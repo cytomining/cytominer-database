@@ -5,6 +5,7 @@ import configparser
 import backports.tempfile
 import odo
 import pandas
+import pkg_resources
 import pytest
 
 import cytominer_database.command
@@ -46,6 +47,56 @@ def test_run(dataset, runner):
         assert result.exit_code == 0
 
         config = configparser.ConfigParser()
+
+        with open(config_file, "r") as config_fd:
+            config.read_file(config_fd)
+
+        for (k, v) in dict({"cells": "Cells.csv", "cytoplasm": "Cytoplasm.csv", "nuclei": "Nuclei.csv"}).items():
+            config["filenames"][k] = v
+
+        for table_key in ["image", "cells", "cytoplasm", "nuclei"]:
+            csv_filename = os.path.join(temp_dir, config["filenames"][table_key])
+
+            table_name = config["filenames"][table_key].split(".")[0]
+
+            odo.odo("sqlite:///{}::{}".format(str(sqlite_file), table_name), csv_filename)
+
+            df = pandas.read_csv(csv_filename)
+
+            assert df.shape[0] == dataset["ingest"]["{}_nrows".format(table_name)]
+
+            assert df.shape[1] == dataset["ingest"]["{}_ncols".format(table_name)] + 1
+
+            if table_key != "image":
+                assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == \
+                       dataset["ingest"]["{}_nrows".format(table_name)]
+
+
+def test_run_defaults(dataset, runner):
+    opts = ["ingest"]
+
+    if dataset["munge"]:
+        opts += ["--munge"]
+    else:
+        opts += ["--no-munge"]
+
+    opts += [dataset["data_dir"]]
+
+    with backports.tempfile.TemporaryDirectory() as temp_dir:
+        sqlite_file = os.path.join(temp_dir, "test.db")
+
+        opts += ["sqlite:///{}".format(sqlite_file)]
+
+        result = runner.invoke(cytominer_database.command.command, opts)
+
+        assert result.exit_code == 0
+
+        config = configparser.ConfigParser()
+
+        config_file = pkg_resources.resource_filename(
+            "cytominer_database",
+            os.path.join("config", "config_htqc.ini")
+        )
 
         with open(config_file, "r") as config_fd:
             config.read_file(config_fd)
