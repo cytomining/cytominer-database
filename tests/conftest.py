@@ -21,21 +21,6 @@ def dataset(request):
         return {
             "data_dir": "tests/data_a",
             "munged_dir": "tests/data_a_munged",
-            "row_counts":
-                {
-                    "n_plates": 1,
-                    "n_channels": 3,
-                    "n_channels_raddist": 3,
-                    "n_patterns": 3,
-                    "n_wells": 4,
-                    "n_images": 8,
-                    "n_objects": 40,
-                    "n_bins_raddist": 4,
-                    "n_scales_texture": 3,
-                    "n_scales_neighborhood": 2,
-                    "n_moments_coefs": 30,
-                    "n_correlation_pairs": 5
-                },
             "ingest":
                 {
                     "image_nrows": 8,
@@ -53,21 +38,6 @@ def dataset(request):
     if request.param == "cellpainting":
         return {
             "data_dir": "tests/data_b",
-            "row_counts":
-                {
-                    "n_plates": 1,
-                    "n_channels": 5,
-                    "n_channels_raddist": 4,
-                    "n_patterns": 3,
-                    "n_wells": 2,
-                    "n_images": 4,
-                    "n_objects": 40,
-                    "n_bins_raddist": 4,
-                    "n_scales_texture": 3,
-                    "n_scales_neighborhood": 2,
-                    "n_moments_coefs": 30,
-                    "n_correlation_pairs": 10
-                },
             "ingest":
                 {
                     "Image_nrows": 4,
