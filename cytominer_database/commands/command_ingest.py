@@ -30,7 +30,7 @@ TARGET is a connection string for the database.
     "--config-file",
     default=pkg_resources.resource_filename(
         "cytominer_database",
-        os.path.join("config", "config_htqc.ini")
+        os.path.join("config", "config_cellpainting.ini")
     ),
     help="Configuration file.",
     type=click.Path(exists=True)

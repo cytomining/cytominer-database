@@ -72,15 +72,15 @@ def test_run(dataset, runner):
                        dataset["ingest"]["{}_nrows".format(table_name)]
 
 
-def test_run_defaults(dataset, runner):
+def test_run_defaults(cellpainting, runner):
     opts = ["ingest"]
 
-    if dataset["munge"]:
+    if cellpainting["munge"]:
         opts += ["--munge"]
     else:
         opts += ["--no-munge"]
 
-    opts += [dataset["data_dir"]]
+    opts += [cellpainting["data_dir"]]
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test.db")
@@ -95,7 +95,7 @@ def test_run_defaults(dataset, runner):
 
         config_file = pkg_resources.resource_filename(
             "cytominer_database",
-            os.path.join("config", "config_htqc.ini")
+            os.path.join("config", "config_cellpainting.ini")
         )
 
         with open(config_file, "r") as config_fd:
@@ -113,10 +113,10 @@ def test_run_defaults(dataset, runner):
 
             df = pandas.read_csv(csv_filename)
 
-            assert df.shape[0] == dataset["ingest"]["{}_nrows".format(table_name)]
+            assert df.shape[0] == cellpainting["ingest"]["{}_nrows".format(table_name)]
 
-            assert df.shape[1] == dataset["ingest"]["{}_ncols".format(table_name)] + 1
+            assert df.shape[1] == cellpainting["ingest"]["{}_ncols".format(table_name)] + 1
 
             if table_key != "image":
                 assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == \
-                       dataset["ingest"]["{}_nrows".format(table_name)]
+                       cellpainting["ingest"]["{}_nrows".format(table_name)]
