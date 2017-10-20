@@ -16,40 +16,50 @@ def pytest_generate_tests(metafunc):
 
 
 @pytest.fixture
+def cellpainting():
+    return {
+        "data_dir": "tests/data_b",
+        "ingest":
+            {
+                "Image_nrows": 4,
+                "Image_ncols": 6,
+                "Cells_nrows": 40,
+                "Cells_ncols": 586,
+                "Cytoplasm_nrows": 40,
+                "Cytoplasm_ncols": 572,
+                "Nuclei_nrows": 40,
+                "Nuclei_ncols": 595
+            },
+        "munge": False
+    }
+
+
+@pytest.fixture
+def htqc():
+    return {
+        "data_dir": "tests/data_a",
+        "munged_dir": "tests/data_a_munged",
+        "ingest":
+            {
+                "image_nrows": 8,
+                "image_ncols": 229,
+                "Cells_nrows": 40,
+                "Cells_ncols": 294,
+                "Cytoplasm_nrows": 40,
+                "Cytoplasm_ncols": 279,
+                "Nuclei_nrows": 40,
+                "Nuclei_ncols": 287
+            },
+        "munge": True
+    }
+
+
+@pytest.fixture
 def dataset(request):
     if request.param == "htqc":
-        return {
-            "data_dir": "tests/data_a",
-            "munged_dir": "tests/data_a_munged",
-            "ingest":
-                {
-                    "image_nrows": 8,
-                    "image_ncols": 229,
-                    "Cells_nrows": 40,
-                    "Cells_ncols": 294,
-                    "Cytoplasm_nrows": 40,
-                    "Cytoplasm_ncols": 279,
-                    "Nuclei_nrows": 40,
-                    "Nuclei_ncols": 287
-                },
-            "munge": True
-        }
+        return htqc()
 
     if request.param == "cellpainting":
-        return {
-            "data_dir": "tests/data_b",
-            "ingest":
-                {
-                    "Image_nrows": 4,
-                    "Image_ncols": 6,
-                    "Cells_nrows": 40,
-                    "Cells_ncols": 586,
-                    "Cytoplasm_nrows": 40,
-                    "Cytoplasm_ncols": 572,
-                    "Nuclei_nrows": 40,
-                    "Nuclei_ncols": 595
-                },
-            "munge": False
-        }
+        return cellpainting()
 
     raise ValueError("No such dataset: {}".format(request.param))
