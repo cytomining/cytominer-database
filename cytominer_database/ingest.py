@@ -46,6 +46,7 @@ Example::
 import csv
 import hashlib
 import os
+import warnings
 
 import backports.tempfile
 import click
@@ -86,7 +87,14 @@ def into(input, output, name, identifier):
 
             [writer.writerow([identifier] + row) for row in reader]
 
-        odo.odo(source, "{}::{}".format(output, name), has_header=True, delimiter=",")
+        with warnings.catch_warnings():
+            # Suppress the following warning on Python 3:
+            #
+            #   /usr/local/lib/python3.6/site-packages/odo/utils.py:128: DeprecationWarning: inspect.getargspec() is
+            #     deprecated, use inspect.signature() or inspect.getfullargspec()
+            warnings.simplefilter("ignore", category=DeprecationWarning)
+
+            odo.odo(source, "{}::{}".format(output, name), has_header=True, delimiter=",")
 
 
 def seed(source, target, config):
