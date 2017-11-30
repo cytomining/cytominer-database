@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name='cytominer_database',
-    version='0.0.1b5',
+    version='0.0.1',
     author="Shantanu Singh",
     author_email="shsingh@broadinstitute.org",
     entry_points="""
