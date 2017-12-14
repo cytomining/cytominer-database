@@ -100,7 +100,7 @@ def into(input, output, name, identifier, skip_table_prefix=False):
             odo.odo(source, "{}::{}".format(output, name), has_header=True, delimiter=",")
 
 
-def seed(source, target, config, skip_image_prefix):
+def seed(source, target, config, skip_image_prefix=False):
     """
     Read CSV files into a database backend.
 
