@@ -44,7 +44,17 @@ have been merged into a single CSV file. If True,
 the CSV will be split into one CSV per compartment.
 """
 )
-def command(source, target, config_file, munge):
+@click.option(
+    "--skip-image-prefix/--no-skip-image-prefix",
+    default=False,
+    help="""\
+True if the prefix of image table name should be
+excluded from the names of columns from per image
+table e.g. use  `Metadata_Plate` instead of
+`Image_Metadata_Plate`.
+"""
+)
+def command(source, target, config_file, munge, skip_image_prefix):
     config = configparser.ConfigParser()
 
     with open(config_file, "r") as config_fd:
@@ -53,4 +63,5 @@ def command(source, target, config_file, munge):
     if munge:
         cytominer_database.munge.munge(config=config, source=source)
 
-    cytominer_database.ingest.seed(source, target, config)
+    cytominer_database.ingest.seed(source, target, config,
+        skip_image_prefix)
