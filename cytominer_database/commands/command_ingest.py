@@ -46,7 +46,7 @@ the CSV will be split into one CSV per compartment.
 )
 @click.option(
     "--skip-image-prefix/--no-skip-image-prefix",
-    default=False,
+    default=True,
     help="""\
 True if the prefix of image table name should be
 excluded from the names of columns from per image
