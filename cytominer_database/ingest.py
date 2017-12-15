@@ -63,13 +63,15 @@ def __format__(name, header):
     return "{}_{}".format(name, header)
 
 
-def into(input, output, name, identifier):
+def into(input, output, name, identifier, skip_table_prefix=False):
     """Ingest a CSV file into a table in a database.
 
     :param input: Input CSV file.
     :param output: Connection string for the database.
     :param name: Table in database into which the CSV file will be ingested
     :param identifier: Unique identifier for ``input``.
+    :param skip_table_prefix: True if the prefix of the table name should be excluded
+     from the names of columns.
     """
 
     with backports.tempfile.TemporaryDirectory() as directory:
@@ -80,7 +82,8 @@ def into(input, output, name, identifier):
             writer = csv.writer(fout)
 
             headers = next(reader)
-            headers = [__format__(name, header) for header in headers]
+            if not skip_table_prefix:
+                headers = [__format__(name, header) for header in headers]
             headers = ["TableNumber"] + headers
 
             writer.writerow(headers)
@@ -97,13 +100,15 @@ def into(input, output, name, identifier):
             odo.odo(source, "{}::{}".format(output, name), has_header=True, delimiter=",")
 
 
-def seed(source, target, config):
+def seed(source, target, config, skip_image_prefix=True):
     """
     Read CSV files into a database backend.
 
     :param config: Configuration file.
     :param source: Directory containing subdirectories that contain CSV files.
     :param target: Connection string for the database.
+    :param skip_image_prefix: True if the prefix of image table name should be excluded
+     from the names of columns from per image table
     """
 
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
@@ -122,7 +127,8 @@ def seed(source, target, config):
         name, _ = os.path.splitext(config["filenames"]["image"])
 
         try:
-            into(input=image, output=target, name=name.capitalize(), identifier=identifier)
+            into(input=image, output=target, name=name.capitalize(), identifier=identifier,
+                skip_table_prefix = skip_image_prefix)
         except sqlalchemy.exc.DatabaseError as e:
             click.echo(e)
 
