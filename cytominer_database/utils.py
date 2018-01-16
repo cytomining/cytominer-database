@@ -105,6 +105,19 @@ def validate_csv_set(config, directory):
 
 
 def collect_csvs(config, directory):
+    """
+    Collect CSV files from a directory.
+
+    This function collects CSV files in a directory, excluding those that have been specified in the configuration file.
+    This enables collecting only those CSV files that correspond to cellular compartments. e.g. Cells.csv, Cytoplasm.csv,
+    Nuclei.csv. CSV files corresponding to experiment, image, or object will be excluded.
+
+    :param config: configuration file.
+    :param directory: directory containing the CSV files.
+
+    :return: a list of CSV files.
+
+    """
     config_filenames = []
 
     for filename_option in ["experiment", "image", "object"]:
