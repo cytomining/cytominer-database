@@ -91,11 +91,7 @@ def validate_csv_set(config, directory):
     if not os.path.isfile(image_csv):
         raise IOError("{} not found in {}. Skipping.".format(config["filenames"]["image"], directory))
 
-    pattern_csvs = [filename for filename in glob.glob(os.path.join(directory, '*.csv')) if filename not in [
-        os.path.join(directory, config['filenames']['image']),
-        os.path.join(directory, config['filenames']['object']),
-        os.path.join(directory, config['filenames']['experiment'])
-    ]]
+    pattern_csvs = collect_csvs(config, directory)
 
     filenames = pattern_csvs + [image_csv]
 
@@ -106,3 +102,15 @@ def validate_csv_set(config, directory):
         raise IOError("Some files were invalid: {}. Skipping {}.".format(invalid_files, directory))
 
     return pattern_csvs, image_csv
+
+
+def collect_csvs(config, directory):
+    config_filenames = []
+
+    for filename_option in ["experiment", "image", "object"]:
+        if config.has_option("filenames", filename_option):
+            config_filenames.append(os.path.join(directory, config["filenames"][filename_option]))
+
+    filenames = glob.glob(os.path.join(directory, "*.csv"))
+
+    return [filename for filename in filenames if filename not in config_filenames]
