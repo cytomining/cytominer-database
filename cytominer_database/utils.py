@@ -23,16 +23,7 @@ def find_directories(directory):
     :return: list of subdirectories of ``directory``
 
     """
-    directories = set()
-
-    filenames = glob.glob(os.path.join(directory, '*/'))
-
-    for filename in filenames:
-        pathname = os.path.relpath(filename)
-
-        directories.add(pathname)
-
-    return directories
+    return glob.glob(os.path.join(directory, '*/'))
 
 
 def validate_csv(csvfile):
