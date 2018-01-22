@@ -1,11 +1,9 @@
 import os
 
 import click.testing
-import configparser
 import backports.tempfile
 import odo
-import pandas
-import pkg_resources
+import pandas as pd
 import pytest
 
 import cytominer_database.command
@@ -23,12 +21,10 @@ def test_help(runner):
 
 
 def test_run(dataset, runner):
-    config_file = os.path.join(dataset["data_dir"], "config.ini")
+    opts = ["ingest"]
 
-    opts = [
-        "ingest",
-        "--config-file", config_file
-    ]
+    if dataset["config"]:
+        opts += ["--config-file", os.path.join(dataset["data_dir"], dataset["config"])]
 
     if dataset["munge"]:
         opts += ["--munge"]
@@ -44,32 +40,23 @@ def test_run(dataset, runner):
 
         result = runner.invoke(cytominer_database.command.command, opts)
 
-        assert result.exit_code == 0
+        assert result.exit_code == 0, result.output
 
-        config = configparser.ConfigParser()
+        for blob in dataset["ingest"]:
+            table_name = blob["table"]
 
-        with open(config_file, "r") as config_fd:
-            config.read_file(config_fd)
+            csv_pathname = os.path.join(temp_dir, "{}.csv".format(table_name))
 
-        for (k, v) in dict({"cells": "Cells.csv", "cytoplasm": "Cytoplasm.csv", "nuclei": "Nuclei.csv"}).items():
-            config["filenames"][k] = v
+            odo.odo("sqlite:///{}::{}".format(str(sqlite_file), table_name), csv_pathname)
 
-        for table_key in ["image", "cells", "cytoplasm", "nuclei"]:
-            csv_filename = os.path.join(temp_dir, config["filenames"][table_key])
+            df = pd.read_csv(csv_pathname)
 
-            table_name = config["filenames"][table_key].split(".")[0]
+            assert df.shape[0] == blob["nrows"]
 
-            odo.odo("sqlite:///{}::{}".format(str(sqlite_file), table_name), csv_filename)
+            assert df.shape[1] == blob["ncols"] + 1
 
-            df = pandas.read_csv(csv_filename)
-
-            assert df.shape[0] == dataset["ingest"]["{}_nrows".format(table_name)]
-
-            assert df.shape[1] == dataset["ingest"]["{}_ncols".format(table_name)] + 1
-
-            if table_key != "image":
-                assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == \
-                       dataset["ingest"]["{}_nrows".format(table_name)]
+            if table_name.lower() != "image":
+                assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == blob["nrows"]
 
 
 def test_run_defaults(cellpainting, runner):
@@ -91,32 +78,18 @@ def test_run_defaults(cellpainting, runner):
 
         assert result.exit_code == 0
 
-        config = configparser.ConfigParser()
+        for blob in cellpainting["ingest"]:
+            table_name = blob["table"]
 
-        config_file = pkg_resources.resource_filename(
-            "cytominer_database",
-            os.path.join("config", "config_cellpainting.ini")
-        )
+            csv_pathname = os.path.join(temp_dir, "{}.csv".format(table_name))
 
-        with open(config_file, "r") as config_fd:
-            config.read_file(config_fd)
+            odo.odo("sqlite:///{}::{}".format(str(sqlite_file), table_name), csv_pathname)
 
-        for (k, v) in dict({"cells": "Cells.csv", "cytoplasm": "Cytoplasm.csv", "nuclei": "Nuclei.csv"}).items():
-            config["filenames"][k] = v
+            df = pd.read_csv(csv_pathname)
 
-        for table_key in ["image", "cells", "cytoplasm", "nuclei"]:
-            csv_filename = os.path.join(temp_dir, config["filenames"][table_key])
+            assert df.shape[0] == blob["nrows"]
 
-            table_name = config["filenames"][table_key].split(".")[0]
+            assert df.shape[1] == blob["ncols"] + 1
 
-            odo.odo("sqlite:///{}::{}".format(str(sqlite_file), table_name), csv_filename)
-
-            df = pandas.read_csv(csv_filename)
-
-            assert df.shape[0] == cellpainting["ingest"]["{}_nrows".format(table_name)]
-
-            assert df.shape[1] == cellpainting["ingest"]["{}_ncols".format(table_name)] + 1
-
-            if table_key != "image":
-                assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == \
-                       cellpainting["ingest"]["{}_nrows".format(table_name)]
+            if table_name.lower() != "image":
+                assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == blob["nrows"]

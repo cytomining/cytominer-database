@@ -22,19 +22,18 @@ def test_seed(dataset):
             target="sqlite:///{}".format(str(sqlite_file))
         )
 
-        for csv_filename in [dataset["image_csv"], "Cells.csv", "Cytoplasm.csv", "Nuclei.csv"]:
-            csv_pathname = os.path.join(temp_dir, csv_filename)
+        for blob in dataset["ingest"]:
+            table_name = blob["table"]
 
-            table_name = os.path.splitext(csv_filename)[0]
+            csv_pathname = os.path.join(temp_dir, "{}.csv".format(table_name))
 
             odo.odo("sqlite:///{}::{}".format(str(sqlite_file), table_name), csv_pathname)
 
             df = pd.read_csv(csv_pathname)
 
-            assert df.shape[0] == dataset["ingest"]["{}_nrows".format(table_name)]
+            assert df.shape[0] == blob["nrows"]
 
-            assert df.shape[1] == dataset["ingest"]["{}_ncols".format(table_name)] + 1
+            assert df.shape[1] == blob["ncols"] + 1
 
-            if csv_filename != dataset["image_csv"]:
-                assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == \
-                       dataset["ingest"]["{}_nrows".format(table_name)]
+            if table_name.lower() != "image":
+                assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == blob["nrows"]

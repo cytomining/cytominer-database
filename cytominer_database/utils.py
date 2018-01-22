@@ -1,5 +1,6 @@
 import csv
 import glob
+import logging
 import os
 import pkg_resources
 import tempfile
@@ -11,6 +12,8 @@ import csvkit.utilities.csvclean
 # csvkit (or a dependency of csvkit) mucks with warning levels.
 # reset warnings to default after importing csvkit.
 warnings.resetwarnings()
+
+logger = logging.getLogger(__name__)
 
 
 def find_directories(directory):
@@ -142,7 +145,10 @@ def read_config(filename):
         pkg_resources.resource_filename("cytominer_database", "config/config_default.ini"),  # default config file
         filename
     ]:
-        with open(config_filename, "r") as fd:
-            config.read_file(fd)
+        try:
+            with open(config_filename, "r") as fd:
+                config.read_file(fd)
+        except IOError as e:
+            logger.warn("Unable to read configuration file: {}.".format(config_filename))
 
     return config
