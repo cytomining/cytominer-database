@@ -19,6 +19,7 @@ def pytest_generate_tests(metafunc):
 def cellpainting():
     return {
         "data_dir": "tests/data_b",
+        "image_csv": "Image.csv",
         "ingest":
             {
                 "Image_nrows": 4,
@@ -39,6 +40,7 @@ def htqc():
     return {
         "data_dir": "tests/data_a",
         "munged_dir": "tests/data_a_munged",
+        "image_csv": "image.csv",
         "ingest":
             {
                 "image_nrows": 8,

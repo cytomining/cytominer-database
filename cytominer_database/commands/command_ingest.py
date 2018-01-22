@@ -39,29 +39,24 @@ TARGET is a connection string for the database.
     "--munge/--no-munge",
     default=True,
     help="""\
-True if the CSV files for individual compartments
-have been merged into a single CSV file. If True,
-the CSV will be split into one CSV per compartment.
+True if the CSV files for individual compartments \
+have been merged into a single CSV file; \
+the CSV will be split into one CSV per compartment \
+(Default: true).
 """
 )
 @click.option(
     "--skip-image-prefix/--no-skip-image-prefix",
     default=True,
     help="""\
-True if the prefix of image table name should be
-excluded from the names of columns from per image
-table e.g. use  `Metadata_Plate` instead of
-`Image_Metadata_Plate`.
+True if the prefix of image table name should be \
+excluded from the names of columns from per image \
+table e.g. use  `Metadata_Plate` instead of \
+`Image_Metadata_Plate` (Default: true).
 """
 )
 def command(source, target, config_file, munge, skip_image_prefix):
-    config = configparser.ConfigParser()
-
-    with open(config_file, "r") as config_fd:
-        config.read_file(config_fd)
-
     if munge:
-        cytominer_database.munge.munge(config=config, source=source)
+        cytominer_database.munge.munge(config_file=config_file, source=source)
 
-    cytominer_database.ingest.seed(source, target, config,
-        skip_image_prefix)
+    cytominer_database.ingest.seed(source, target, config_file, skip_image_prefix)

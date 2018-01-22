@@ -2,9 +2,11 @@ import csv
 import glob
 import logging
 import os
+import pkg_resources
 import tempfile
 import warnings
 
+import configparser
 import csvkit.utilities.csvclean
 
 # csvkit (or a dependency of csvkit) mucks with warning levels.
@@ -127,3 +129,16 @@ def collect_csvs(config, directory):
     filenames = glob.glob(os.path.join(directory, "*.csv"))
 
     return [filename for filename in filenames if filename not in config_filenames]
+
+
+def read_config(filename):
+    config = configparser.ConfigParser()
+
+    for config_filename in [
+        pkg_resources.resource_filename("cytominer_database", "config/config_default.ini"),  # default config file
+        filename
+    ]:
+        with open(config_filename, "r") as fd:
+            config.read_file(fd)
+
+    return config

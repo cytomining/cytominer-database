@@ -32,13 +32,7 @@ recommended engine, but ingest will likely also work with PostgreSQL and MySQL.
 
 Example::
 
-    import configparser
     import cytominer_database.ingest
-
-    config = configparser.ConfigParser()
-
-    with open(config_file, "r") as config_fd:
-        config.read_file(config_fd)
 
     cytominer_database.ingest.seed(source, target, config)
 """
@@ -100,22 +94,23 @@ def into(input, output, name, identifier, skip_table_prefix=False):
             odo.odo(source, "{}::{}".format(output, name), has_header=True, delimiter=",")
 
 
-def seed(source, target, config, skip_image_prefix=True):
+def seed(source, target, config_file, skip_image_prefix=True):
     """
     Read CSV files into a database backend.
 
-    :param config: Configuration file.
+    :param config_file: Configuration file.
     :param source: Directory containing subdirectories that contain CSV files.
     :param target: Connection string for the database.
     :param skip_image_prefix: True if the prefix of image table name should be excluded
      from the names of columns from per image table
     """
+    config_file = cytominer_database.utils.read_config(config_file)
 
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
 
     for directory in directories:
         try:
-            patterns, image = cytominer_database.utils.validate_csv_set(config, directory)
+            patterns, image = cytominer_database.utils.validate_csv_set(config_file, directory)
         except IOError as e:
             click.echo(e)
 
@@ -124,11 +119,11 @@ def seed(source, target, config, skip_image_prefix=True):
         with open(image, "rb") as document:
             identifier = hashlib.md5(document.read()).hexdigest()
 
-        name, _ = os.path.splitext(config["filenames"]["image"])
+        name, _ = os.path.splitext(config_file["filenames"]["image"])
 
         try:
             into(input=image, output=target, name=name.capitalize(), identifier=identifier,
-                skip_table_prefix = skip_image_prefix)
+                 skip_table_prefix=skip_image_prefix)
         except sqlalchemy.exc.DatabaseError as e:
             click.echo(e)
 
