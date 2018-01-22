@@ -129,6 +129,13 @@ def collect_csvs(config, directory):
 
 
 def read_config(filename):
+    """
+    Read a configuration file.
+
+    :param filename: configuration filename
+
+    :return: a configuration object
+    """
     config = configparser.ConfigParser()
 
     for config_filename in [
