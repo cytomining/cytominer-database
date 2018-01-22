@@ -1,6 +1,5 @@
 import csv
 import glob
-import logging
 import os
 import pkg_resources
 import tempfile
@@ -12,8 +11,6 @@ import csvkit.utilities.csvclean
 # csvkit (or a dependency of csvkit) mucks with warning levels.
 # reset warnings to default after importing csvkit.
 warnings.resetwarnings()
-
-logger = logging.getLogger(__name__)
 
 
 def find_directories(directory):

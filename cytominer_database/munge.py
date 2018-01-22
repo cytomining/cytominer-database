@@ -1,9 +1,12 @@
+import logging
 import os
 
 import click
 import pandas as pd
 
 import cytominer_database.utils
+
+logger = logging.getLogger(__name__)
 
 
 def munge(config_file, source, target=None):
@@ -38,6 +41,11 @@ def munge(config_file, source, target=None):
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
 
     valid_directories = []  # list of subdirectories that have an object CSV file.
+
+    if not config.has_option("filenames", "object"):
+        logger.warn("No object CSV configured, skipping `munge`.")
+
+        return valid_directories
 
     for directory in directories:
         try:
