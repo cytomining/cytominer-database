@@ -2,9 +2,11 @@ import csv
 import glob
 import logging
 import os
+import pkg_resources
 import tempfile
 import warnings
 
+import configparser
 import csvkit.utilities.csvclean
 
 # csvkit (or a dependency of csvkit) mucks with warning levels.
@@ -91,11 +93,7 @@ def validate_csv_set(config, directory):
     if not os.path.isfile(image_csv):
         raise IOError("{} not found in {}. Skipping.".format(config["filenames"]["image"], directory))
 
-    pattern_csvs = [filename for filename in glob.glob(os.path.join(directory, '*.csv')) if filename not in [
-        os.path.join(directory, config['filenames']['image']),
-        os.path.join(directory, config['filenames']['object']),
-        os.path.join(directory, config['filenames']['experiment'])
-    ]]
+    pattern_csvs = collect_csvs(config, directory)
 
     filenames = pattern_csvs + [image_csv]
 
@@ -106,3 +104,51 @@ def validate_csv_set(config, directory):
         raise IOError("Some files were invalid: {}. Skipping {}.".format(invalid_files, directory))
 
     return pattern_csvs, image_csv
+
+
+def collect_csvs(config, directory):
+    """
+    Collect CSV files from a directory.
+
+    This function collects CSV files in a directory, excluding those that have been specified in the configuration file.
+    This enables collecting only those CSV files that correspond to cellular compartments. e.g. Cells.csv, Cytoplasm.csv,
+    Nuclei.csv. CSV files corresponding to experiment, image, or object will be excluded.
+
+    :param config: configuration file.
+    :param directory: directory containing the CSV files.
+
+    :return: a list of CSV files.
+
+    """
+    config_filenames = []
+
+    for filename_option in ["experiment", "image", "object"]:
+        if config.has_option("filenames", filename_option):
+            config_filenames.append(os.path.join(directory, config["filenames"][filename_option]))
+
+    filenames = glob.glob(os.path.join(directory, "*.csv"))
+
+    return [filename for filename in filenames if filename not in config_filenames]
+
+
+def read_config(filename):
+    """
+    Read a configuration file.
+
+    :param filename: configuration filename
+
+    :return: a configuration object
+    """
+    config = configparser.ConfigParser()
+
+    for config_filename in [
+        pkg_resources.resource_filename("cytominer_database", "config/config_default.ini"),  # default config file
+        filename
+    ]:
+        try:
+            with open(config_filename, "r") as fd:
+                config.read_file(fd)
+        except IOError as e:
+            logger.warn("Unable to read configuration file: {}.".format(config_filename))
+
+    return config
