@@ -117,7 +117,8 @@ def seed(source, target, config_file, skip_image_prefix=True):
             continue
 
         with open(image, "rb") as document:
-            identifier = hashlib.md5(document.read()).hexdigest()
+            identifier = int(hashlib.md5(document.read()).hexdigest(), 16)
+            
 
         name, _ = os.path.splitext(config_file["filenames"]["image"])
 
