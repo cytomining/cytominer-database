@@ -76,25 +76,30 @@ def validate_csv_set(config, directory):
     :param config: configuration file - this contains the set of CSV files to validate.
     :param directory: directory containing the CSV files.
 
-    :return: a tuple where the first element is the list of pattern CSV files, the second is the image CSV file.
+    :return: a tuple where the first element is the list of compartment CSV files, the second is the image CSV file.
 
     """
+
+    # get the image CSV
     image_csv = os.path.join(directory, config["filenames"]["image"])
 
     if not os.path.isfile(image_csv):
         raise IOError("{} not found in {}. Skipping.".format(config["filenames"]["image"], directory))
 
-    pattern_csvs = collect_csvs(config, directory)
+    # get the CSV file for each compartment
+    compartment_csvs = collect_csvs(config, directory)
 
-    filenames = pattern_csvs + [image_csv]
+    filenames = compartment_csvs + [image_csv]
 
+    # validate all the CSVs
     file_checks = dict({(filename, validate_csv(filename)) for filename in filenames})
 
+    # if any CSV is invalid, throw an error
     if not all(file_checks.values()):
         invalid_files = ",".join([os.path.basename(filename) for (filename, valid) in file_checks.items() if not valid])
         raise IOError("Some files were invalid: {}. Skipping {}.".format(invalid_files, directory))
 
-    return pattern_csvs, image_csv
+    return compartment_csvs, image_csv
 
 
 def collect_csvs(config, directory):
@@ -124,7 +129,8 @@ def collect_csvs(config, directory):
 
 def read_config(filename):
     """
-    Read a configuration file.
+    Read a configuration file. A default config file is read first, and the values are overriden
+    by those in the specified configuration file.
 
     :param filename: configuration filename
 
@@ -140,6 +146,6 @@ def read_config(filename):
             with open(config_filename, "r") as fd:
                 config.read_file(fd)
         except IOError as e:
-            logger.warn("Unable to read configuration file: {}.".format(config_filename))
+            logger.warning("Unable to read configuration file: {}.".format(config_filename))
 
     return config

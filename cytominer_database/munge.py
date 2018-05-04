@@ -43,7 +43,7 @@ def munge(config_file, source, target=None):
     valid_directories = []  # list of subdirectories that have an object CSV file.
 
     if not config.has_option("filenames", "object"):
-        logger.warn("No object CSV configured, skipping `munge`.")
+        logger.warning("No object CSV configured, skipping `munge`.")
 
         return valid_directories
 

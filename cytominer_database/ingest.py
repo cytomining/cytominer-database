@@ -71,6 +71,9 @@ def into(input, output, name, identifier, skip_table_prefix=False):
     with backports.tempfile.TemporaryDirectory() as directory:
         source = os.path.join(directory, os.path.basename(input))
 
+        # create a temporary CSV file which is identical to the input CSV file
+        # but with the column names prefixed with the name of the compartment
+        # (or `Image`, if this is an image CSV file, and `skip_table_prefix` is False)
         with open(input, "r") as fin, open(source, "w") as fout:
             reader = csv.reader(fin)
             writer = csv.writer(fout)
@@ -78,12 +81,16 @@ def into(input, output, name, identifier, skip_table_prefix=False):
             headers = next(reader)
             if not skip_table_prefix:
                 headers = [__format__(name, header) for header in headers]
+
+            # The first column is `TableNumber`, which is the unique identifier for the image CSV
             headers = ["TableNumber"] + headers
 
             writer.writerow(headers)
 
             [writer.writerow([identifier] + row) for row in reader]
 
+        # Now ingest the temp CSV file (with the modified column names) into the database backend
+        # the rows of the CSV file are inserted into a table with name `name`.
         with warnings.catch_warnings():
             # Suppress the following warning on Python 3:
             #
@@ -91,6 +98,7 @@ def into(input, output, name, identifier, skip_table_prefix=False):
             #     deprecated, use inspect.signature() or inspect.getfullargspec()
             warnings.simplefilter("ignore", category=DeprecationWarning)
 
+            # `odo` is used to ingest. This can be swapped out for any other library that does the same thing
             odo.odo(source, "{}::{}".format(output, name), has_header=True, delimiter=",")
 
 
@@ -106,22 +114,28 @@ def seed(source, target, config_file, skip_image_prefix=True):
     """
     config_file = cytominer_database.utils.read_config(config_file)
 
+    # list the subdirectories that contain CSV files
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
 
     for directory in directories:
+
+        # get the image CSV and the CSVs for each of the compartments
         try:
-            patterns, image = cytominer_database.utils.validate_csv_set(config_file, directory)
+            compartments, image = cytominer_database.utils.validate_csv_set(config_file, directory)
         except IOError as e:
             click.echo(e)
 
             continue
 
+        # get a unique identifier for the image CSV. This will later be used as the TableNumber column
+        # the casting to int is to allow the database to be readable by CellProfiler Analyst, which
+        # requires TableNumber to be an integer.
         with open(image, "rb") as document:
             identifier = int(hashlib.md5(document.read()).hexdigest(), 16)
-            
 
         name, _ = os.path.splitext(config_file["filenames"]["image"])
 
+        # ingest the image CSV
         try:
             into(input=image, output=target, name=name.capitalize(), identifier=identifier,
                  skip_table_prefix=skip_image_prefix)
@@ -130,7 +144,8 @@ def seed(source, target, config_file, skip_image_prefix=True):
 
             continue
 
-        for pattern in patterns:
-            name, _ = os.path.splitext(os.path.basename(pattern))
+        # ingest the CSV for each compartment
+        for compartment in compartments:
+            name, _ = os.path.splitext(os.path.basename(compartment))
 
-            into(input=pattern, output=target, name=name.capitalize(), identifier=identifier)
+            into(input=compartment, output=target, name=name.capitalize(), identifier=identifier)
