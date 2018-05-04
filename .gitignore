@@ -1,6 +1,7 @@
 *.egg-info
 *.pyc
 *.sqlite
+*~
 .idea
 .cache
 tests/data_a/1/Cells.csv
@@ -16,3 +17,6 @@ doc_old/
 cytominer_database/__pycache__/
 tests/__pycache__/
 .python-version
+.ipynb_checkpoints/
+.pytest_cache/
+*.ipynb
