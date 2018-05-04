@@ -81,6 +81,8 @@ def into(input, output, name, identifier, skip_table_prefix=False):
             headers = next(reader)
             if not skip_table_prefix:
                 headers = [__format__(name, header) for header in headers]
+
+            # The first column is `TableNumber`, which is the unique identifier for the image CSV
             headers = ["TableNumber"] + headers
 
             writer.writerow(headers)
@@ -117,7 +119,7 @@ def seed(source, target, config_file, skip_image_prefix=True):
 
     for directory in directories:
 
-        # get the image CSV  and the CSVs for each of the compartments
+        # get the image CSV and the CSVs for each of the compartments
         try:
             compartments, image = cytominer_database.utils.validate_csv_set(config_file, directory)
         except IOError as e:
@@ -125,7 +127,7 @@ def seed(source, target, config_file, skip_image_prefix=True):
 
             continue
 
-        # get a unique identifier for the image. This will later be used as the TablerNumber column
+        # get a unique identifier for the image CSV. This will later be used as the TableNumber column
         # the casting to int is to allow the database to be readable by CellProfiler Analyst, which
         # requires TableNumber to be an integer.
         with open(image, "rb") as document:
