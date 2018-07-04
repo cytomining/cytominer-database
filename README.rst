@@ -9,10 +9,6 @@ cytominer-database
     :target: http://cytominer-database.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. image:: https://gemnasium.com/badges/github.com/cytomining/cytominer-database.svg
-    :target: https://gemnasium.com/github.com/cytomining/cytominer-database
-    :alt: Dependency Status
-
 cytominer-database provides command-line tools for organizing measurements extracted from images.
 
 Software tools such as CellProfiler can extract hundreds of measurements from millions of cells in a typical
