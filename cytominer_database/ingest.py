@@ -38,9 +38,9 @@ Example::
 """
 
 import csv
-import hashlib
 import os
 import warnings
+import zlib
 
 import backports.tempfile
 import click
