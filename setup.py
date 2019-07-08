@@ -35,7 +35,6 @@ setuptools.setup(
         'configparser>=3.5.0',
         'csvkit>=1.0.2',
         'networkx<2.0',  # TODO: https://github.com/blaze/odo/issues/579 -- remove dependency when resolved
-        'odo>=0.5.0',
         'pandas>=0.20.3'
     ],
     license='BSD',

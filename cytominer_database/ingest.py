@@ -44,8 +44,8 @@ import warnings
 
 import backports.tempfile
 import click
-import odo
 import sqlalchemy.exc
+from sqlalchemy import create_engine
 
 import cytominer_database.utils
 
@@ -98,8 +98,11 @@ def into(input, output, name, identifier, skip_table_prefix=False):
             #     deprecated, use inspect.signature() or inspect.getfullargspec()
             warnings.simplefilter("ignore", category=DeprecationWarning)
 
-            # `odo` is used to ingest. This can be swapped out for any other library that does the same thing
-            odo.odo(source, "{}::{}".format(output, name), has_header=True, delimiter=",")
+            target = "{}::{}".format(output, name)
+            engine = create_engine(target)
+
+            df = pd.read_csv(source, index_col=0)
+            df.to_sql(name=target, con=engine, if_exists="append")
 
 
 def seed(source, target, config_file, skip_image_prefix=True):
