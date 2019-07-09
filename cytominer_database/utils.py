@@ -25,7 +25,13 @@ def find_directories(directory):
     :return: list of subdirectories of ``directory``
 
     """
-    return glob.glob(os.path.join(directory, '*/'))
+    directory = os.path.abspath(directory)
+
+    return [
+        os.path.join(directory, x)
+        for x in os.listdir(directory)
+        if os.path.isdir(os.path.join(directory, x))
+        ]
 
 
 def validate_csv(csvfile):
