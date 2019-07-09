@@ -47,8 +47,9 @@ def test_run(dataset, runner):
 
             target = "sqlite:///{}::{}".format(str(sqlite_file), table_name)
             engine = create_engine(target)
+            con = engine.connect()
 
-            df = pd.read_sql(target, con=engine, index_col=0)
+            df = pd.read_sql(target, con=con, index_col=0)
 
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1
@@ -81,8 +82,9 @@ def test_run_defaults(cellpainting, runner):
 
             target = "sqlite:///{}::{}".format(str(sqlite_file), table_name)
             engine = create_engine(target)
+            con = engine.connect()
 
-            df = pd.read_sql(target, con=engine, index_col=0)
+            df = pd.read_sql(target, con=con, index_col=0)
 
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1
