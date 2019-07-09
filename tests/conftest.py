@@ -1,3 +1,4 @@
+import os
 import pytest
 
 
@@ -19,7 +20,7 @@ def pytest_generate_tests(metafunc):
 def cellpainting():
     return {
         "config": "config.ini",
-        "data_dir": "tests/data_b",
+        "data_dir": os.path.join("tests", "data_b"),
         "image_csv": "Image.csv",
         "ingest": [
             {
@@ -50,8 +51,8 @@ def cellpainting():
 def htqc():
     return {
         "config": "config.ini",
-        "data_dir": "tests/data_a",
-        "munged_dir": "tests/data_a_munged",
+        "data_dir": os.path.join("tests", "data_a"),
+        "munged_dir": os.path.join("tests", "data_a_munged"),
         "image_csv": "image.csv",
         "ingest": [
             {
@@ -83,7 +84,7 @@ def htqc():
 def qc():
     return {
         "config": None,
-        "data_dir": "tests/data_c",
+        "data_dir": os.path.join("tests", "data_c"),
         "image_csv": "Image.csv",
         "ingest": [
             {
