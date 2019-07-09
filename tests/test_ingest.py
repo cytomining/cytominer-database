@@ -9,21 +9,25 @@ import cytominer_database.munge
 
 
 def test_seed(dataset):
-    config_file = os.path.join(dataset["data_dir"], "config.ini")
+    data_dir = os.path.abspath(dataset["data_dir"])
+    munge = dataset["munge"]
+    ingest = dataset["ingest"]
 
-    if dataset["munge"]:
-        cytominer_database.munge.munge(config_file, dataset["data_dir"])
+    config_file = os.path.join(data_dir, "config.ini")
+
+    if munge:
+        cytominer_database.munge.munge(config_file, data_dir)
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
-        sqlite_file = os.path.join(temp_dir, "test.db")
+        sqlite_file = os.path.join(os.path.abspath(temp_dir), "test.db")
 
         cytominer_database.ingest.seed(
             config_file=config_file,
-            source=dataset["data_dir"],
+            source=data_dir,
             target="sqlite:///{}".format(str(sqlite_file))
         )
 
-        for blob in dataset["ingest"]:
+        for blob in ingest:
             table_name = blob["table"].capitalize()
 
             target = "sqlite:///{}::{}".format(str(sqlite_file), table_name)
