@@ -37,13 +37,14 @@ Example::
     cytominer_database.ingest.seed(source, target, config)
 """
 
+import os
 import csv
 import hashlib
-import os
+import click
 import warnings
 
+import pandas as pd
 import backports.tempfile
-import click
 import sqlalchemy.exc
 from sqlalchemy import create_engine
 
