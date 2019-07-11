@@ -20,9 +20,7 @@ def pytest_generate_tests(metafunc):
 def cellpainting():
     return {
         "config": "config.ini",
-        "data_dir": os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "data_b"
-            ),
+        "data_dir": "tests/data_b",
         "image_csv": "Image.csv",
         "ingest": [
             {
@@ -53,12 +51,8 @@ def cellpainting():
 def htqc():
     return {
         "config": "config.ini",
-        "data_dir": os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "data_a"
-            ),
-        "munged_dir": os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "data_a_munged"
-            ),
+        "data_dir": "tests/data_a",
+        "munged_dir": "tests/data_a_munged",
         "image_csv": "image.csv",
         "ingest": [
             {
@@ -90,9 +84,7 @@ def htqc():
 def qc():
     return {
         "config": None,
-        "data_dir": os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "data_c"
-            ),
+        "data_dir": "tests/data_c",
         "image_csv": "Image.csv",
         "ingest": [
             {
@@ -107,6 +99,10 @@ def qc():
 
 @pytest.fixture
 def dataset(request):
+    # Note that calling fixtures directly is deprecated:
+    # https://docs.pytest.org/en/latest/deprecations.html#calling-fixtures-directly
+    # Instead, use the request fixture to dynamically run the named fixture function:
+    # https://docs.pytest.org/en/latest/reference.html#_pytest.fixtures.FixtureRequest.getfixturevalue
     dataset_param = request.param
 
     if dataset_param == "htqc":
