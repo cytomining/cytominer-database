@@ -70,7 +70,7 @@ def into(input, output, name, identifier, skip_table_prefix=False):
     """
 
     with backports.tempfile.TemporaryDirectory() as directory:
-        source = os.path.join(os.path.abspath(directory), os.path.basename(input))
+        source = os.path.join(directory, os.path.basename(input))
 
         # create a temporary CSV file which is identical to the input CSV file
         # but with the column names prefixed with the name of the compartment
