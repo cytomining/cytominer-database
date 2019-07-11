@@ -25,7 +25,6 @@ def find_directories(directory):
     :return: list of subdirectories of ``directory``
 
     """
-    directory = os.path.abspath(directory)
 
     return [
         os.path.join(directory, x)
