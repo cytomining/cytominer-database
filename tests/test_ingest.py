@@ -9,7 +9,7 @@ import cytominer_database.munge
 
 
 def test_seed(dataset):
-    data_dir = os.path.abspath(dataset["data_dir"])
+    data_dir = dataset["data_dir"]
     munge = dataset["munge"]
     ingest = dataset["ingest"]
 
@@ -19,7 +19,7 @@ def test_seed(dataset):
         cytominer_database.munge.munge(config_file, data_dir)
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
-        sqlite_file = os.path.join(os.path.abspath(temp_dir), "test.db")
+        sqlite_file = os.path.join(temp_dir, "test.db")
 
         cytominer_database.ingest.seed(
             config_file=config_file,

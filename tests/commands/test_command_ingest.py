@@ -24,17 +24,17 @@ def test_run(dataset, runner):
     opts = ["ingest"]
 
     if dataset["config"]:
-        opts += ["--config-file", os.path.join(os.path.abspath(dataset["data_dir"]), dataset["config"])]
+        opts += ["--config-file", os.path.join(dataset["data_dir"], dataset["config"])]
 
     if dataset["munge"]:
         opts += ["--munge"]
     else:
         opts += ["--no-munge"]
 
-    opts += [os.path.abspath(dataset["data_dir"])]
+    opts += [dataset["data_dir"]]
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
-        sqlite_file = os.path.join(os.path.abspath(temp_dir), "test.db")
+        sqlite_file = os.path.join(temp_dir, "test.db")
 
         opts += ["sqlite:///{}".format(sqlite_file)]
 
@@ -66,10 +66,10 @@ def test_run_defaults(cellpainting, runner):
     else:
         opts += ["--no-munge"]
 
-    opts += [os.path.abspath(cellpainting["data_dir"])]
+    opts += [cellpainting["data_dir"]]
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
-        sqlite_file = os.path.join(os.path.abspath(temp_dir), "test.db")
+        sqlite_file = os.path.join(temp_dir, "test.db")
 
         opts += ["sqlite:///{}".format(sqlite_file)]
 
