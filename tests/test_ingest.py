@@ -1,38 +1,42 @@
 import os
 
+import pandas as pd
 import backports.tempfile
+from sqlalchemy import create_engine
+
 import cytominer_database.ingest
 import cytominer_database.munge
-import odo
-import pandas as pd
 
 
 def test_seed(dataset):
-    config_file = os.path.join(dataset["data_dir"], "config.ini")
+    data_dir = dataset["data_dir"]
+    munge = dataset["munge"]
+    ingest = dataset["ingest"]
 
-    if dataset["munge"]:
-        cytominer_database.munge.munge(config_file, dataset["data_dir"])
+    config_file = os.path.join(data_dir, "config.ini")
+
+    if munge:
+        cytominer_database.munge.munge(config_file, data_dir)
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test.db")
 
         cytominer_database.ingest.seed(
             config_file=config_file,
-            source=dataset["data_dir"],
+            source=data_dir,
             target="sqlite:///{}".format(str(sqlite_file))
         )
 
-        for blob in dataset["ingest"]:
-            table_name = blob["table"]
+        for blob in ingest:
+            table_name = blob["table"].capitalize()
 
-            csv_pathname = os.path.join(temp_dir, "{}.csv".format(table_name))
+            target = "sqlite:///{}::{}".format(str(sqlite_file), table_name)
+            engine = create_engine(target)
+            con = engine.connect()
 
-            odo.odo("sqlite:///{}::{}".format(str(sqlite_file), table_name), csv_pathname)
-
-            df = pd.read_csv(csv_pathname)
+            df = pd.read_sql(target, con=con, index_col=0)
 
             assert df.shape[0] == blob["nrows"]
-
             assert df.shape[1] == blob["ncols"] + 1
 
             if table_name.lower() != "image":
