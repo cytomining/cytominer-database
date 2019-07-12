@@ -37,15 +37,16 @@ Example::
     cytominer_database.ingest.seed(source, target, config)
 """
 
-import csv
 import os
+import csv
+import click
 import warnings
 import zlib
 
+import pandas as pd
 import backports.tempfile
-import click
-import odo
 import sqlalchemy.exc
+from sqlalchemy import create_engine
 
 import cytominer_database.utils
 
@@ -98,8 +99,12 @@ def into(input, output, name, identifier, skip_table_prefix=False):
             #     deprecated, use inspect.signature() or inspect.getfullargspec()
             warnings.simplefilter("ignore", category=DeprecationWarning)
 
-            # `odo` is used to ingest. This can be swapped out for any other library that does the same thing
-            odo.odo(source, "{}::{}".format(output, name), has_header=True, delimiter=",")
+            target = "{}::{}".format(output, name)
+            engine = create_engine(target)
+            con = engine.connect()
+
+            df = pd.read_csv(source, index_col=0)
+            df.to_sql(name=target, con=con, if_exists="append")
 
 def checksum(pathname, buffer_size=65536):
     """
