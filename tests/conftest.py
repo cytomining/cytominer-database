@@ -1,3 +1,4 @@
+import os
 import pytest
 
 
@@ -98,13 +99,19 @@ def qc():
 
 @pytest.fixture
 def dataset(request):
-    if request.param == "htqc":
-        return htqc()
+    # Note that calling fixtures directly is deprecated:
+    # https://docs.pytest.org/en/latest/deprecations.html#calling-fixtures-directly
+    # Instead, use the request fixture to dynamically run the named fixture function:
+    # https://docs.pytest.org/en/latest/reference.html#_pytest.fixtures.FixtureRequest.getfixturevalue
+    dataset_param = request.param
 
-    if request.param == "cellpainting":
-        return cellpainting()
+    if dataset_param == "htqc":
+        return request.getfixturevalue('htqc')
 
-    if request.param == "qc":
-        return qc()
+    if dataset_param == "cellpainting":
+        return request.getfixturevalue('cellpainting')
+
+    if dataset_param == "qc":
+        return request.getfixturevalue('qc')
 
     raise ValueError("No such dataset: {}".format(request.param))

@@ -1,10 +1,10 @@
 import os
 
+import pytest
+import pandas as pd
 import click.testing
 import backports.tempfile
-import odo
-import pandas as pd
-import pytest
+from sqlalchemy import create_engine
 
 import cytominer_database.command
 
@@ -43,16 +43,15 @@ def test_run(dataset, runner):
         assert result.exit_code == 0, result.output
 
         for blob in dataset["ingest"]:
-            table_name = blob["table"]
+            table_name = blob["table"].capitalize()
 
-            csv_pathname = os.path.join(temp_dir, "{}.csv".format(table_name))
+            target = "sqlite:///{}::{}".format(str(sqlite_file), table_name)
+            engine = create_engine(target)
+            con = engine.connect()
 
-            odo.odo("sqlite:///{}::{}".format(str(sqlite_file), table_name), csv_pathname)
-
-            df = pd.read_csv(csv_pathname)
+            df = pd.read_sql(target, con=con, index_col=0)
 
             assert df.shape[0] == blob["nrows"]
-
             assert df.shape[1] == blob["ncols"] + 1
 
             if table_name.lower() != "image":
@@ -79,16 +78,15 @@ def test_run_defaults(cellpainting, runner):
         assert result.exit_code == 0
 
         for blob in cellpainting["ingest"]:
-            table_name = blob["table"]
+            table_name = blob["table"].capitalize()
 
-            csv_pathname = os.path.join(temp_dir, "{}.csv".format(table_name))
+            target = "sqlite:///{}::{}".format(str(sqlite_file), table_name)
+            engine = create_engine(target)
+            con = engine.connect()
 
-            odo.odo("sqlite:///{}::{}".format(str(sqlite_file), table_name), csv_pathname)
-
-            df = pd.read_csv(csv_pathname)
+            df = pd.read_sql(target, con=con, index_col=0)
 
             assert df.shape[0] == blob["nrows"]
-
             assert df.shape[1] == blob["ncols"] + 1
 
             if table_name.lower() != "image":
