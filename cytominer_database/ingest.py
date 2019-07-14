@@ -39,9 +39,9 @@ Example::
 
 import os
 import csv
-import hashlib
 import click
 import warnings
+import zlib
 
 import pandas as pd
 import backports.tempfile
@@ -106,6 +106,25 @@ def into(input, output, name, identifier, skip_table_prefix=False):
             df = pd.read_csv(source, index_col=0)
             df.to_sql(name=target, con=con, if_exists="append")
 
+def checksum(pathname, buffer_size=65536):
+    """
+    Generate a 32-bit unique identifier for a file.
+    
+    :param pathname: input file
+    :param buffer_size: buffer size   
+    """
+    with open(pathname, "rb") as stream:
+        result = zlib.crc32(bytes(0))
+
+        while True:
+            buffer = stream.read(buffer_size)
+
+            if not buffer:
+                break
+
+            result = zlib.crc32(buffer, result)
+
+    return result & 0xffffffff
 
 def seed(source, target, config_file, skip_image_prefix=True):
     """
@@ -135,8 +154,7 @@ def seed(source, target, config_file, skip_image_prefix=True):
         # get a unique identifier for the image CSV. This will later be used as the TableNumber column
         # the casting to int is to allow the database to be readable by CellProfiler Analyst, which
         # requires TableNumber to be an integer.
-        with open(image, "rb") as document:
-            identifier = int(hashlib.md5(document.read()).hexdigest(), 16)
+        identifier = checksum(image)
 
         name, _ = os.path.splitext(config_file["filenames"]["image"])
 
