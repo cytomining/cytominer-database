@@ -6,6 +6,8 @@ setuptools.setup(
     version='0.2.0',
     author="Shantanu Singh",
     author_email="shsingh@broadinstitute.org",
+    maintainer="Gregory Way",
+    maintainer_email="gregory.way@gmail.com",
     entry_points="""
     [console_scripts]
     cytominer-database=cytominer_database.command:command
