@@ -1,3 +1,1 @@
-"""
-
-"""
+name = "cytominer_database"
