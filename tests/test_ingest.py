@@ -27,6 +27,8 @@ def test_seed(dataset):
             target="sqlite:///{}".format(str(sqlite_file))
         )
 
+        assert os.path.exists(str(sqlite_file))
+
         for blob in ingest:
             table_name = blob["table"].capitalize()
 
