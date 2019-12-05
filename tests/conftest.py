@@ -18,6 +18,12 @@ def pytest_generate_tests(metafunc):
 
 @pytest.fixture
 def cellpainting():
+    """
+    Return configuration for a Cell Painting dataset.
+    - 3 compartments CSVs: Cells, Cytoplasm, Nuclei
+    - 1 image CSV
+    - No object.csv and therefore no munging
+    """
     return {
         "config": "config.ini",
         "data_dir": "tests/data_b",
@@ -49,6 +55,12 @@ def cellpainting():
 
 @pytest.fixture
 def htqc():
+    """
+    Return configuration for a 3-channel image-based profiling dataset.
+    - 1 object CSV that comprises Cells, Cytoplasm, Nuclei
+    - 1 image CSV
+    - munging required
+    """
     return {
         "config": "config.ini",
         "data_dir": "tests/data_a",
@@ -82,6 +94,11 @@ def htqc():
 
 @pytest.fixture
 def qc():
+    """
+    Return configuration for a QC dataset (only image table, no objects).
+    - 1 image CSV
+    - No object.csv and therefore no munging
+    """
     return {
         "config": None,
         "data_dir": "tests/data_c",
