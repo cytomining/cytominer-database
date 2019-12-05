@@ -99,12 +99,11 @@ def into(input, output, name, identifier, skip_table_prefix=False):
             #     deprecated, use inspect.signature() or inspect.getfullargspec()
             warnings.simplefilter("ignore", category=DeprecationWarning)
 
-            target = "{}::{}".format(output, name)
-            engine = create_engine(target)
+            engine = create_engine(output)
             con = engine.connect()
 
             df = pd.read_csv(source, index_col=0)
-            df.to_sql(name=target, con=con, if_exists="append")
+            df.to_sql(name=name, con=con, if_exists="append")
 
 def checksum(pathname, buffer_size=65536):
     """
