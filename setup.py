@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name='cytominer_database',
-    version='0.3.2',
+    version='0.3.1',
     author="Shantanu Singh",
     author_email="shsingh@broadinstitute.org",
     maintainer="Gregory Way",
@@ -32,7 +32,7 @@ setuptools.setup(
     ),
     include_package_data=True,
     install_requires=[
-        'backports.tempfile>=1.0',
+        'backports.tempfile>=1.0rc1',
         'click>=6.7',
         'configparser>=3.5.0',
         'csvkit>=1.0.2',
