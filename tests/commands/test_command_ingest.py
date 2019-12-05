@@ -45,11 +45,11 @@ def test_run(dataset, runner):
         for blob in dataset["ingest"]:
             table_name = blob["table"].capitalize()
 
-            target = "sqlite:///{}::{}".format(str(sqlite_file), table_name)
+            target = "sqlite:///{}".format(str(sqlite_file))
             engine = create_engine(target)
             con = engine.connect()
 
-            df = pd.read_sql(target, con=con, index_col=0)
+            df = pd.read_sql(sql=table_name, con=con, index_col=0)
 
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1
@@ -80,11 +80,11 @@ def test_run_defaults(cellpainting, runner):
         for blob in cellpainting["ingest"]:
             table_name = blob["table"].capitalize()
 
-            target = "sqlite:///{}::{}".format(str(sqlite_file), table_name)
+            target = "sqlite:///{}".format(str(sqlite_file))
             engine = create_engine(target)
             con = engine.connect()
 
-            df = pd.read_sql(target, con=con, index_col=0)
+            df = pd.read_sql(sql=table_name, con=con, index_col=0)
 
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1
