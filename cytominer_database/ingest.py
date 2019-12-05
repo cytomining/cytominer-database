@@ -99,8 +99,7 @@ def into(input, output, name, identifier, skip_table_prefix=False):
             #     deprecated, use inspect.signature() or inspect.getfullargspec()
             warnings.simplefilter("ignore", category=DeprecationWarning)
 
-            target = output
-            engine = create_engine(target)
+            engine = create_engine(output)
             con = engine.connect()
 
             df = pd.read_csv(source, index_col=0)
