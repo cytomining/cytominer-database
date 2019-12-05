@@ -32,7 +32,7 @@ setuptools.setup(
     ),
     include_package_data=True,
     install_requires=[
-        'backports.tempfile>=1.0rc1',
+        'backports.tempfile>=1.0',
         'click>=6.7',
         'configparser>=3.5.0',
         'csvkit>=1.0.2',
