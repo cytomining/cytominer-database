@@ -1,9 +1,23 @@
 import setuptools
+from sphinx.setup_command import BuildDoc
 
+cmdclass = {"build_sphinx": BuildDoc}
+
+name = "cytominer_database"
+version = "0.3"
+release = "0.3.3"
 
 setuptools.setup(
-    name='cytominer_database',
-    version='0.3.3',
+    name=name,
+    version=release,
+    cmdclass=cmdclass,
+    command_options={
+        "build_sphinx": {
+            "project": ("setup.py", name),
+            "version": ("setup.py", version),
+            "release": ("setup.py", release),
+        }
+    },
     author="Shantanu Singh",
     author_email="shsingh@broadinstitute.org",
     maintainer="Gregory Way",
@@ -13,31 +27,24 @@ setuptools.setup(
     cytominer-database=cytominer_database.command:command
     """,
     long_description="cytominer-database provides mechanisms to import CSV "
-                     "files generated in a morphological profiling experiment "
-                     "into a database backend. "
-                     "Please refer to the online documentation at "
-                     "http://cytominer-database.readthedocs.io",
+    "files generated in a morphological profiling experiment "
+    "into a database backend. "
+    "Please refer to the online documentation at "
+    "http://cytominer-database.readthedocs.io",
     package_data={
-        'cytominer_database': [
-            'config/*.ini',
-            'config/*.json',
-            'config/*.sql'
-        ],
+        "cytominer_database": ["config/*.ini", "config/*.json", "config/*.sql"]
     },
-    packages=setuptools.find_packages(
-        exclude=[
-            'tests',
-            'doc'
-        ]
-    ),
+    packages=setuptools.find_packages(exclude=["tests", "doc"]),
     include_package_data=True,
     install_requires=[
-        'backports.tempfile>=1.0rc1',
-        'click>=6.7',
-        'configparser>=3.5.0',
-        'csvkit>=1.0.2',
-        'pandas>=0.20.3'
+        "backports.tempfile>=1.0rc1",
+        "click>=6.7",
+        "configparser>=3.5.0",
+        "csvkit>=1.0.2",
+        "pandas>=0.20.3",
+        "sphinx>=2.2.2",
+        "sphinx-rtd-theme>=0.4.3",
     ],
-    license='BSD',
-    url='https://github.com/cytomining/cytominer-database'
+    license="BSD",
+    url="https://github.com/cytomining/cytominer-database",
 )
