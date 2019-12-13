@@ -1,7 +1,7 @@
 --index-url https://pypi.python.org/simple/
 
---editable .
-
 pytest>=3.2.2
 sphinx>=1.6.4
 sphinx_rtd_theme>=0.2.5b1
+
+--editable .
