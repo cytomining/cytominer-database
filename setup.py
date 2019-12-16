@@ -1,11 +1,11 @@
 import setuptools
 
-name = "cytominer_database"
-release = "0.3.3"
+project = "cytominer_database"
+version = "0.3.3"
 
 setuptools.setup(
-    name=name,
-    version=release,
+    name=project,
+    version=version,
     author="Shantanu Singh",
     author_email="shsingh@broadinstitute.org",
     maintainer="Gregory Way",
@@ -30,8 +30,6 @@ setuptools.setup(
         "configparser>=3.5.0",
         "csvkit>=1.0.2",
         "pandas>=0.20.3",
-        "sphinx>=2.2.2",
-        "sphinx-rtd-theme>=0.4.3",
     ],
     license="BSD",
     url="https://github.com/cytomining/cytominer-database",
