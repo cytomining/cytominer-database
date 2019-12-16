@@ -47,8 +47,11 @@ import pandas as pd
 import backports.tempfile
 import sqlalchemy.exc
 from sqlalchemy import create_engine
-
 import cytominer_database.utils
+
+import pyarrow
+import pyarrow.parquet as pq
+import pyarrow.csv
 
 
 def __format__(name, header):
@@ -58,11 +61,11 @@ def __format__(name, header):
     return "{}_{}".format(name, header)
 
 
-def into(input, output, name, identifier, skip_table_prefix=False):
+def into(input, output, name, identifier, skip_table_prefix=False, engine):
     """Ingest a CSV file into a table in a database.
 
     :param input: Input CSV file.
-    :param output: Connection string for the database.
+    :param output: Connection string for the SQL database or Parquet directory
     :param name: Table in database into which the CSV file will be ingested
     :param identifier: Unique identifier for ``input``.
     :param skip_table_prefix: True if the prefix of the table name should be excluded
@@ -90,27 +93,50 @@ def into(input, output, name, identifier, skip_table_prefix=False):
 
             [writer.writerow([identifier] + row) for row in reader]
 
+        # check engine
+        if engine == 'Parquet':
+             # Check if compartment-specific parquet output directory exists
+             # Comment: Maybe it is cost-inefficient to do this for every file,
+             # .. when we only need to assign and check four times in total,
+             # .. irrespective of the number of csv files?
+            table = pyarrow.csv.read_csv(source)
+            destination = os.path.join(output, name, ".parquet")
+
+            if not destination.exists():
+                writer = pq.ParquetWriter(destination, table.schema)
+                # create a write object
+                # Problem: We need to pass the creater writer object
+                # .. to call it with the next .csv file -> additional argument?
+                # Or we can open and close the parquet
+                # .. writer with every new .csv file
+
+            # ToDo: assign to writer the correct parquet object
+            # .. if it was not created because it exists from previous call
+            writer.write_table(table)
+        elif engine == "SQLite"
         # Now ingest the temp CSV file (with the modified column names) into the database backend
-        # the rows of the CSV file are inserted into a table with name `name`.
-        with warnings.catch_warnings():
-            # Suppress the following warning on Python 3:
-            #
-            #   /usr/local/lib/python3.6/site-packages/odo/utils.py:128: DeprecationWarning: inspect.getargspec() is
-            #     deprecated, use inspect.signature() or inspect.getfullargspec()
-            warnings.simplefilter("ignore", category=DeprecationWarning)
+            # the rows of the CSV file are inserted into a table with name `name`.
+            with warnings.catch_warnings():
+                # Suppress the following warning on Python 3:
+                #
+                #   /usr/local/lib/python3.6/site-packages/odo/utils.py:128: DeprecationWarning: inspect.getargspec() is
+                #     deprecated, use inspect.signature() or inspect.getfullargspec()
+                warnings.simplefilter("ignore", category=DeprecationWarning)
 
-            engine = create_engine(output)
-            con = engine.connect()
-
-            df = pd.read_csv(source, index_col=0)
-            df.to_sql(name=name, con=con, if_exists="append")
+                engine = create_engine(output)
+                con = engine.connect()
+                df = pd.read_csv(source, index_col=0)
+                df.to_sql(name=name, con=con, if_exists="append")
+                #  choose database engine and ingest
+# ToDo : Close writer after all files have been read
+# --> Higher level? This would also allow a clear writer opening!
 
 def checksum(pathname, buffer_size=65536):
     """
     Generate a 32-bit unique identifier for a file.
-    
+
     :param pathname: input file
-    :param buffer_size: buffer size   
+    :param buffer_size: buffer size
     """
     with open(pathname, "rb") as stream:
         result = zlib.crc32(bytes(0))
@@ -131,11 +157,13 @@ def seed(source, target, config_file, skip_image_prefix=True):
 
     :param config_file: Configuration file.
     :param source: Directory containing subdirectories that contain CSV files.
-    :param target: Connection string for the database.
+    :param target: Connection string for the SQLight database
+                   OR directory string for parquet output
     :param skip_image_prefix: True if the prefix of image table name should be excluded
      from the names of columns from per image table
     """
-    config_file = cytominer_database.utils.read_config(config_file)
+    # moved this to top level
+    # config_file = cytominer_database.utils.read_config(config_file)
 
     # list the subdirectories that contain CSV files
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
@@ -156,11 +184,12 @@ def seed(source, target, config_file, skip_image_prefix=True):
         identifier = checksum(image)
 
         name, _ = os.path.splitext(config_file["filenames"]["image"])
+        engine  = os.path.splitext(config_file["database_engine"]["database"])
 
         # ingest the image CSV
         try:
             into(input=image, output=target, name=name.capitalize(), identifier=identifier,
-                 skip_table_prefix=skip_image_prefix)
+                 skip_table_prefix=skip_image_prefix, ingestion=engine)
         except sqlalchemy.exc.DatabaseError as e:
             click.echo(e)
 
@@ -170,4 +199,4 @@ def seed(source, target, config_file, skip_image_prefix=True):
         for compartment in compartments:
             name, _ = os.path.splitext(os.path.basename(compartment))
 
-            into(input=compartment, output=target, name=name.capitalize(), identifier=identifier)
+            into(input=compartment, output=target, name=name.capitalize(), identifier=identifier, ingestion=engine)
