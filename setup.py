@@ -1,23 +1,11 @@
 import setuptools
-from sphinx.setup_command import BuildDoc
-
-cmdclass = {"build_sphinx": BuildDoc}
 
 name = "cytominer_database"
-version = "0.3"
 release = "0.3.3"
 
 setuptools.setup(
     name=name,
     version=release,
-    cmdclass=cmdclass,
-    command_options={
-        "build_sphinx": {
-            "project": ("setup.py", name),
-            "version": ("setup.py", version),
-            "release": ("setup.py", release),
-        }
-    },
     author="Shantanu Singh",
     author_email="shsingh@broadinstitute.org",
     maintainer="Gregory Way",
