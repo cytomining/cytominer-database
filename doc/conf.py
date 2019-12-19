@@ -48,6 +48,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'cytominer_database'
+copyright = "2019, Allen Goodman, Claire McQuin, Shantanu Singh, Gregory Way"
+author = "Allen Goodman, Claire McQuin, Shantanu Singh, Gregory Way"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
