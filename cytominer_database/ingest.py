@@ -61,7 +61,7 @@ def __format__(name, header):
     return "{}_{}".format(name, header)
 
 
-def into(input, output, name, identifier, skip_table_prefix=False, engine):
+def into(input, output, name, identifier, skip_table_prefix=False, writers):
     """Ingest a CSV file into a table in a database.
 
     :param input: Input CSV file.
@@ -72,12 +72,16 @@ def into(input, output, name, identifier, skip_table_prefix=False, engine):
      from the names of columns.
     """
 
-    with backports.tempfile.TemporaryDirectory() as directory:
+    with backports.tempfile.TemporaryDirectory() as directory: 
+        # Question: Why do we need to reload the directory and generate the source? 
+        # Why is "source" used as "fout"-writer later ?
+        # Isn't Source == input ? ("input" seems to have exactly the "directory + basename"-structure?)
         source = os.path.join(directory, os.path.basename(input))
 
-        # create a temporary CSV file which is identical to the input CSV file
-        # but with the column names prefixed with the name of the compartment
-        # (or `Image`, if this is an image CSV file, and `skip_table_prefix` is False)
+        # Question: Can we move this section into the "SQLite" case?
+            # create a temporary CSV file which is identical to the input CSV file
+            # but with the column names prefixed with the name of the compartment
+            # (or `Image`, if this is an image CSV file, and `skip_table_prefix` is False)
         with open(input, "r") as fin, open(source, "w") as fout:
             reader = csv.reader(fin)
             writer = csv.writer(fout)
@@ -88,33 +92,12 @@ def into(input, output, name, identifier, skip_table_prefix=False, engine):
 
             # The first column is `TableNumber`, which is the unique identifier for the image CSV
             headers = ["TableNumber"] + headers
-
             writer.writerow(headers)
-
             [writer.writerow([identifier] + row) for row in reader]
 
-        # check engine
-        if engine == 'Parquet':
-             # Check if compartment-specific parquet output directory exists
-             # Comment: Maybe it is cost-inefficient to do this for every file,
-             # .. when we only need to assign and check four times in total,
-             # .. irrespective of the number of csv files?
-            table = pyarrow.csv.read_csv(source)
-            destination = os.path.join(output, name, ".parquet")
-
-            if not destination.exists():
-                writer = pq.ParquetWriter(destination, table.schema)
-                # create a write object
-                # Problem: We need to pass the creater writer object
-                # .. to call it with the next .csv file -> additional argument?
-                # Or we can open and close the parquet
-                # .. writer with every new .csv file
-
-            # ToDo: assign to writer the correct parquet object
-            # .. if it was not created because it exists from previous call
-            writer.write_table(table)
-        elif engine == "SQLite"
-        # Now ingest the temp CSV file (with the modified column names) into the database backend
+        # The argument "writers" is an empty dict {} iff "SQLite" was selected as ingestion engine 
+        if writers == {} :
+            # Now ingest the temp CSV file (with the modified column names) into the database backend
             # the rows of the CSV file are inserted into a table with name `name`.
             with warnings.catch_warnings():
                 # Suppress the following warning on Python 3:
@@ -122,14 +105,14 @@ def into(input, output, name, identifier, skip_table_prefix=False, engine):
                 #   /usr/local/lib/python3.6/site-packages/odo/utils.py:128: DeprecationWarning: inspect.getargspec() is
                 #     deprecated, use inspect.signature() or inspect.getfullargspec()
                 warnings.simplefilter("ignore", category=DeprecationWarning)
-
                 engine = create_engine(output)
                 con = engine.connect()
                 df = pd.read_csv(source, index_col=0)
                 df.to_sql(name=name, con=con, if_exists="append")
-                #  choose database engine and ingest
-# ToDo : Close writer after all files have been read
-# --> Higher level? This would also allow a clear writer opening!
+        else: # Write into open Parquet writers which are stored in the dictionary   
+            table           = pyarrow.csv.read_csv(source)
+            parquetWriter   = writers[name]  # will return the opened writer of the image or compartment
+            parquetWriter.write_table(table)
 
 def checksum(pathname, buffer_size=65536):
     """
@@ -151,25 +134,45 @@ def checksum(pathname, buffer_size=65536):
 
     return result & 0xffffffff
 
+def getWriters(source, target, tablePaths, writer_dict):
+    # Comment:  Here we use a dictionary for four different writers,
+    #           ..where key = compartment and  value = opened writer.
+    #           Alternatively, we can dynamically allocate the writer
+    #           ..variable with:  globals()["writer_" + name ] = ...
+
+    for tablePath in tablePaths:  # tablePaths = [image, compartments] 
+        name, _             = os.path.splitext(os.path.basename(tablePath)) # why do we need splitext?
+
+        if name in writer_dict :    # close writer
+            writer = writer_dict[name]
+            writer.close()
+        else:                       # open writer
+            table               = pyarrow.csv.read_csv(tablePath)
+            destination         = os.path.join(target,name,".parquet") # ToDo: make sure 'target' ends with '/'
+            writer_dict[name]   = pq.ParquetWriter(destination, table.schema)
+
+    return writer_dict
+
+
 def seed(source, target, config_file, skip_image_prefix=True):
     """
     Read CSV files into a database backend.
 
     :param config_file: Configuration file.
     :param source: Directory containing subdirectories that contain CSV files.
-    :param target: Connection string for the SQLight database
+    :param target: Connection string for the SQLite database
                    OR directory string for parquet output
     :param skip_image_prefix: True if the prefix of image table name should be excluded
      from the names of columns from per image table
     """
-    # moved this to top level
+    # moved this to top level:
     # config_file = cytominer_database.utils.read_config(config_file)
-
     # list the subdirectories that contain CSV files
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
+    # get ingestion engine type 
+    engine  = os.path.splitext(config_file["database_engine"]["database"])  
 
-    for directory in directories:
-
+    for i, directory in enumerate(directories):
         # get the image CSV and the CSVs for each of the compartments
         try:
             compartments, image = cytominer_database.utils.validate_csv_set(config_file, directory)
@@ -177,26 +180,59 @@ def seed(source, target, config_file, skip_image_prefix=True):
             click.echo(e)
 
             continue
-
-        # get a unique identifier for the image CSV. This will later be used as the TableNumber column
-        # the casting to int is to allow the database to be readable by CellProfiler Analyst, which
-        # requires TableNumber to be an integer.
+            # get a unique identifier for the image CSV. This will later be used as the TableNumber column
+            # the casting to int is to allow the database to be readable by CellProfiler Analyst, which
+            # requires TableNumber to be an integer.
         identifier = checksum(image)
 
-        name, _ = os.path.splitext(config_file["filenames"]["image"])
-        engine  = os.path.splitext(config_file["database_engine"]["database"])
+        # If first file: Initialize dictionary containing writers                
+        if i == 0 :
+            writer_dict = {}
+            if engine == 'Parquet' :
+                writer_dict = getWriters(target, tablePaths=[image, compartments]) 
 
-        # ingest the image CSV
+        # start ingestion
+        # 1. ingest the image CSV
+        name, _ = os.path.splitext(config_file["filenames"]["image"])
+            # Claim: 
+            # os.path.splitext(config_file["filenames"]["image"]) == os.path.splitext(os.path.basename(image))
+            
+            # Proposal:
+            # 1. Since we use "name, _ = os.path.splitext(os.path.basename(compartment)) " 
+            # .. for the compartments, let's use  "name, _ = os.path.splitext(os.path.basename(image))" 
+            # .. for the image-part too ?
+            # 2. Unite the ingestion of image and compartment csv's ? 
+            # 3. Find a way to work around the skip_table_prefix, 
+            # .. which is passed by different default values for seed() and into()
+        """
+        for table in [image, compartments]:
+            name, _ = os.path.splitext(os.path.basename(table))
+            if name is not "Image":
+                skip_image_prefix = False 
+            try:
+                into(input=table, output=target, name=name.capitalize(), identifier=identifier,
+                        skip_table_prefix=skip_image_prefix, writers=writer_dict)
+            except sqlalchemy.exc.DatabaseError as e:
+                click.echo(e)
+                continue
+        """
         try:
             into(input=image, output=target, name=name.capitalize(), identifier=identifier,
-                 skip_table_prefix=skip_image_prefix, ingestion=engine)
+                    skip_table_prefix=skip_image_prefix, writers=writer_dict)
         except sqlalchemy.exc.DatabaseError as e:
             click.echo(e)
-
             continue
 
-        # ingest the CSV for each compartment
+        # 2. ingest the CSV for each compartment
         for compartment in compartments:
             name, _ = os.path.splitext(os.path.basename(compartment))
+            into(input=compartment, output=target, name=name.capitalize(), identifier=identifier,
+                    writers=writer_dict)
 
-            into(input=compartment, output=target, name=name.capitalize(), identifier=identifier, ingestion=engine)
+        #close Parquet writer after last file has been ingested
+        if i == (len(directories)-1) and engine == 'Parquet':
+            writer_dict = getWriters(target, tablePaths=[image, compartments], writer_dict)
+
+
+
+
