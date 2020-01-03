@@ -25,13 +25,13 @@ def test_seed(dataset):
     with backports.tempfile.TemporaryDirectory() as temp_dir:
         if engine == 'Parquet':
             # create output directory
-            target = os.path.join(temp_dir, "parquet_output" )
+            target = os.path.join(temp_dir, "test_parquet_output" )
             try:
                 os.stat(target)
             except:
                 os.mkdir(target)
 
-        elif engine == 'SQLight':
+        elif engine == 'SQLite':
             sqlite_file = os.path.join(temp_dir, "test.db")
             target      = "sqlite:///{}".format(str(sqlite_file))
 
