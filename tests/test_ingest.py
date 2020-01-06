@@ -17,7 +17,7 @@ def test_seed(dataset):
     # moved upwards from lower level cytominer_database.ingest.seed()
     config_file = cytominer_database.utils.read_config(config_file)
     # get database engine option
-    engine  = os.path.splitext(config_file["database_engine"]["database"])
+    engine  = config_file["database_engine"]["database"]
 
     if munge:
         cytominer_database.munge.munge(config_file, data_dir)

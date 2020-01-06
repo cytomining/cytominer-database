@@ -134,7 +134,7 @@ def checksum(pathname, buffer_size=65536):
 
     return result & 0xffffffff
 
-def getWriters(source, target, tablePaths, writer_dict):
+def getWriters(source, target,  writer_dict, tablePaths):
     # Comment:  Here we use a dictionary for four different writers,
     #           ..where key = compartment and  value = opened writer.
     #           Alternatively, we can dynamically allocate the writer
@@ -170,7 +170,7 @@ def seed(source, target, config_file, skip_image_prefix=True):
     # list the subdirectories that contain CSV files
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
     # get ingestion engine type
-    engine  = os.path.splitext(config_file["database_engine"]["database"])
+    engine  = config_file["database_engine"]["database"]
 
     for i, directory in enumerate(directories):
         # get the image CSV and the CSVs for each of the compartments
