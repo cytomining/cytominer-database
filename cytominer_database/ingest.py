@@ -61,7 +61,7 @@ def __format__(name, header):
     return "{}_{}".format(name, header)
 
 
-def into(input, output, name, identifier, skip_table_prefix=False, writers):
+def into(input, output, name, identifier,  writers, skip_table_prefix=False):
     """Ingest a CSV file into a table in a database.
 
     :param input: Input CSV file.
@@ -72,8 +72,8 @@ def into(input, output, name, identifier, skip_table_prefix=False, writers):
      from the names of columns.
     """
 
-    with backports.tempfile.TemporaryDirectory() as directory: 
-        # Question: Why do we need to reload the directory and generate the source? 
+    with backports.tempfile.TemporaryDirectory() as directory:
+        # Question: Why do we need to reload the directory and generate the source?
         # Why is "source" used as "fout"-writer later ?
         # Isn't Source == input ? ("input" seems to have exactly the "directory + basename"-structure?)
         source = os.path.join(directory, os.path.basename(input))
@@ -95,7 +95,7 @@ def into(input, output, name, identifier, skip_table_prefix=False, writers):
             writer.writerow(headers)
             [writer.writerow([identifier] + row) for row in reader]
 
-        # The argument "writers" is an empty dict {} iff "SQLite" was selected as ingestion engine 
+        # The argument "writers" is an empty dict {} iff "SQLite" was selected as ingestion engine
         if writers == {} :
             # Now ingest the temp CSV file (with the modified column names) into the database backend
             # the rows of the CSV file are inserted into a table with name `name`.
@@ -109,7 +109,7 @@ def into(input, output, name, identifier, skip_table_prefix=False, writers):
                 con = engine.connect()
                 df = pd.read_csv(source, index_col=0)
                 df.to_sql(name=name, con=con, if_exists="append")
-        else: # Write into open Parquet writers which are stored in the dictionary   
+        else: # Write into open Parquet writers which are stored in the dictionary
             table           = pyarrow.csv.read_csv(source)
             parquetWriter   = writers[name]  # will return the opened writer of the image or compartment
             parquetWriter.write_table(table)
@@ -140,7 +140,7 @@ def getWriters(source, target, tablePaths, writer_dict):
     #           Alternatively, we can dynamically allocate the writer
     #           ..variable with:  globals()["writer_" + name ] = ...
 
-    for tablePath in tablePaths:  # tablePaths = [image, compartments] 
+    for tablePath in tablePaths:  # tablePaths = [image, compartments]
         name, _             = os.path.splitext(os.path.basename(tablePath)) # why do we need splitext?
 
         if name in writer_dict :    # close writer
@@ -169,8 +169,8 @@ def seed(source, target, config_file, skip_image_prefix=True):
     # config_file = cytominer_database.utils.read_config(config_file)
     # list the subdirectories that contain CSV files
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
-    # get ingestion engine type 
-    engine  = os.path.splitext(config_file["database_engine"]["database"])  
+    # get ingestion engine type
+    engine  = os.path.splitext(config_file["database_engine"]["database"])
 
     for i, directory in enumerate(directories):
         # get the image CSV and the CSVs for each of the compartments
@@ -185,30 +185,30 @@ def seed(source, target, config_file, skip_image_prefix=True):
             # requires TableNumber to be an integer.
         identifier = checksum(image)
 
-        # If first file: Initialize dictionary containing writers                
+        # If first file: Initialize dictionary containing writers
         if i == 0 :
             writer_dict = {}
             if engine == 'Parquet' :
-                writer_dict = getWriters(target, tablePaths=[image, compartments]) 
+                writer_dict = getWriters(target, tablePaths=[image, compartments])
 
         # start ingestion
         # 1. ingest the image CSV
         name, _ = os.path.splitext(config_file["filenames"]["image"])
-            # Claim: 
+            # Claim:
             # os.path.splitext(config_file["filenames"]["image"]) == os.path.splitext(os.path.basename(image))
-            
+
             # Proposal:
-            # 1. Since we use "name, _ = os.path.splitext(os.path.basename(compartment)) " 
-            # .. for the compartments, let's use  "name, _ = os.path.splitext(os.path.basename(image))" 
+            # 1. Since we use "name, _ = os.path.splitext(os.path.basename(compartment)) "
+            # .. for the compartments, let's use  "name, _ = os.path.splitext(os.path.basename(image))"
             # .. for the image-part too ?
-            # 2. Unite the ingestion of image and compartment csv's ? 
-            # 3. Find a way to work around the skip_table_prefix, 
+            # 2. Unite the ingestion of image and compartment csv's ?
+            # 3. Find a way to work around the skip_table_prefix,
             # .. which is passed by different default values for seed() and into()
         """
         for table in [image, compartments]:
             name, _ = os.path.splitext(os.path.basename(table))
             if name is not "Image":
-                skip_image_prefix = False 
+                skip_image_prefix = False
             try:
                 into(input=table, output=target, name=name.capitalize(), identifier=identifier,
                         skip_table_prefix=skip_image_prefix, writers=writer_dict)
@@ -217,8 +217,8 @@ def seed(source, target, config_file, skip_image_prefix=True):
                 continue
         """
         try:
-            into(input=image, output=target, name=name.capitalize(), identifier=identifier,
-                    skip_table_prefix=skip_image_prefix, writers=writer_dict)
+            into(input=image, output=target, name=name.capitalize(), identifier=identifier, writers=writer_dict,
+                    skip_table_prefix=skip_image_prefix)
         except sqlalchemy.exc.DatabaseError as e:
             click.echo(e)
             continue
@@ -232,7 +232,3 @@ def seed(source, target, config_file, skip_image_prefix=True):
         #close Parquet writer after last file has been ingested
         if i == (len(directories)-1) and engine == 'Parquet':
             writer_dict = getWriters(target, tablePaths=[image, compartments], writer_dict)
-
-
-
-
