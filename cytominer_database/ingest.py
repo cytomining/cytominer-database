@@ -189,7 +189,7 @@ def seed(source, target, config_file, skip_image_prefix=True):
         if i == 0 :
             writer_dict = {}
             if engine == 'Parquet' :
-                writer_dict = getWriters(target, writer_dict, tablePaths=[image, compartments])
+                writer_dict = getWriters(source, target, writer_dict, tablePaths=[image, compartments])
 
         # start ingestion
         # 1. ingest the image CSV
@@ -231,4 +231,4 @@ def seed(source, target, config_file, skip_image_prefix=True):
 
         #close Parquet writer after last file has been ingested
         if i == (len(directories)-1) and engine == 'Parquet':
-            writer_dict = getWriters(target, writer_dict, tablePaths=[image, compartments])
+            writer_dict = getWriters(source, target, writer_dict, tablePaths=[image, compartments])
