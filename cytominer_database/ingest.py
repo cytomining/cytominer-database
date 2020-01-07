@@ -141,14 +141,16 @@ def getWriters(source, target,  writer_dict, tablePaths):
     #           ..variable with:  globals()["writer_" + name ] = ...
 
     for tablePath in tablePaths:  # tablePaths = [image, compartments]
-        name, _             = os.path.splitext(os.path.basename(tablePath)) # why do we need splitext?
+        name, _   = os.path.splitext(os.path.basename(tablePath)) # why do we need splitext?
+        name      = name.capitalize()
 
         if name in writer_dict :    # close writer
             writer = writer_dict[name]
             writer.close()
         else:                       # open writer
             table               = pyarrow.csv.read_csv(tablePath)
-            destination         = os.path.join(target,name,".parquet") # ToDo: make sure 'target' ends with '/'
+            basename            = name + ".parquet"
+            destination         = os.path.join(target, basename)
             writer_dict[name]   = pq.ParquetWriter(destination, table.schema)
 
     return writer_dict
@@ -189,11 +191,13 @@ def seed(source, target, config_file, skip_image_prefix=True):
         if i == 0 :
             writer_dict = {}
             if engine == 'Parquet' :
-                writer_dict = getWriters(source, target, writer_dict, tablePaths=[image, compartments])
+                tablePaths  = [image] + compartments
+                writer_dict = getWriters(source, target, writer_dict, tablePaths)
 
         # start ingestion
         # 1. ingest the image CSV
         name, _ = os.path.splitext(config_file["filenames"]["image"])
+        name      = name.capitalize()
             # Claim:
             # os.path.splitext(config_file["filenames"]["image"]) == os.path.splitext(os.path.basename(image))
 
@@ -226,9 +230,11 @@ def seed(source, target, config_file, skip_image_prefix=True):
         # 2. ingest the CSV for each compartment
         for compartment in compartments:
             name, _ = os.path.splitext(os.path.basename(compartment))
+            name      = name.capitalize()
             into(input=compartment, output=target, name=name.capitalize(), identifier=identifier,
                     writers=writer_dict)
 
         #close Parquet writer after last file has been ingested
         if i == (len(directories)-1) and engine == 'Parquet':
-            writer_dict = getWriters(source, target, writer_dict, tablePaths=[image, compartments])
+            tablePaths  = [image] + compartments
+            writer_dict = getWriters(source, target, writer_dict, tablePaths)
