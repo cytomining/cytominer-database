@@ -42,22 +42,35 @@ Example::
 # ToDo:
 """
 - Build new schema
-Load a collection of tables and compare (1) number of columns and (2) type of every column.
-Build the correct schema:
-(1) Among all tables: Names of widest table (no missing columns). 
-(2) For each row, among all tables: Higher Type 
-   OR : simply convert all column types int -> float 
+Regarding the names:
+Load a random collection of tables and compare the number of columns.
+Choose a table that belongs to the group with no missing columns. \
+Leave an option to explicitly feed an example table.
 
-- Get pyarrow table enforcing new schema
-# use new_pq_table = self.pa.Table.from_pandas(df, schema=pq_table.schema) 
+Regarding the types:
+Convert all column types int -> float (will be a small fraction of columns!)
+(Potentially include later: Automatic comparison-based type casting)
 
-Example access: 
+- build example schema and pass it along. (Will get an error for conversions with loss!)
+
+- Get pyarrow table enforcing a specific pyarrow schema
+# use new_table = self.pa.Table.from_pandas(df, schema=table.schema) # check how this handles tables with missing columns or null values!
+
+----> Then we don't need to explicitly concert the rows (of the pandas df)
+ 
+ - build new pyarrow schema (test_modifying_schemata.ipynb ):
+# get field
 old_field = f1.schema[faulty_indices[0]]
+# unpack
 old_name, old_type = old_field.name, old_field.type
-#check equivalence
+# pack
 check_old_field = pa.field(old_name, old_type)
+# check equivalence
 old_field.equals(check_old_field) # True !!
-# --> can build field from field attributes!
+#pyarrow schemata
+assert(isinstance(f1.schema[index].type, int))
+however
+print(f1.schema[0].type) # int64 or double
 """
 
 import os
@@ -101,7 +114,10 @@ def getDFfromTempDir(input, name, identifier, skip_table_prefix=False):
             writer.writerow(headers)
             [writer.writerow([identifier] + row) for row in reader]
             pandasDataFrame = pd.read_csv(source, index_col=0) 
-            return pandasDataFrame   
+            return pandasDataFrame  
+
+def dataFrame = convertCols_Int2Float(dataFrame):
+
 
 
 def writeCSVtoDB(input, output, name, identifier,  writers, skip_table_prefix=False):
@@ -116,6 +132,8 @@ def writeCSVtoDB(input, output, name, identifier,  writers, skip_table_prefix=Fa
     """
     # Create modified .csv in a temporary directory and get Pandas DataFrame
     dataFrame = getModifiedDataframefromTempDir(input, name, identifier, skip_table_prefix=False)
+    # Convert columns with integer values to float64 
+    dataFrame = convertColsInt2Float(dataFrame)
 
     # If SQLite is the format specified in the config file, then the argument "writers" is an empty dict {}. 
             # Then ingest the temp CSV file (with the modified column names) into the database backend
