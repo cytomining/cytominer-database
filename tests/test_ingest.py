@@ -14,17 +14,32 @@ def test_seed(dataset):
     ingest = dataset["ingest"]
 
     config_file = os.path.join(data_dir, "config.ini")
+    # moved upwards from lower level cytominer_database.ingest.seed()
+    config_file = cytominer_database.utils.read_config(config_file)
+    # get database engine option
+    engine  = config_file["database_engine"]["database"]
 
     if munge:
         cytominer_database.munge.munge(config_file, data_dir)
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
-        sqlite_file = os.path.join(temp_dir, "test.db")
+        if engine == 'Parquet':
+            # create output directory
+            target = os.path.join(temp_dir, "test_parquet_output" )
+            try:
+                os.stat(target)
+            except:
+                os.mkdir(target)
+
+        elif engine == 'SQLite':
+            sqlite_file = os.path.join(temp_dir, "test.db")
+            target      = "sqlite:///{}".format(str(sqlite_file))
+
 
         cytominer_database.ingest.seed(
             config_file=config_file,
             source=data_dir,
-            target="sqlite:///{}".format(str(sqlite_file))
+            target=target
         )
 
         assert os.path.exists(str(sqlite_file))
