@@ -13,9 +13,9 @@ def test_seed(dataset):
     munge = dataset["munge"]
     ingest = dataset["ingest"]
 
-    config_file = os.path.join(data_dir, "config.ini")
+    config_path = os.path.join(data_dir, "config.ini")
     # moved upwards from lower level cytominer_database.ingest.seed()
-    config_file = cytominer_database.utils.read_config(config_file)
+    config_file = cytominer_database.utils.read_config(config_path)
     # get database engine option
     engine  = config_file["database_engine"]["database"]
 
@@ -37,7 +37,7 @@ def test_seed(dataset):
 
 
         cytominer_database.ingest.seed(
-            config_file=config_file,
+            config_file=config_path,
             source=data_dir,
             target=target
         )
