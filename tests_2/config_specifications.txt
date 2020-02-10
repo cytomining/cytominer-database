@@ -10,6 +10,8 @@ database = Parquet
 # options: Parquet, SQLite
 
 [schema]
+reference_option = sample
+# options: 'sample', or path to directory containing reference tables. The path is relative to the source path, e.g. the absolute path is "/content/input/data_a/reference_folder" and the subdirectories containing the tables are located in source =  "/content/input/data_a", then the string specifying the path is given as 'reference_folder'. 
 ref_fraction = 1  
 # ref_fraction is the fraction of all existing directories (containting tables) 
 that will be used to determine the reference schema for the Parquet file.
