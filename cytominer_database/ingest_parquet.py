@@ -89,9 +89,10 @@ import pyarrow.csv
 import numpy as np
 import collections
 import numpy as np
+import cytominer_database
 
 
-def write_csv_to_sqlite(input, output, identifier, skip_table_prefix=False):
+def write_csv_to_sqlite(input, output, identifier,  skip_table_prefix=False):
     """
     Gets a modified dataframe, opens an engine and writes to SQLite
 
@@ -115,9 +116,9 @@ def write_csv_to_sqlite(input, output, identifier, skip_table_prefix=False):
  # many different options in config.ini.
  # Also note that we use skip_table_prefix and skip_image_prefix interchangebly.
 
-    print("............... in write_csv_to_sqlite:", name, "..................")
     name, _ = os.path.splitext(os.path.basename(input))
     name = name.capitalize()
+    print("............... in write_csv_to_sqlite:", name, "..................")
     # get dataframe
     dataframe = get_df_from_temp_dir(input, identifier, skip_table_prefix)
     # Note: we could generate the identifier within get_df_from_temp_dir(),
@@ -133,7 +134,7 @@ def write_csv_to_sqlite(input, output, identifier, skip_table_prefix=False):
         dataframe.to_sql(name=name, con=con, if_exists="append")
 
 def write_csv_to_parquet(
-    input, output, identifier, writers_dict, skip_table_prefix=False
+    input, output, identifier, writers_dict, config_file , skip_table_prefix=False
 ):
     """
     Gets a modified dataframe and writes Table to opened ParquetWriter
@@ -561,13 +562,13 @@ def convert_cols_int2float(pandas_df):
 def convert_cols_2string(dataframe):
     """
     Converts all column types to 'string'.
-    :pandas_df: Pandas dataframe
+    :dataframe: Pandas dataframe
     """
     # iterates over the columns of the input Pandas dataframe
     # and converts all values to type string
     for col_name in dataframe.columns:
         dataframe[col_name] = dataframe[col_name].astype("str")
-    return pandas_df
+    return dataframe
 
 
 def get_full_paths_in_dir(directory, config_file, name=None):
@@ -658,7 +659,7 @@ def seed(source, target, config_path, skip_image_prefix=True, directories=None):
             )  # here we assume every directory holds a image.csv
             # ............................. image-csv ...........................
             try:
-                write_csv_to_SQLite(
+                write_csv_to_sqlite(
                     input=image,
                     output=target,
                     identifier=identifier,
@@ -689,6 +690,7 @@ def seed(source, target, config_path, skip_image_prefix=True, directories=None):
                 output=target,
                 identifier=identifier,
                 writers_dict=writers_dict,
+                config_file = config,
                 skip_table_prefix=skip_image_prefix,
             )
 
@@ -699,6 +701,7 @@ def seed(source, target, config_path, skip_image_prefix=True, directories=None):
                     output=target,
                     identifier=identifier,
                     writers_dict=writers_dict,
+                    config_file = config
                 )
     # --------------------- close writers ---------------------------------------
     if config["database_engine"]["database"] == "Parquet":
