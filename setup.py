@@ -36,7 +36,8 @@ setuptools.setup(
         'click>=6.7',
         'configparser>=3.5.0',
         'csvkit>=1.0.2',
-        'pandas>=0.20.3'
+        'pandas>=0.20.3',
+        'pyarrow>=0.16.1'
     ],
     license='BSD',
     url='https://github.com/cytomining/cytominer-database'
