@@ -41,17 +41,23 @@ def test_seed(dataset):
             source=data_dir,
             target=target
         )
-
-        assert os.path.exists(str(sqlite_file))
+        if engine == 'Parquet':
+            assert os.path.exists(str(target))
+        
+        elif engine == 'SQLite':
+            assert os.path.exists(str(sqlite_file))
 
         for blob in ingest:
             table_name = blob["table"].capitalize()
-
-            target = "sqlite:///{}".format(str(sqlite_file))
-            engine = create_engine(target)
-            con = engine.connect()
-
-            df = pd.read_sql(sql=table_name, con=con, index_col=0)
+            
+            if engine == 'Parquet':
+                df = pd.read_parquet(path=target, engine ='pyarrow') # ignore column 0 (columns=[1:])? Column 0 should be read only as an index (index_col=0) ?
+            
+            elif engine == 'SQLite':
+                target = "sqlite:///{}".format(str(sqlite_file))
+                engine = create_engine(target)
+                con = engine.connect()
+                df = pd.read_sql(sql=table_name, con=con, index_col=0)
 
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1

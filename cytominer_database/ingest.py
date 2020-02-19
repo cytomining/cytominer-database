@@ -95,6 +95,11 @@ import pyarrow.csv
 import numpy as np
 import collections
 import numpy as np
+#------ temporary solution to path import issues --------
+import sys
+sys.path.append("/Users/frances/git/cytominer-database")
+# -------------------------------------------------------
+
 import cytominer_database
 
 
