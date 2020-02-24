@@ -1,66 +1,32 @@
 import os
 
-import pandas as pd
 import backports.tempfile
-from sqlalchemy import create_engine
-
-import cytominer_database.ingest
 import cytominer_database.munge
+import pandas as pd
+import pandas.util.testing
 
 
-def test_seed(dataset):
-    data_dir = dataset["data_dir"]
-    munge = dataset["munge"]
-    ingest = dataset["ingest"]
+def test_munge(dataset):
+    if not dataset["munge"]:
+        return
 
-    config_file = os.path.join(data_dir, "config.ini")
-    # moved upwards from lower level cytominer_database.ingest.seed()
-    config_file = cytominer_database.utils.read_config(config_file)
-    # get database engine option
-    engine  = config_file["database_engine"]["database"]
-
-    if munge:
-        cytominer_database.munge.munge(config_file, data_dir)
+    config_file = os.path.join(dataset["data_dir"], "config.ini")
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
-        if engine == 'Parquet':
-            # create output directory
-            target = os.path.join(temp_dir, "test_parquet_output" )
-            try:
-                os.stat(target)
-            except:
-                os.mkdir(target)
-
-        elif engine == 'SQLite':
-            sqlite_file = os.path.join(temp_dir, "test.db")
-            target      = "sqlite:///{}".format(str(sqlite_file))
-
-
-        cytominer_database.ingest.seed(
+        valid_directories = cytominer_database.munge.munge(
             config_file=config_file,
-            source=data_dir,
-            target=target
+            source=dataset["data_dir"],
+            target=temp_dir
         )
-        if engine == 'Parquet':
-            assert os.path.exists(str(target))
-        
-        elif engine == 'SQLite':
-            assert os.path.exists(str(sqlite_file))
 
-        for blob in ingest:
-            table_name = blob["table"].capitalize()
-            
-            if engine == 'Parquet':
-                df = pd.read_parquet(path=target, engine ='pyarrow') # ignore column 0 (columns=[1:])? Column 0 should be read only as an index (index_col=0) ?
-            
-            elif engine == 'SQLite':
-                target = "sqlite:///{}".format(str(sqlite_file))
-                engine = create_engine(target)
-                con = engine.connect()
-                df = pd.read_sql(sql=table_name, con=con, index_col=0)
+        for directory in valid_directories:
+            for csv_filename in ["Cells.csv",  "Cytoplasm.csv", "Nuclei.csv"]:
+                input_csv = pd.read_csv(
+                    os.path.join(directory.replace(dataset["data_dir"], temp_dir), csv_filename)
+                )
 
-            assert df.shape[0] == blob["nrows"]
-            assert df.shape[1] == blob["ncols"] + 1
+                output_csv = pd.read_csv(
+                    os.path.join(directory.replace(dataset["data_dir"], dataset["munged_dir"]), csv_filename)
+                )
 
-            if table_name.lower() != "image":
-                assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == blob["nrows"]
+                pandas.util.testing.assert_frame_equal(input_csv, output_csv)
