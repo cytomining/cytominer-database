@@ -137,14 +137,16 @@ def read_config(filename):
     Read a configuration file. A default config file is read first, and the values are overriden
     by those in the specified configuration file.
 
-    :param filename: configuration filename
+    :param filename: configuration filename 
 
     :return: a configuration object
     """
     config = configparser.ConfigParser()
 
     for config_filename in [
-        pkg_resources.resource_filename("cytominer_database", "config/config_default.ini"),  # default config file
+    # pkg_resources.resource_filename() returns a true filesystem path for specified resource
+    # resource_filename(package_or_requirement, resource_name)
+        pkg_resources.resource_filename("cytominer_database", "config/config_default.ini"),  # get default config file
         filename
     ]:
         try:
