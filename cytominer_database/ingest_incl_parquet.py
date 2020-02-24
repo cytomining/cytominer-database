@@ -61,10 +61,10 @@ and carried out on all subfolders in the source folder, e.g. "plate_a/")
 or by using the tables in a prespecified folder. This option is selected in the config.ini as well.
 
 - The script contains many print() statements. They can all be deleted.
-- names and paths of CSV Files are stored in and passed as dictionaries, where the key is the 
-    capitalized table name (e.g. key = "Image" to store value ="path/set_1/image.csv"). 
+- names and paths of CSV Files are stored in and passed as dictionaries, where the key is the
+    capitalized table name (e.g. key = "Image" to store value ="path/set_1/image.csv").
     To account for cases where the capitalization is inconsistent or where some CSV files are missing,
-    the dictionaries are built automatically from the basenames of existing CSV files in specified directories. 
+    the dictionaries are built automatically from the basenames of existing CSV files in specified directories.
     This means that per default, object.csv is also read and written. However, this can be surpressed by explicitly
     excluding them in write_csv_to_sqlite() and write_csv_to_parquet().
 
@@ -165,7 +165,7 @@ def write_csv_to_parquet(
     """
     name, _ = os.path.splitext(os.path.basename(input))
     name = name.capitalize()
-    
+
     # --------special case---------
     # if name == "Object": return
     # ----------------------------

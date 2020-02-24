@@ -108,9 +108,9 @@ def into(input, output, name, identifier, skip_table_prefix=False):
 def checksum(pathname, buffer_size=65536):
     """
     Generate a 32-bit unique identifier for a file.
-    
+
     :param pathname: input file
-    :param buffer_size: buffer size   
+    :param buffer_size: buffer size
     """
     with open(pathname, "rb") as stream:
         result = zlib.crc32(bytes(0))
@@ -125,7 +125,7 @@ def checksum(pathname, buffer_size=65536):
 
     return result & 0xffffffff
 
-def seed(source, target, config_file, skip_image_prefix=True):
+def seed(source, target, config_path, skip_image_prefix=True):
     """
     Read CSV files into a database backend.
 
@@ -135,7 +135,7 @@ def seed(source, target, config_file, skip_image_prefix=True):
     :param skip_image_prefix: True if the prefix of image table name should be excluded
      from the names of columns from per image table
     """
-    config_file = cytominer_database.utils.read_config(config_file)
+    config_file = cytominer_database.utils.read_config(config_path)
 
     # list the subdirectories that contain CSV files
     directories = sorted(list(cytominer_database.utils.find_directories(source)))

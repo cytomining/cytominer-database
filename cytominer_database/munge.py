@@ -9,7 +9,7 @@ import cytominer_database.utils
 logger = logging.getLogger(__name__)
 
 
-def munge(config_file, source, target=None):
+def munge(config_path, source, target=None):
     """
     Searches ``source`` for directories containing a CSV file corresponding to
     per-object measurements, then splits the CSV file into one CSV file per compartment.
@@ -18,7 +18,7 @@ def munge(config_file, source, target=None):
     Cytoplasm, and Nuclei. ``munge`` will split this CSV file into 3 CSV files:
     Cells.csv, Cytoplasm.csv, and Nuclei.csv.
 
-    :param config_file: Configuration file.
+    :param config_path: Path to configuration file.
 
     :param source: Directory containing subdirectories that contain an object CSV file.
 
@@ -33,7 +33,7 @@ def munge(config_file, source, target=None):
         cytominer_database.munge.munge(source, target, config)
     """
 
-    config = cytominer_database.utils.read_config(config_file)
+    config = cytominer_database.utils.read_config(config_path)
 
     if not target:
         target = source
