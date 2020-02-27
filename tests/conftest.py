@@ -2,11 +2,11 @@ import os
 import pytest
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser): # where is this used?
     parser.addoption("--dataset", action="store", help="dataset to test")
 
 
-def pytest_generate_tests(metafunc):
+def pytest_generate_tests(metafunc): # where is this used?
     if "dataset" in metafunc.fixturenames:
         if metafunc.config.option.dataset is None:
             metafunc.parametrize("dataset", ["htqc", "cellpainting", "qc"], indirect=True)

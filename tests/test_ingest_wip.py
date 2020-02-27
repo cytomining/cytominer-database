@@ -12,7 +12,7 @@ def test_seed(dataset):
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
     ingest = dataset["ingest"]
-
+#!!!!!!!!!!!!! adapted config_new.ini !!!!!!!!!
     config_path = os.path.join(data_dir, "config.ini")
     # Get database engine option
     # (for this we need to read the config file from the path here already!)
