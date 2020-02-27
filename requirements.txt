@@ -7,3 +7,4 @@ sphinx>=1.6.4
 sphinx_rtd_theme>=0.2.5b1
 pyarrow>=0.16.0
 numpy>=1.17.0
+csvkit>=1.0.3

@@ -14,7 +14,7 @@ def test_munge(dataset):
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
         valid_directories = cytominer_database.munge.munge(
-            config_file=config_file,
+            config_path=config_file,
             source=dataset["data_dir"],
             target=temp_dir
         )

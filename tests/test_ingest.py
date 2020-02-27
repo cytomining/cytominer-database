@@ -1,32 +1,45 @@
 import os
 
-import backports.tempfile
-import cytominer_database.munge
 import pandas as pd
-import pandas.util.testing
+import backports.tempfile
+from sqlalchemy import create_engine
+
+import cytominer_database.ingest
+import cytominer_database.munge
 
 
-def test_munge(dataset):
-    if not dataset["munge"]:
-        return
+def test_seed(dataset):
+    data_dir = dataset["data_dir"]
+    munge = dataset["munge"]
+    ingest = dataset["ingest"]
 
-    config_file = os.path.join(dataset["data_dir"], "config.ini")
+    config_file = os.path.join(data_dir, "config.ini")
+
+    if munge:
+        cytominer_database.munge.munge(config_file, data_dir)
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
-        valid_directories = cytominer_database.munge.munge(
-            config_file=config_file,
-            source=dataset["data_dir"],
-            target=temp_dir
+        sqlite_file = os.path.join(temp_dir, "test.db")
+
+        cytominer_database.ingest.seed(
+            config_path=config_file,
+            source=data_dir,
+            target="sqlite:///{}".format(str(sqlite_file))
         )
 
-        for directory in valid_directories:
-            for csv_filename in ["Cells.csv",  "Cytoplasm.csv", "Nuclei.csv"]:
-                input_csv = pd.read_csv(
-                    os.path.join(directory.replace(dataset["data_dir"], temp_dir), csv_filename)
-                )
+        assert os.path.exists(str(sqlite_file))
 
-                output_csv = pd.read_csv(
-                    os.path.join(directory.replace(dataset["data_dir"], dataset["munged_dir"]), csv_filename)
-                )
+        for blob in ingest:
+            table_name = blob["table"].capitalize()
 
-                pandas.util.testing.assert_frame_equal(input_csv, output_csv)
+            target = "sqlite:///{}".format(str(sqlite_file))
+            engine = create_engine(target)
+            con = engine.connect()
+
+            df = pd.read_sql(sql=table_name, con=con, index_col=0)
+
+            assert df.shape[0] == blob["nrows"]
+            assert df.shape[1] == blob["ncols"] + 1
+
+            if table_name.lower() != "image":
+                assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == blob["nrows"]
