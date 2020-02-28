@@ -95,13 +95,12 @@ import pyarrow.csv
 import numpy as np
 import collections
 import numpy as np
+import cytominer_database
+
 #------ temporary solution to path import issues --------
 #import sys
 #sys.path.append("/Users/frances/git/cytominer-database")
 # -------------------------------------------------------
-
-import cytominer_database
-
 
 def write_csv_to_sqlite(input, output, identifier,  skip_table_prefix=False):
     """
@@ -171,7 +170,7 @@ def write_csv_to_parquet(
     # ----------------------------
 
 
-    print("............... in write_csv_to_pa rquet: ", name, ".................")
+    print("............... in write_csv_to_parquet: ", name, ".................")
     print(input)
     # get dataframe
     dataframe = get_df(input, identifier, skip_table_prefix)
@@ -194,8 +193,24 @@ def write_csv_to_parquet(
     # ---------------------------------------------------------
     # read into pyarrow table format
     table = pyarrow.Table.from_pandas(dataframe)
+
     # --------- temporary: check agreement of pyarrow format ------
-    assert table.schema is writers_dict[name]["schema"]
+    # note: use "==" for schema comparisons, otherwise comparison may be False 
+    assert (table.schema.types == writers_dict[name]["schema"].types)
+    assert (table.schema.names == writers_dict[name]["schema"].names)
+    """
+    if not (table.schema is writers_dict[name]["schema"]):
+        print("---------------- == --------------")
+        print("table.schema.names == writers_dict[name]['schema'].names")
+        print(table.schema.names == writers_dict[name]['schema'].names)
+        print("table.schema.types == writers_dict[name]['schema'].types")
+        print(table.schema.types == writers_dict[name]['schema'].types )
+        print("---------------- is --------------")
+        print("table.schema.names is writers_dict[name]['schema'].names")
+        print(table.schema.names is writers_dict[name]['schema'].names)
+        print("table.schema.types is writers_dict[name]['schema'].types")
+        print(table.schema.types is writers_dict[name]['schema'].types )
+    """    
     # ---------------------------------------------------------
     # get opened parquet writer, write table to file
     print(
@@ -361,6 +376,7 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
         print("ref_dir", ref_dir)
 
     else: # elif os.path.isdir(os.path.join(source, reference))
+        print("reference == ", reference)
         print("open_writers: reference != 'sample' ")
         #'reference' is a path to the folder containing all reference tables (no sampling)
         reference_folder = os.path.join(source, reference)
@@ -642,7 +658,7 @@ def seed(source, target, config_path, skip_image_prefix=True, directories=None):
     # Note: prefixes are never skipped for compartments.
     # They are skipped for images by default, but can be added if skip_image_prefix is passed as True.
     # get backend option
-
+    print("In seed(): config_path =", config_path)
     config = cytominer_database.utils.read_config(config_path)
     engine = config["database_engine"]["database"]
     print("------ in seed_modified -------- ")

@@ -4,7 +4,8 @@ import pandas as pd
 import backports.tempfile
 from sqlalchemy import create_engine
 
-import cytominer_database.ingest
+#import cytominer_database.ingest
+import cytominer_database.ingest_incl_parquet
 import cytominer_database.munge
 
 
@@ -12,7 +13,6 @@ def test_seed(dataset):
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
     ingest = dataset["ingest"]
-#!!!!!!!!!!!!! adapted config_new.ini !!!!!!!!!
     config_path = os.path.join(data_dir, "config.ini")
     # Get database engine option
     # (for this we need to read the config file from the path here already!)
@@ -34,7 +34,9 @@ def test_seed(dataset):
     with backports.tempfile.TemporaryDirectory() as temp_dir:
         if engine == 'Parquet':
             # create output directory
+        
             target = os.path.join(temp_dir, "test_parquet_output" )
+            print("Parquet target = ", target)
             try:
                 os.stat(target)
             except:
@@ -43,6 +45,7 @@ def test_seed(dataset):
         elif engine == 'SQLite':
             sqlite_file = os.path.join(temp_dir, "test.db")
             target      = "sqlite:///{}".format(str(sqlite_file))
+            print("SQL target = ", target)
 
 
         cytominer_database.ingest_incl_parquet.seed(
@@ -60,16 +63,18 @@ def test_seed(dataset):
             table_name = blob["table"].capitalize()
 
             if engine == 'Parquet':
-                df = pd.read_parquet(path=target, engine ='pyarrow') # ignore column 0 (columns=[1:])? Column 0 should be read only as an index (index_col=0) ?
-
+                #df = pd.read_parquet(path=target, engine ='pyarrow') # ignore column 0 (columns=[1:])? Column 0 should be read only as an index (index_col=0) ?
+                df = pd.read_parquet(path=target)
             elif engine == 'SQLite':
                 target = "sqlite:///{}".format(str(sqlite_file))
                 engine = create_engine(target)
                 con = engine.connect()
                 df = pd.read_sql(sql=table_name, con=con, index_col=0)
-
+"""
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1
 
             if table_name.lower() != "image":
                 assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == blob["nrows"]
+
+"""                
