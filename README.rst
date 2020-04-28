@@ -48,22 +48,37 @@ The [filenames] section in the configuration file saves the correct basename of 
 
 .. code-block::
 
+  [database_engine]
+  database = Parquet      #or: SQLite
+
+The [database_engine] section specifies the backend. Possible key-value pairs are:
+"database=SQLite" or "database=Parquet".
+[Potential ToDo: Delete Section and introduce a command flag]
+
+.. code-block::
+
  [schema]
  reference_option = sample      #or: path/to/reference/folder
  ref_fraction = 1               #or: any decimal value in [0, 1]
  type_conversion = int2float    #or: all2string
 
-The [schema] section specifies how to manage incompatibilities in the file schemas.
+The [schema] section specifies how to manage incompatibilities in the table schema
+ of the files and is only relevant if the files are ingested to Parquet format.
+ In that case, a Parquet file is fixed to a schema with which it was first opened,
+  i.e. by the first file which is written (the reference file). To append the data
+of all .csv files of that file-kind, it is important to assure the reference file
+satisfies certain incompatibility requirements, e.g. does not miss any columns
+ and all existing files can be automatically converted to the reference schema.
+
 
 The key "reference_option" can be set to the path of a folder which contains exactly
 one .csv file for every kind of measurement file to be ingested.
-These files will then be used as reference files to build a schema which fits
-all existing files (i.e. to which all files can be converted automatically).
-Hence it is important that the files have the correct column names and types and do not miss any columns.
+These files are then used directly reference files for the reference schema and hence
+ must be complete in the number of columns and posses correct column names and types.
 
-Alternatively, the reference files can be found automatically from a sampled subset of all existing files.
-For this a subset of all files is sampled uniformly at random, among which
-the file with the maximum number of columns is chosen as a reference file.
+Alternatively, the reference files can be found automatically from a sampled subset of all existing files:
+A subset of all files is sampled uniformly at random and the first table with
+ the maximum number of columns among all sampled .csv files is chosen as the reference table.
 
 For this, the key "reference_option" takes the value "sample" and in addition the key
 "ref_fraction" can be set to any real number in [0,1], specifying the fraction of files
@@ -76,13 +91,3 @@ and cannot be written into the same table as non-trivial files with non-zero flo
 A good way to avoid automatic type conversion is to convert all values to string-type.
 This can be done by setting "type_conversion=all2string".
 However, the loss of type information might be a disadvantage in downstream tasks.
-
-
-.. code-block::
-
-  [database_engine]
-  database = Parquet      #or: SQLite
-
-The [database_engine] section specifies the backend. Possible key-value pairs are:
-"database=SQLite" or "database=Parquet".
-[Potential ToDo: Delete Section and introduce a command flag]
