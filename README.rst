@@ -70,24 +70,27 @@ The [schema] section
  type_conversion = int2float    #or: all2string
 
 The [schema] section specifies how to manage incompatibilities in the table schema
-of the files and is only relevant if the files are ingested to Parquet format.
+of the files.
 In that case, a Parquet file is fixed to a schema with which it was first opened,
 i.e. by the first file which is written (the reference file). To append the data
 of all .csv files of that file-kind, it is important to assure the reference file
 satisfies certain incompatibility requirements, e.g. does not miss any columns
 and all existing files can be automatically converted to the reference schema.
+This section is used only if the files are ingested to Parquet format and was
+developed to handle the special cases in which tables that cannot be concatenated automatically.
 
 There are two options for the key **reference_option**: The first is to set the value to a *folder path*.
 The specified folder contains exactly
 one .csv reference file for every kind of measurement file to be ingested.
-These files are then used directly reference files and must be complete in the number of columns and posses correct column names and types.
+The table in these files then directly determines the schema, hence it must bus complete in the number of columns and posses correct column names and types.
 
 Alternatively, the reference files can be found automatically from a sampled subset of all existing files.
 This is the case if **reference_option** = *sample*.
 A subset of all files is sampled uniformly at random and the first table with
 the maximum number of columns among all sampled .csv files is chosen as the reference table.
 If this case, an additional key **ref_fraction** can be set, which specifies the fraction of files
-sampled among all files. The default value is **ref_fraction** = *1* (all tables are compared in width). This key is only used if "reference_option=sample".
+sampled among all files. The default value is **ref_fraction** = *1* , for which
+ all tables are compared in width. This key is only used if "reference_option=sample".
 
 Lastly, the key **type_conversion** determines how the schema types are handled in the case of disagreement.
 The default value is *int2float*, for which all integer columns are converted to floats.
