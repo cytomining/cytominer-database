@@ -39,8 +39,8 @@ There are three different sections, the first being:
 .. code-block::
 
   [filenames]
-  image = image.csv
-  object = object.csv
+  image = image.csv #or: Image.csv
+  object = object.csv #or: Object.csv
 
 Cytominer-Database is currently limited to the following measurement file kinds: Cells.csv, Cytoplasm.csv, Nuclei.csv, Image.csv, Object.csv.
 The [filenames] section in the configuration file saves the correct basename of existing measurement files
@@ -49,9 +49,9 @@ The [filenames] section in the configuration file saves the correct basename of 
 .. code-block::
 
  [schema]
- reference_option = sample
- ref_fraction = 1
- type_conversion = int2float
+ reference_option = sample #or: path/to/reference/folder
+ ref_fraction = 1 #or: any decimal value in [0, 1]
+ type_conversion = int2float #or: all2string
 
 The [schema] section specifies how to manage incompatibilities in the file schemas.
 
@@ -81,7 +81,7 @@ However, the loss of type information might be a disadvantage in downstream task
 .. code-block::
 
   [database_engine]
-  database = Parquet
+  database = Parquet #or: SQLite
 
 The [database_engine] section specifies the backend. Possible key-value pairs are:
 "database=SQLite" or "database=Parquet".
