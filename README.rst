@@ -63,22 +63,21 @@ The [database_engine] section specifies the backend. Possible key-value pairs ar
  type_conversion = int2float    #or: all2string
 
 The [schema] section specifies how to manage incompatibilities in the table schema
- of the files and is only relevant if the files are ingested to Parquet format.
- In that case, a Parquet file is fixed to a schema with which it was first opened,
-  i.e. by the first file which is written (the reference file). To append the data
+of the files and is only relevant if the files are ingested to Parquet format.
+In that case, a Parquet file is fixed to a schema with which it was first opened,
+i.e. by the first file which is written (the reference file). To append the data
 of all .csv files of that file-kind, it is important to assure the reference file
 satisfies certain incompatibility requirements, e.g. does not miss any columns
- and all existing files can be automatically converted to the reference schema.
-
+and all existing files can be automatically converted to the reference schema.
 
 The key "reference_option" can be set to the path of a folder which contains exactly
 one .csv file for every kind of measurement file to be ingested.
 These files are then used directly reference files for the reference schema and hence
- must be complete in the number of columns and posses correct column names and types.
+must be complete in the number of columns and posses correct column names and types.
 
 Alternatively, the reference files can be found automatically from a sampled subset of all existing files:
 A subset of all files is sampled uniformly at random and the first table with
- the maximum number of columns among all sampled .csv files is chosen as the reference table.
+the maximum number of columns among all sampled .csv files is chosen as the reference table.
 
 For this, the key "reference_option" takes the value "sample" and in addition the key
 "ref_fraction" can be set to any real number in [0,1], specifying the fraction of files
