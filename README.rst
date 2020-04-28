@@ -77,23 +77,22 @@ of all .csv files of that file-kind, it is important to assure the reference fil
 satisfies certain incompatibility requirements, e.g. does not miss any columns
 and all existing files can be automatically converted to the reference schema.
 
-The key "reference_option" can be set to the path of a folder which contains exactly
-one .csv file for every kind of measurement file to be ingested.
-These files are then used directly reference files for the reference schema and hence
-must be complete in the number of columns and posses correct column names and types.
+There are two options for the key **reference_option**: The first is to set the value to a *folder path*.
+The specified folder contains exactly
+one .csv reference file for every kind of measurement file to be ingested.
+These files are then used directly reference files and must be complete in the number of columns and posses correct column names and types.
 
 Alternatively, the reference files can be found automatically from a sampled subset of all existing files:
 A subset of all files is sampled uniformly at random and the first table with
 the maximum number of columns among all sampled .csv files is chosen as the reference table.
-
-For this, the key "reference_option" takes the value "sample" and in addition the key
-"ref_fraction" can be set to any real number in [0,1], specifying the fraction of files
+For this, the key **reference_option** takes the value *sample* and in addition the key
+**ref_fraction** can be set to any real number in [0,1], specifying the fraction of files
 sampled among all files. The default value is '1' (all tables are compared in width).
 
-The key "type_conversion" determines how the schema types are handled in the case of disagreement.
-The default value is "type_conversion=int2float", in for which all integer columns are converted to floats.
+Lastly, the key **type_conversion** determines how the schema types are handled in the case of disagreement.
+The default value is *int2float*, for which all integer columns are converted to floats.
 This has been proven helpful for trivial columns (0-valued column), which may be of "int" type
 and cannot be written into the same table as non-trivial files with non-zero float values.
 A good way to avoid automatic type conversion is to convert all values to string-type.
-This can be done by setting "type_conversion=all2string".
+This can be done by setting **type_conversion**=*all2string*.
 However, the loss of type information might be a disadvantage in downstream tasks.
