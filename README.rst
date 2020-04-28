@@ -1,3 +1,4 @@
+==================
 cytominer-database
 ==================
 
@@ -17,7 +18,7 @@ high-throughput imaging experiment. The measurements are stored across thousands
 cytominer-database helps you organize these data into a single database backend, such as SQLite.
 
 Why cytominer-database?
------------------------
+=======================
 While tools like CellProfiler can store measurements directly in databases, it is usually infeasible to create a
 centralized database in which to store these measurements. A more scalable approach is to create a set of CSVs per
 “batch” of images, and then later merge these CSVs.
@@ -32,10 +33,11 @@ SQLite, MySQL, PostgresSQL, and several other backends supported by odo.
 will ingest the CSV files nested under source_directory into a SQLite backend
 
 How to use the configuration file
----------------------------------
+=================================
 The configuration file ingest_config.ini must be located in the source_directory and can be modified to specify the ingestion.
-There are three different sections, the first being:
-
+There are three different sections.
+The [filenames] section
+-----------------------
 .. code-block::
 
   [filenames]
@@ -46,6 +48,8 @@ Cytominer-Database is currently limited to the following measurement file kinds:
 The [filenames] section in the configuration file saves the correct basename of existing measurement files
 (this may be important in the case of inconsistent capitalization). # TODO: Are there any other reasons for the [filenames] section?
 
+The [database_engine] section
+-----------------------------
 .. code-block::
 
   [database_engine]
@@ -54,6 +58,9 @@ The [filenames] section in the configuration file saves the correct basename of 
 The [database_engine] section specifies the backend. Possible key-value pairs are:
 "database=SQLite" or "database=Parquet".
 [Potential ToDo: Delete Section and introduce a command flag]
+
+The [schema] section
+--------------------
 
 .. code-block::
 
