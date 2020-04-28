@@ -137,7 +137,7 @@ def read_config(filename):
     Read a configuration file. A default config file is read first, and the values are overriden
     by those in the specified configuration file.
 
-    :param filename: configuration filename 
+    :param filename: configuration filename
 
     :return: a configuration object
     """
@@ -156,3 +156,50 @@ def read_config(filename):
             logger.warning("Unable to read configuration file: {}.".format(config_filename))
 
     return config
+
+
+def type_convert_dataframe(dataframe, config_file):
+    """
+    Type casting of entire pandas dataframe.
+    Calls conversion function based on specifications in configuration file.
+    :param dataframe: input file
+    :config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
+    """
+    # simple, explicit type conversion
+    type_conversion = config_file["schema"]["type_conversion"]
+    if type_conversion == "int2float":
+        dataframe = convert_cols_int2float(dataframe)
+    elif type_conversion == "all2string":
+        dataframe = convert_cols_2string(dataframe)
+    return dataframe
+
+def convert_cols_int2float(pandas_df):
+    """
+    Converts all columns with type 'int' to 'float'.
+    :pandas_df: Pandas dataframe
+    """
+
+    # iterates over the columns of the input Pandas dataframe
+    # and converts int-types to float.
+    for i in range(len(pandas_df.columns)):
+        if pandas_df.dtypes[i] == "int":
+            name = pandas_df.columns[i]  # column headers
+            ####################################################################
+            # Exception: Do not convert these columns from int to float
+            keep_int = ["ImageNumber", "ObjectNumber", "TableNumber"]
+            if name in keep_int:
+                continue
+            pandas_df[name] = pandas_df[name].astype("float")
+    return pandas_df
+
+
+def convert_cols_2string(dataframe):
+    """
+    Converts all column types to 'string'.
+    :dataframe: Pandas dataframe
+    """
+    # iterates over the columns of the input Pandas dataframe
+    # and converts all values to type string
+    for col_name in dataframe.columns:
+        dataframe[col_name] = dataframe[col_name].astype("str")
+    return dataframe

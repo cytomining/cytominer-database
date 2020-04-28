@@ -147,7 +147,6 @@ def seed(source, target, config_path, skip_image_prefix=True):
             compartments, image = cytominer_database.utils.validate_csv_set(config_file, directory)
         except IOError as e:
             click.echo(e)
-
             continue
 
         # get a unique identifier for the image CSV. This will later be used as the TableNumber column
