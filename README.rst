@@ -93,6 +93,6 @@ Lastly, the key **type_conversion** determines how the schema types are handled 
 The default value is *int2float*, for which all integer columns are converted to floats.
 This has been proven helpful for trivial columns (0-valued column), which may be of "int" type
 and cannot be written into the same table as non-trivial files with non-zero float values.
-A good way to avoid automatic type conversion is to convert all values to string-type.
+Automatic type conversion can be avoided by converting all values to string-type.
 This can be done by setting **type_conversion** = *all2string*.
 However, the loss of type information might be a disadvantage in downstream tasks.
