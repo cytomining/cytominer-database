@@ -122,7 +122,7 @@ def seed(source, target, config_path, skip_image_prefix=True, directories=None):
     # get backend option
     print("In seed(): config_path =", config_path)
     config = cytominer_database.utils.read_config(config_path)
-    engine = config["database_engine"]["database"]
+    engine = config["ingestion_engine"]["engine"]
     print("------ in seed_modified -------- ")
     print("engine = ", engine)
     # oper the Parquet writer, using a schema that all tables will be aligned with
@@ -216,7 +216,7 @@ def seed(source, target, config_path, skip_image_prefix=True, directories=None):
                     config_file = config
                 )
     # --------------------- close writers ---------------------------------------
-    if config["database_engine"]["database"] == "Parquet":
+    if config["ingestion_engine"]["engine"] == "Parquet":
         for name in writers_dict.keys():
             writers_dict[name]["writer"].close()
     print(

@@ -17,7 +17,7 @@ def test_seed(dataset):
     # Get database engine option
     # (for this we need to read the config file from the path here already!)
     config_file = cytominer_database.utils.read_config(config_path)
-    engine      = config_file["database_engine"]["database"]
+    engine      = config_file["ingestion_engine"]["engine"]
 
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)

@@ -23,7 +23,8 @@ While tools like CellProfiler can store measurements directly in databases, it i
 centralized database in which to store these measurements. A more scalable approach is to create a set of CSVs per
 “batch” of images, and then later merge these CSVs.
 
-cytominer-database ingest reads these CSVs, checks for errors, then ingests them into a database backend, including
+cytominer-database ingest reads these CSVs, checks for errors, then ingests
+ them into a database backend, including
 SQLite, MySQL, PostgresSQL, and several other backends supported by odo.
 
 .. code-block:: sh
@@ -34,7 +35,8 @@ will ingest the CSV files nested under source_directory into a SQLite backend
 
 How to use the configuration file
 =================================
-The configuration file ingest_config.ini must be located in the source_directory and can be modified to specify the ingestion.
+The configuration file ingest_config.ini must be located in the source_directory
+ and can be modified to specify the ingestion.
 There are three different sections.
 
 The [filenames] section
@@ -46,20 +48,22 @@ The [filenames] section
   image   = image.csv      #or: Image.csv
   object  = object.csv     #or: Object.csv
 
-Cytominer-Database is currently limited to the following measurement file kinds: Cells.csv, Cytoplasm.csv, Nuclei.csv, Image.csv, Object.csv.
+Cytominer-Database is currently limited to the following measurement file kinds:
+ Cells.csv, Cytoplasm.csv, Nuclei.csv, Image.csv, Object.csv.
 The [filenames] section in the configuration file saves the correct basename of existing measurement files
-(this may be important in the case of inconsistent capitalization). # TODO: Are there any other reasons for the [filenames] section?
+(this may be important in the case of inconsistent capitalization).
+# TODO: Are there any other reasons for the [filenames] section?
 
 The [database_engine] section
 -----------------------------
 
 .. code-block::
 
-  [database_engine]
-  database = Parquet      #or: SQLite
+  [ingestion_engine]
+  engine = Parquet      #or: SQLite
 
 The [database_engine] section specifies the backend. Possible key-value pairs are:
-"database=SQLite" or "database=Parquet".
+"engine=SQLite" or "engine=Parquet".
 [Potential ToDo: Delete Section and introduce a command flag]
 
 The [schema] section
@@ -85,7 +89,8 @@ developed to handle the special cases in which tables that cannot be concatenate
 There are two options for the key **reference_option**: The first is to set the value to a *folder path*.
 The specified folder contains exactly
 one .csv reference file for every kind of measurement file to be ingested.
-The table in these files then directly determines the schema, hence it must bus complete in the number of columns and posses correct column names and types.
+The table in these files directly determines the schema, hence it must be
+ complete in the number of columns and posses correct column names and types.
 
 Alternatively, the reference files can be found automatically from a sampled subset of all existing files.
 This is the case if **reference_option** = *sample*.

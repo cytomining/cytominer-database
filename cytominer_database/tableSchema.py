@@ -41,7 +41,7 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
      the image.csv files should be prefixed with the table name ("Image").
     """
     writers_dict = {}  # nested dictionary: dict in dict
-    engine = config_file["database_engine"]["database"]
+    engine = config_file["ingestion_engine"]["engine"]
     reference = config_file["schema"]["reference_option"]
 
     print("engine = ", engine)
