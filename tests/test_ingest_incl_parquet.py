@@ -64,17 +64,20 @@ def test_seed(dataset):
 
             if engine == 'Parquet':
                 #df = pd.read_parquet(path=target, engine ='pyarrow') # ignore column 0 (columns=[1:])? Column 0 should be read only as an index (index_col=0) ?
-                df = pd.read_parquet(path=target)
+                basename = '.'.join([table_name,'parquet'])
+                compartment_path = os.path.join(target,basename)
+                df = pd.read_parquet(path=compartment_path)
             elif engine == 'SQLite':
                 target = "sqlite:///{}".format(str(sqlite_file))
                 engine = create_engine(target)
                 con = engine.connect()
                 df = pd.read_sql(sql=table_name, con=con, index_col=0)
-"""
+            print("df.shape[0] , blob['nrows'] : ", df.shape[0], blob["nrows"])
+            print("df.shape[1] , blob['ncols'] : ", df.shape[1], blob["ncols"])
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1
 
             if table_name.lower() != "image":
                 assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == blob["nrows"]
 
-"""                
+              
