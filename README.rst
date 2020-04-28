@@ -36,7 +36,8 @@ How to use the configuration file
 The configuration file ingest_config.ini must be located in the source_directory and can be modified to specify the ingestion.
 There are three different sections, the first being:
 
-.. code-block:: sh
+.. code-block:: 
+
   [filenames]
   image = image.csv
   object = object.csv
@@ -45,7 +46,8 @@ Cytominer-Database is currently limited to the following measurement file kinds:
 The [filenames] section in the configuration file saves the correct basename of existing measurement files
 (this may be important in the case of inconsistent capitalization). # TODO: Are there any other reasons for the [filenames] section?
 
-.. code-block:: sh
+.. code-block::
+
  [schema]
  reference_option = sample
  ref_fraction = 1
@@ -72,7 +74,8 @@ This can be done by setting "type_conversion=all2string".
 However, the loss of type information might be a disadvantage in downstream tasks.
 
 
-.. code-block:: sh
+.. code-block::
+
   [database_engine]
   database = Parquet
 
