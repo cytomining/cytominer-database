@@ -24,7 +24,7 @@ centralized database in which to store these measurements. A more scalable appro
 “batch” of images, and then later merge these CSVs.
 
 cytominer-database ingest reads these CSVs, checks for errors, then ingests
- them into a database backend, including
+them into a database backend, including
 SQLite, MySQL, PostgresSQL, and several other backends supported by odo.
 
 .. code-block:: sh
@@ -36,7 +36,7 @@ will ingest the CSV files nested under source_directory into a SQLite backend
 How to use the configuration file
 =================================
 The configuration file ingest_config.ini must be located in the source_directory
- and can be modified to specify the ingestion.
+and can be modified to specify the ingestion.
 There are three different sections.
 
 The [filenames] section
@@ -49,7 +49,7 @@ The [filenames] section
   object  = object.csv     #or: Object.csv
 
 Cytominer-Database is currently limited to the following measurement file kinds:
- Cells.csv, Cytoplasm.csv, Nuclei.csv, Image.csv, Object.csv.
+Cells.csv, Cytoplasm.csv, Nuclei.csv, Image.csv, Object.csv.
 The [filenames] section in the configuration file saves the correct basename of existing measurement files
 (this may be important in the case of inconsistent capitalization).
 # TODO: Are there any other reasons for the [filenames] section?
