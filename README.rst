@@ -90,7 +90,7 @@ There are two options for the key **reference_option**: The first is to set the 
 The specified folder contains exactly
 one .csv reference file for every kind of measurement file to be ingested.
 The table in these files directly determines the schema, hence it must be
- complete in the number of columns and posses correct column names and types.
+complete in the number of columns and posses correct column names and types.
 
 Alternatively, the reference files can be found automatically from a sampled subset of all existing files.
 This is the case if **reference_option** = *sample*.
@@ -98,7 +98,7 @@ A subset of all files is sampled uniformly at random and the first table with
 the maximum number of columns among all sampled .csv files is chosen as the reference table.
 If this case, an additional key **ref_fraction** can be set, which specifies the fraction of files
 sampled among all files. The default value is **ref_fraction** = *1* , for which
- all tables are compared in width. This key is only used if "reference_option=sample".
+all tables are compared in width. This key is only used if "reference_option=sample".
 
 Lastly, the key **type_conversion** determines how the schema types are handled in the case of disagreement.
 The default value is *int2float*, for which all integer columns are converted to floats.
