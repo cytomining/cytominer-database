@@ -63,7 +63,7 @@ The [database_engine] section
   engine = Parquet      #or: SQLite
 
 The [database_engine] section specifies the backend. Possible key-value pairs are:
-"engine=SQLite" or "engine=Parquet".
+**engine** = *SQLite* or **engine** = *Parquet*.
 [Potential ToDo: Delete Section and introduce a command flag]
 
 The [schema] section
