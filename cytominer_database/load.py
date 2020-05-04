@@ -60,6 +60,7 @@ def get_df(input, identifier, skip_table_prefix=False):
 
     # exit for files which are not valid (redundant check)
     if not cytominer_database.utils.validate_csv(input):
+        warnings.warn("CSV could not be validated in get_df() for {}".format(input), UserWarning)
         return
 
     print("------------------- in get_df() ----------------")
@@ -70,7 +71,7 @@ def get_df(input, identifier, skip_table_prefix=False):
     dataframe = pd.read_csv(input)  # remove index_col=0 !!
     # add "name"prefix to column headers
     if not skip_table_prefix:
-        no_prefix = ["ImageNumber", "ObjectNumber"]  # exception rows
+        no_prefix = ["ImageNumber", "ObjectNumber"]  # exception columns
         dataframe.columns = [
             i if i in no_prefix else name + "_" + i for i in dataframe.columns
         ]
@@ -78,39 +79,7 @@ def get_df(input, identifier, skip_table_prefix=False):
     number_of_rows, _ = dataframe.shape
     table_number_column = [identifier] * number_of_rows  # create additional column
     dataframe.insert(0, "TableNumber", table_number_column, allow_duplicates=False)
+    print("In get_df(): name = {} ; dataframe.shape = {}".format(name, dataframe.shape))
+
     return dataframe
 
-
-
-
-def get_df_from_temp_dir(input, identifier, skip_table_prefix=False):
-    """
-    Loads .csv file to temporary directory, adds prefix to column headers,
-     adds TableNumber column, returns table as pandas dataframe. Based on
-      previous code. Used only for SQLite backend.
-    :param input: input file path.
-    :param identifier: TableNumber that is added as column before writing the table.
-    :param skip_table_prefix: Per default the table name is added as a prefix
-    to every column header. Skipping this can be true for image.csv tables, if
-     passed explicitly.
-    :pandas_df: pandas dataframe generated from modified .csv file
-    """
-    # Uses original approach to generating pandas dataframe
-    # with temporary directory using backports.tempfile.TemporaryDirectory()
-    name, _ = os.path.splitext(os.path.basename(input))
-    name = name.capitalize()
-
-    with backports.tempfile.TemporaryDirectory() as directory:
-        tmp_source = os.path.join(directory, os.path.basename(input))
-        with open(input, "r") as fin, open(tmp_source, "w") as fout:
-            reader = csv.reader(fin)
-            writer = csv.writer(fout)
-            headers = next(reader)
-            if not skip_table_prefix:
-                headers = [__format__(name, header) for header in headers]
-            # The first column is `TableNumber`, which is the unique identifier for the image CSV
-            headers = ["TableNumber"] + headers
-            writer.writerow(headers)
-            [writer.writerow([identifier] + row) for row in reader]
-            pandas_df = pd.read_csv(tmp_source)
-    return pandas_df

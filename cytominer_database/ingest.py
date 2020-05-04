@@ -68,7 +68,7 @@ def into(input, output, name, identifier, skip_table_prefix=False):
     :param skip_table_prefix: True if the prefix of the table name should be excluded
      from the names of columns.
     """
-
+    """
     with backports.tempfile.TemporaryDirectory() as directory:
         source = os.path.join(directory, os.path.basename(input))
 
@@ -78,8 +78,8 @@ def into(input, output, name, identifier, skip_table_prefix=False):
         with open(input, "r") as fin, open(source, "w") as fout:
             reader = csv.reader(fin)
             writer = csv.writer(fout)
-
             headers = next(reader)
+
             if not skip_table_prefix:
                 headers = [__format__(name, header) for header in headers]
 
@@ -103,13 +103,37 @@ def into(input, output, name, identifier, skip_table_prefix=False):
             con = engine.connect()
 
             df = pd.read_csv(source, index_col=0)
-            df.to_sql(name=name, con=con, if_exists="append")
+    """
+        
+    with warnings.catch_warnings():
+        # Suppress the following warning on Python 3:
+        #
+        #   /usr/local/lib/python3.6/site-packages/odo/utils.py:128: DeprecationWarning: inspect.getargspec() is
+        #     deprecated, use inspect.signature() or inspect.getfullargspec()
+        warnings.simplefilter("ignore", category=DeprecationWarning)
+        engine = create_engine(output)
+        con = engine.connect()
+
+        df = pd.read_csv(input)
+        #print("In into(): df['Index']") # no index prepended yet
+        #print(df['Index'])
+        # add "name"prefix to column headers
+        if not skip_table_prefix:
+            no_prefix = ["ImageNumber", "ObjectNumber"]  # exception columns
+            df.columns = [
+                i if i in no_prefix else name + "_" + i for i in df.columns
+            ]
+        # add TableNumber
+        number_of_rows, _ = df.shape
+        table_number_column = [identifier] * number_of_rows  # create additional column
+        df.insert(0, "TableNumber", table_number_column, allow_duplicates=False)    
+        print("In into(): df.shape is ", df.shape) 
+        df.to_sql(name=name, con=con, if_exists="append", index = False)
 
 def checksum(pathname, buffer_size=65536):
     """
     Generate a 32-bit unique identifier for a file.
 
-    :param pathname: input file
     :param buffer_size: buffer size
     """
     with open(pathname, "rb") as stream:

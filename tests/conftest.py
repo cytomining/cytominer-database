@@ -25,7 +25,7 @@ def cellpainting():
     - No object.csv and therefore no munging
     """
     return {
-        "config": "config.ini",
+        "config": "config_Parquet.ini",
         "data_dir": "tests/data_b",
         "image_csv": "Image.csv",
         "ingest": [
@@ -62,7 +62,7 @@ def htqc():
     - munging required
     """
     return {
-        "config": "config.ini",
+        "config": "config_Parquet.ini",
         "data_dir": "tests/data_a",
         "munged_dir": "tests/data_a_munged",
         "image_csv": "image.csv",
@@ -130,5 +130,22 @@ def dataset(request):
 
     if dataset_param == "qc":
         return request.getfixturevalue('qc')
+
+    raise ValueError("No such dataset: {}".format(request.param))
+
+@pytest.fixture
+def engine_choice(request):
+    # Note that calling fixtures directly is deprecated:
+    # https://docs.pytest.org/en/latest/deprecations.html#calling-fixtures-directly
+    # Instead, use the request fixture to dynamically run the named fixture function:
+    # https://docs.pytest.org/en/latest/reference.html#_pytest.fixtures.FixtureRequest.getfixturevalue
+    engine_param = request.param
+
+    if engine_param == "Parquet":
+        return request.getfixturevalue('Parquet')
+
+    if engine_param == "SQLite":
+        return request.getfixturevalue('SQLite')
+
 
     raise ValueError("No such dataset: {}".format(request.param))

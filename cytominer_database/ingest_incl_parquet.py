@@ -83,7 +83,6 @@ or by using the tables in a prespecified folder. This option is selected in the 
 import os
 import csv
 import click
-import warnings
 import zlib
 import pandas as pd
 import backports.tempfile

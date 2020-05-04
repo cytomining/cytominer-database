@@ -45,7 +45,7 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
     reference = config_file["schema"]["reference_option"]
 
     print("engine = ", engine)
-    print("reference =", reference)
+    print("reference = ", reference)
     if engine == "SQLite":
         return writers_dict
 

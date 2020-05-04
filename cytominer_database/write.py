@@ -15,7 +15,7 @@ import collections
 import numpy as np
 import cytominer_database
 import cytominer_database.utils
-import  cytominer_database.load
+import cytominer_database.load
 
 
 def csv_to_sqlite(input, output, identifier,  skip_table_prefix=False):
@@ -43,7 +43,9 @@ def csv_to_sqlite(input, output, identifier,  skip_table_prefix=False):
     # Also note that we use skip_table_prefix and skip_image_prefix interchangebly.
 
     # -------------- check if filepath leads to valid file --------------------
-    if not cytominer_database.utils.validate_csv(input): return
+    if not cytominer_database.utils.validate_csv(input): 
+        warnings.warn(UserWarning("In csv_to_sqlite(): CSV failed at validation: filepath = ",  input))
+        return
     # -------------------------------------------------------------------------
 
     name, _ = os.path.splitext(os.path.basename(input))
@@ -54,7 +56,8 @@ def csv_to_sqlite(input, output, identifier,  skip_table_prefix=False):
 
     print("............... in write_csv_to_sqlite:", name, "..................")
     # get dataframe
-    dataframe = cytominer_database.load.get_df_from_temp_dir(input, identifier, skip_table_prefix)
+    #dataframe = cytominer_database.load.get_df_from_temp_dir(input, identifier, skip_table_prefix)
+    dataframe = cytominer_database.load.get_df(input, identifier, skip_table_prefix)
     # Note: we could generate the identifier within get_df_from_temp_dir(),
     # instead of passing it to write_csv_to_sqlite() and get_df_from_temp_dir().
     # However, we need to access the image.csv in the parent directory,
@@ -65,7 +68,15 @@ def csv_to_sqlite(input, output, identifier,  skip_table_prefix=False):
         warnings.simplefilter("ignore", category=DeprecationWarning)
         engine = create_engine(output)
         con = engine.connect()
-        dataframe.to_sql(name=name, con=con, if_exists="append")
+        dataframe.to_sql(name=name, con=con, if_exists="append",  index = False)
+        # -------- check dataframe size ---------
+        print("In csv_to_sqlite(). Reading from {}".format( input))
+        print("Name :", name)
+        print("dataframe.shape :", dataframe.shape)
+        written_df = pd.read_sql(sql=name, con=con)
+        print("Df from written sqlite file: name = {}, written_df.shape = {}".format(name,written_df.shape))
+        print("........................................................................")
+        # ----------------------------
 
 def csv_to_parquet(
     input, output, identifier, writers_dict, config_file , skip_table_prefix=False
@@ -98,11 +109,18 @@ def csv_to_parquet(
     print(input)
     # get dataframe
     dataframe = cytominer_database.load.get_df(input, identifier, skip_table_prefix)
+    print("In csv_to_parquet(). Reading from {}".format( input))
+    print(" dataframe.shape (before conversion):", dataframe.shape)
     # --------debugging---------
     # print(dataframe.columns.get_loc("TableNumber")) # should be '0'
     # ----------------------------
     dataframe = cytominer_database.utils.type_convert_dataframe(dataframe, config_file)
     ref_dataframe = writers_dict[name]["pandas_dataframe"]
+    # -------- check dataframe size ---------
+    print("In csv_to_parquet(). Reading from {}".format( input))
+    print(" dataframe.shape (after conversion) :", dataframe.shape)
+    # ----------------------------
+
     # ---------alignment---------
     # Note: missing columns are added with same name and type as in ref_dataframe, but containing NaN values.
     dataframe, ref_dataframe_new = dataframe.align(ref_dataframe, join="right", axis=1)
@@ -149,3 +167,4 @@ def csv_to_parquet(
         name,
         ": in write_csv_to_parquet: finished writing next table to Parquet file-------------",
     )
+
