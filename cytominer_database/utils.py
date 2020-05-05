@@ -158,13 +158,15 @@ def read_config(filename):
     return config
 
 
-def type_convert_dataframe(dataframe, config_file):
+def type_convert_dataframe(dataframe, config_file, engine):
     """
     Type casting of entire pandas dataframe.
     Calls conversion function based on specifications in configuration file.
     :param dataframe: input file
     :config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
     """
+    if engine == "SQLite": # no conversion
+        return dataframe
     # simple, explicit type conversion
     type_conversion = config_file["schema"]["type_conversion"]
     if type_conversion == "int2float":
@@ -203,3 +205,8 @@ def convert_cols_2string(dataframe):
     for col_name in dataframe.columns:
         dataframe[col_name] = dataframe[col_name].astype("str")
     return dataframe
+
+def get_name(input):
+    name, _ = os.path.splitext(os.path.basename(input))
+    return name.capitalize()
+

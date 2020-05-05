@@ -26,15 +26,6 @@ def test_seed(dataset, config_choice):
 
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
-        # Notes:
-        # (1) Input agument "config_path" is unparsed (just a path string).
-        # We could also just load the config file once and pass it along,
-        # instead of passing the string and reloading the file several times
-        # i.e. call cytominer_database.utils.read_config(config_path) only once.
-        # (2) The function argument name in the definition was changed as follows:
-        # cytominer_database.utils.read_config(config_file) ---> cytominer_database.utils.read_config(config_path)
-        # because config_file in read_config(config_file) is not a file, but a path to a file.
-        # The function documentation has been changed accordingly.
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
         # set up
@@ -56,7 +47,7 @@ def test_seed(dataset, config_choice):
         cytominer_database.ingest_incl_parquet.seed(
             config_path=config_path,
             source=data_dir,
-            target=target
+            output_path=target
         )
         # necessary ? 
         if engine_type == 'Parquet':

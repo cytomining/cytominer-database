@@ -1,3 +1,41 @@
+# May 4th, TODO:
+# Main: Clean up. Build base class and engine-extensions.
+# Other: - get rid of superfluous arguments. 
+#  ----> identifier
+    # "Note: we could generate the identifier within get_df_from_temp_dir(),
+    # instead of passing it to write_csv_to_sqlite() and get_df_from_temp_dir().
+    # However, we need to access the image.csv in the parent directory,
+    # which can get messy if we're writing another table kind
+    # (e.g.input = ....../Cells.csv ----> access  ....../image.csv)""
+# ---> skip_table/image_prefix
+    # "Note on skip_table_prefix:
+    # Per default, header prefixes are not added to image.csv and object.csv tables.
+    # Header prefixes are always added to all other table types.
+    # This is why the writing functions "write_csv_to_SQLite/Parquet()" call the
+    # "image" separately from "compartments"
+    # (in the first case, the argument skip_image_prefix is passed).
+    # An alternative would be to remove this case distinction and not pass skip_image
+    # as an argument. The option can be read from the config file directly before
+    # modifying the headers. This would require passing the config file along,
+    # which is already done in many functions, since the ParquetWriter introduces
+    # many different options in config.ini.
+    # Also note that we use skip_table_prefix and skip_image_prefix interchangebly. "
+# ---> how to deal with the config file 
+        # "Notes:
+        # (1) Input agument "config_path" is unparsed (just a path string).
+        # We could also just load the config file once and pass it along,
+        # instead of passing the string and reloading the file several times
+        # i.e. call cytominer_database.utils.read_config(config_path) only once.
+        # (2) The function argument name in the definition was changed as follows:
+        # cytominer_database.utils.read_config(config_file) ---> cytominer_database.utils.read_config(config_path)
+        # because config_file in read_config(config_file) is not a file, but a path to a file.
+        # The function documentation has been changed accordingly."   
+# ---> table name, input
+        # Currently we are always calling "name = cytominer_database.utils.get_name(input)" 
+        # Hence we're passing input as function arguments many often. Better: Attribute of class instance?
+
+
+# ----> write a new validate_csv_set() and deal with weird image/compartment output structure         
 """
 A mechanism to ingest CSV files into a database.
 
@@ -104,7 +142,7 @@ import cytominer_database.tableSchema
 #sys.path.append("/Users/frances/git/cytominer-database")
 # -------------------------------------------------------
 
-def seed(source, target, config_path, skip_image_prefix=True, directories=None):
+def seed(source, output_path, config_path, skip_image_prefix=True, directories=None):
     """
     Main function. Loads configuration. Opens ParquetWriter.
     Calls writer function. Closes ParquetWriter.
@@ -125,10 +163,12 @@ def seed(source, target, config_path, skip_image_prefix=True, directories=None):
     print("------ in seed_modified -------- ")
     print("engine = ", engine)
     # oper the Parquet writer, using a schema that all tables will be aligned with
+    writers_dict = None # init
     if engine == "Parquet":
         # dictionary that contains [name]["writer"], [name]["schema"], [name]["pandas_dataframe"]
         print("------ in seed_modified: going to open writers")
-        writers_dict = cytominer_database.tableSchema.open_writers(source, target, config, skip_image_prefix)
+        writers_dict = cytominer_database.tableSchema.open_writers(source, output_path, config, skip_image_prefix)
+
 
     print("---------------- in seed(): opened all writers --------------------")
     # temporary for debugging purposes: option to pass directories as a list
@@ -139,88 +179,27 @@ def seed(source, target, config_path, skip_image_prefix=True, directories=None):
         )  # lists the subdirectories that contain CSV files
     print("directories: ")
     print(directories)
-    # ---------------------------------------------------------------------------
+    # ----------------------------- iterate over subfolders in source folder------------------------------------
     for directory in directories:
-        # ----------------------------- SQLite ---------------------------------
-        if engine == "SQLite":
-            # ....................... get input file paths ......................
-            try:
-                compartments, image = cytominer_database.utils.validate_csv_set(
-                    config, directory
-                )
-            except IOError as e:
-                click.echo(e)
-                continue
-            # ....... get identifier for entire directory (TableNumber) .........
-            identifier = checksum(
-                image
-            )  # here we assume every directory holds a image.csv
-            # ............................. image-csv ...........................
-            try:
-                cytominer_database.write.csv_to_sqlite(
-                    input=image,
-                    output=target,
-                    identifier=identifier,
-                    skip_table_prefix=skip_image_prefix,
-                )
-            except sqlalchemy.exc.DatabaseError as e:
-                click.echo(e)
-                continue
-            # ...........................compartments-csv .......................
-            for compartment in compartments:
-                cytominer_database.write.csv_to_sqlite(
-                    input=compartment, output=target, identifier=identifier
-                )  # skip_table_prefix=False by default
-        # ----------------------------- Parquet --------------------------------
-        elif engine == "Parquet":
-            # ....................... get input file paths ......................
-            try:
-                compartments, image = cytominer_database.utils.validate_csv_set(
-                    config, directory
-                )
-                # deprecated:
-                # compartments, image = get_full_paths_in_dir(directory, config)
+        # ....................... get input .csv file paths ......................
+        try:
+            compartments, image = cytominer_database.utils.validate_csv_set(config, directory)
+        except IOError as e:
+            click.echo(e)
+            continue
 
-                # Add here ?
-                # compartments_without_None_values = [comp for comp in compartments if comp]
-            except IOError as e:
-                click.echo(e)
-                print("In seed(): Cannot validate csv set: ", directory )
+        identifier = checksum(image)
+        csv_locations = [image] + compartments
+        # ----------------------------- iterate over .csv's ---------------------------------
+        for input_path in csv_locations:
+                dataframe = cytominer_database.load.get_and_modify_df(input_path, identifier, skip_image_prefix)
+                dataframe = cytominer_database.utils.type_convert_dataframe(dataframe, config, engine)
+                cytominer_database.write.write_to_disk(dataframe, input_path, output_path, engine, writers_dict)
 
-                continue
-            # note: get_full_paths_in_dir() was modified to return only values that are not None
-            # Hence, if image.csv is missing in the directory, we'll get an error at this assignment.
-
-            # ....... get identifier for entire directory (TableNumber) .........
-            identifier = checksum(
-                image
-            )  # here we assume every directory holds a image.csv
-            # ............................. image-csv ...........................
-            cytominer_database.write.csv_to_parquet(
-                input=image,
-                output=target,
-                identifier=identifier,
-                writers_dict=writers_dict,
-                config_file = config,
-                skip_table_prefix=skip_image_prefix,
-            )
-
-            # .......................... compartments-csv .........................
-            for compartment in compartments:  #
-                cytominer_database.write.csv_to_parquet(
-                    input=compartment,
-                    output=target,
-                    identifier=identifier,
-                    writers_dict=writers_dict,
-                    config_file = config
-                )
     # --------------------- close writers ---------------------------------------
     if config["ingestion_engine"]["engine"] == "Parquet":
         for name in writers_dict.keys():
             writers_dict[name]["writer"].close()
-    print(
-        "&&&&&&&&&&&&&&&&&&&&&&&&& closed writers &&&&&&&&&&&&&&&&&&&&&&&&&&&&&"
-    )
 
 def checksum(pathname, buffer_size=65536):
     """

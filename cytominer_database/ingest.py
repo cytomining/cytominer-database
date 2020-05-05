@@ -156,7 +156,7 @@ def seed(source, target, config_path, skip_image_prefix=True):
     :param config_file: Configuration file.
     :param source: Directory containing subdirectories that contain CSV files.
     :param target: Connection string for the database.
-    :param skip_image_prefix: True if the prefix of image table name should be excluded
+    :param  : True if the prefix of image table name should be excluded
      from the names of columns from per image table
     """
     config_file = cytominer_database.utils.read_config(config_path)
@@ -165,11 +165,13 @@ def seed(source, target, config_path, skip_image_prefix=True):
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
 
     for directory in directories:
-
         # get the image CSV and the CSVs for each of the compartments
         try:
             compartments, image = cytominer_database.utils.validate_csv_set(config_file, directory)
         except IOError as e:
+            click.echo(e)
+            continue
+        except sqlalchemy.exc.DatabaseError as e:
             click.echo(e)
             continue
 
@@ -177,7 +179,6 @@ def seed(source, target, config_path, skip_image_prefix=True):
         # the casting to int is to allow the database to be readable by CellProfiler Analyst, which
         # requires TableNumber to be an integer.
         identifier = checksum(image)
-
         name, _ = os.path.splitext(config_file["filenames"]["image"])
 
         # ingest the image CSV
@@ -186,7 +187,6 @@ def seed(source, target, config_path, skip_image_prefix=True):
                  skip_table_prefix=skip_image_prefix)
         except sqlalchemy.exc.DatabaseError as e:
             click.echo(e)
-
             continue
 
         # ingest the CSV for each compartment
