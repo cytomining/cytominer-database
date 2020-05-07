@@ -16,14 +16,17 @@ import numpy as np
 import cytominer_database
 import cytominer_database.utils 
 
-#------ temporary solution to path import issues --------
-#
-# Loads individual tables into memory as pandas dataframe.
-#
-# -------------------------------------------------------
-
 
 def get_and_modify_df(input, identifier, skip_image_prefix):
+    """
+    Loads .csv as Pandas dataframe and returns modified pandas dataframe.
+
+
+    :param input: input file path. 
+    :param identifier: TableNumber that is added as column before writing the table.
+    :skip_image_prefix: Boolean value specifying if the column headers of
+     the image.csv files should be prefixed with the table name ("Image").
+    """
     # get dataframe
     dataframe = load_df(input)
     # get table name
@@ -57,8 +60,6 @@ def add_prefix(name, dataframe):
 
     :param name: table name
     :param dataframe: dataframe to be modified
-    :param skip_table_prefix: Per default the table name is added as a prefix
-    to every column header. Skipping affects only image.csv and object.csv tables.
     """
     # add "name" prefix to column headers
     no_prefix = ["ImageNumber", "ObjectNumber", "TableNumber"]  # exception columns

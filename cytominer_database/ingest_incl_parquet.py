@@ -2,12 +2,14 @@
 # Main: Clean up. Build base class and engine-extensions.
 # Other: - get rid of superfluous arguments. 
 #  ----> identifier
-    # "Note: we could generate the identifier within get_df_from_temp_dir(),
-    # instead of passing it to write_csv_to_sqlite() and get_df_from_temp_dir().
-    # However, we need to access the image.csv in the parent directory,
-    # which can get messy if we're writing another table kind
+    # Update after restructuring : leave it this way
+    # "Note: we could generate the identifier from the input file directly when it is needed. 
+    # However, this requires accessing the image file of the same directory, so it might be 
+    # easier to just read it out once and then pass it to the function.
+    # Benefit: N
     # (e.g.input = ....../Cells.csv ----> access  ....../image.csv)""
 # ---> skip_table/image_prefix
+# an option would be : instead of passing "skip_image_prefix", we could load the setting from the config file. Needs adjustments of tests.
     # "Note on skip_table_prefix:
     # Per default, header prefixes are not added to image.csv and object.csv tables.
     # Header prefixes are always added to all other table types.
@@ -20,6 +22,9 @@
     # which is already done in many functions, since the ParquetWriter introduces
     # many different options in config.ini.
     # Also note that we use skip_table_prefix and skip_image_prefix interchangebly. "
+    #"    # Note: prefixes are never skipped for compartments.
+    # They are skipped for images by default, but can be added if skip_image_prefix is passed as True.
+    # get backend option"
 # ---> how to deal with the config file 
         # "Notes:
         # (1) Input agument "config_path" is unparsed (just a path string).
@@ -79,7 +84,7 @@ Example::
 """
 * Include in documentation:
 - requirements: csvkit
-- parameter options read from config.ini --> see .txt file
+- [DONE] parameter options read from config.ini --> see .txt file
 
 
 * Important notes:
@@ -147,6 +152,7 @@ def seed(source, output_path, config_path, skip_image_prefix=True, directories=N
     Main function. Loads configuration. Opens ParquetWriter.
     Calls writer function. Closes ParquetWriter.
     :source: path to parent directory containing subdirectories, e.g. "path/plate_a/"
+    :output_path: path of destination folder
     :config_path: path to configuration file config.ini
     :skip_image_prefix: Boolean value specifying if the column headers of
      the image.csv files should be prefixed with the table name ("Image").
@@ -154,31 +160,17 @@ def seed(source, output_path, config_path, skip_image_prefix=True, directories=N
         path list from the source path. Added to test special cases. Can be removed.
 
     """
-    # Note: prefixes are never skipped for compartments.
-    # They are skipped for images by default, but can be added if skip_image_prefix is passed as True.
-    # get backend option
-    print("In seed(): config_path =", config_path)
     config = cytominer_database.utils.read_config(config_path)
     engine = config["ingestion_engine"]["engine"]
-    print("------ in seed_modified -------- ")
-    print("engine = ", engine)
-    # oper the Parquet writer, using a schema that all tables will be aligned with
     writers_dict = None # init
     if engine == "Parquet":
         # dictionary that contains [name]["writer"], [name]["schema"], [name]["pandas_dataframe"]
-        print("------ in seed_modified: going to open writers")
         writers_dict = cytominer_database.tableSchema.open_writers(source, output_path, config, skip_image_prefix)
-
-
     print("---------------- in seed(): opened all writers --------------------")
-    # temporary for debugging purposes: option to pass directories as a list
-    # ...instead of creating the list internally fron 'source'.
     if not directories:
         directories = sorted(
             list(cytominer_database.utils.find_directories(source))
         )  # lists the subdirectories that contain CSV files
-    print("directories: ")
-    print(directories)
     # ----------------------------- iterate over subfolders in source folder------------------------------------
     for directory in directories:
         # ....................... get input .csv file paths ......................
@@ -192,10 +184,10 @@ def seed(source, output_path, config_path, skip_image_prefix=True, directories=N
         csv_locations = [image] + compartments
         # ----------------------------- iterate over .csv's ---------------------------------
         for input_path in csv_locations:
+                table_name = cytominer_database.utils.get_name(input_path)
                 dataframe = cytominer_database.load.get_and_modify_df(input_path, identifier, skip_image_prefix)
                 dataframe = cytominer_database.utils.type_convert_dataframe(dataframe, config, engine)
-                cytominer_database.write.write_to_disk(dataframe, input_path, output_path, engine, writers_dict)
-
+                cytominer_database.write.write_to_disk(dataframe, table_name, output_path, engine, writers_dict)
     # --------------------- close writers ---------------------------------------
     if config["ingestion_engine"]["engine"] == "Parquet":
         for name in writers_dict.keys():
