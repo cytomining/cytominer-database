@@ -86,23 +86,7 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
         # load dataframe
         ref_df = cytominer_database.load.get_and_modify_df(path, refIdentifier, skip_image_prefix)
             
-
-        """old, delete
-        # modify dataframe
-        if name == "Image":
-            ref_df = cytominer_database.load.modify_df(
-                dataframe = ref_df,
-                input=path,
-                identifier=refIdentifier,
-                skip_table_prefix=skip_image_prefix,
-            )
-        else:
-            ref_df = cytominer_database.load.modify_df(
-                dataframe = ref_df,
-                input=path,
-                identifier=refIdentifier
-            )
-        """   
+  
         # ---------------------- temporary -------------------------------------
         #refPyTable_before_conversion = pyarrow.Table.from_pandas(ref_df)
         #ref_schema_before_conversion = refPyTable_before_conversion.schema[0]
