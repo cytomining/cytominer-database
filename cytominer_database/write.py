@@ -44,3 +44,19 @@ def write_to_disk(dataframe, table_name, output_path, engine, writers_dict):
         writer = writers_dict[table_name]["writer"]
         writer.write_table(table)
 
+
+""" --------- code snippets for testing code ---------
+# -------- pandas dataframe alignment ----------------	
+# (note: missing columns are added with same name and type
+#  as in ref_dataframe, but containing NaN values.)	
+dataframe, ref_dataframe_new = dataframe.align(ref_dataframe, join="right", axis=1)	
+# assert that the reference table has not been modified by the alignment.
+assert ref_dataframe_new.equals(ref_dataframe)
+# --------- identical pandas schemata-----------------	
+assert dataframe.dtypes.equals(ref_dataframe.dtypes)
+# --------- identical pyarrow schemata----------------	
+# (note: use "==" for pyarrrow schema comparisons, not "is")
+table = pyarrow.Table.from_pandas(dataframe)
+assert (table.schema.types == writers_dict[name]["schema"].types)	
+assert (table.schema.names == writers_dict[name]["schema"].names)
+"""
