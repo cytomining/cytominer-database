@@ -59,12 +59,16 @@ This is not the case for the command-line command, where the config-file is spec
 
 """
 * Extended explanations of how the PARQUET writer is used (see also the readme.rst).
-
-When opening a Parquet file with the Pyarrow.parquet.writer, we set one fixed table schema (pyarrow.Table.schema) for every table kind.
-and for each new table to be written to the open Parquet writer, schema compatibility is assured by aligning the dataframes. 
+[Big Picure]
+When opening a Parquet file with the Pyarrow.parquet.writer, we use a reference table to set
+one fixed table schema (pyarrow.Table.schema) (per table kind).
+[Schema compatibility: column names]
+For each new table to be written to the open Parquet writer, schema compatibility is assured by aligning the dataframes. 
 The alignment assures that the new table will hold all columns present in the reference table, however, columns not present in the 
 reference table will be dropped from the new table. 
 Hence it is important to assure that the reference table has all columns that will be present in any of the tables of its kind. 
+
+[Schema compatibility: column types]
 Furthermore, the column types of columns with identical column names must agree. This has proven to be problematic
 when software further up the processing pipeline casts the types of its' output automatically. 
 The easiest solution for this is to convert all values in the .csv table to strings, however, this can be a disadvantage in the 
@@ -80,34 +84,35 @@ processing tasks futher down the pipeline. The type incompatipility occurs infre
  Note that schema incompatibilities are currently only solved for the Parquet option,
   and are not resolved when writing the files to SQL with the SQLite option. 
 
-The reference table is set either based on random sampling (specified by a sampling fraction over all files
-in the subdirectories of the source folder (e.g. "plate_a/" -> files from set_1, ..., set_m)
-or by using the tables in a prespecified folder. This is specified in the config.ini file, 
-section "[schema]", key "reference_option", with values "reference_option = sample" or   
-"reference_option = path/to/reference/folder", which must be the path of the folder
- containing the reference files (path is relative to source_directory.)
-The tables are sampled independently within each table kind and independent of other table kinds. 
+[Choosing the reference tables]
+The reference table is set by either
+(a) The widest table among a subset of tables sampled at random 
+(from all subdirectories of the source folder, e.g. "plate_a/" -> .csv files in set_1, ..., set_m ). 
+The sample size is determined as a fraction of the number of all available files of that kind,
+the value of which is a number in [0,1] and is set in the config file with the key "ref_fraction".
+The tables are sampled iid within one table kind and independent of other table kinds. 
+or
+(b) The reference tables are stored in a prespecified folder located at "reference_option = path/to/reference/folder", 
+as specified in the config file (path is relative to source_directory).
 
-- To avoid errors from inconsistent capitalization of .csv file names, the keys of the reference dictionaries
- (referencing the writer and the fixed schema) are built automatically from the basenames of existing CSV files
- in specified directories. This means that per default, object.csv is also read and written.
-  However, this can be surpressed by explicitly excluding them in write.csv_to_sqlite() and write.csv_to_parquet().
+[Reference dictionary keys]
+To avoid errors from inconsistent capitalization of .csv file names, the keys of the reference dictionaries
+(referencing the writer and the fixed schema) are built automatically from the basenames of existing CSV files
+in specified directories. This means that per default, object.csv is also read and written.
+However, this can be surpressed by explicitly excluding them in write.csv_to_sqlite() and write.csv_to_parquet().
  
-
 * Special cases
-
 [DONE]
 - missing columns
 - type disagreements the same column headers of different sets (same table type, e.g. Cells.csv)
 - null values etc in tables that are read in after the correct reference table has been determined
 
-
 [TODO]
 - build tests that compare the table content, not just size
 - build tests for these special cases
 - what happens if by accident the reference table has the wrong type?
-
 """
+
 import os
 import csv
 import click
