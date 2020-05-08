@@ -206,7 +206,12 @@ def convert_cols_2string(dataframe):
         dataframe[col_name] = dataframe[col_name].astype("str")
     return dataframe
 
-def get_name(input):
-    name, _ = os.path.splitext(os.path.basename(input))
+def get_name(file_path):
+    """
+    Returns the capitalized basename of a file path (without the file extension).
+
+    :file_path: Pandas dataframe
+    """
+    name, _ = os.path.splitext(os.path.basename(file_path))
     return name.capitalize()
 

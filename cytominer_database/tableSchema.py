@@ -23,7 +23,7 @@ import cytominer_database.load
 # The reference tables can either be loaded directly from a designated folder,
 # or sampled across all available data, as specified in the config_file.
 #
-# Also contains helper functions "get_dict_of_pathlist()" and "get_dict_of_paths()"
+# Also contains helper functions "get_grouped_table_paths()" and "get_dict_of_paths()"
 # to generate a list of paths
 # and the sampling function get_reference_paths().
 ################################################################################
@@ -32,8 +32,8 @@ import cytominer_database.load
 
 def open_writers(source, target, config_file, skip_image_prefix=True):
     """
-    Gets reference tables and uses them to open ParquetWriters.
-    Returns a dictionary containing the writers.
+    Determines, loads reference tables and openes them as ParquetWriters.
+    Returns a dictionary referencing the writers.
     :param source: path to directory containing all parent folders of .csv files
     :target: output file path
     :config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
@@ -46,19 +46,26 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
 
     print("engine = ", engine)
     print("reference = ", reference)
-    if engine == "SQLite":
+
+    if engine == "SQLite": # no reference table needed
         return writers_dict
 
-    if reference == "sample":
-        print("open_writers: reference == 'sample' ")
-        # we sample from all tables contained in the subdirectories of source
+    if reference == "sample": 
+        # Idea: sample from all tables contained in the subdirectories of source.
+        # Get all possible reference directories for each table kind, as stored in the dictionary
+        directories = sorted(list(cytominer_database.utils.find_directories(source)))
+        grouped_full_paths = get_grouped_table_paths_from_directory_list(directories)
+        # get sample size (as fraction of all available files) from config file
         ref_fraction = float(config_file["schema"]["ref_fraction"])
-        print("ref_fraction", ref_fraction)
-        # get reference directories for all table kinds, as stored in the dictionary
-        path_dict = get_dict_of_pathlist(source=source, directories=None)
-        print("path_dict", path_dict)
-        ref_dir = get_reference_paths(ref_fraction, path_dict)
-        print("ref_dir", ref_dir)
+        # build reference dictionary
+        ref_dir = get_reference_paths(ref_fraction, grouped_full_paths)
+
+        # ---------------- print statements ----------------
+        # print("open_writers: reference == 'sample' ")
+        # print("ref_fraction", ref_fraction)
+        # print("grouped_full_paths", grouped_full_paths)
+        # print("ref_dir", ref_dir)
+        # --------------------------------------------------
 
     else: # elif os.path.isdir(os.path.join(source, reference))
         print("reference == ", reference)
@@ -71,6 +78,8 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
         )  # returns values as single string in a dict
         print("------------- in open_writers(): --------------")
         print("ref_dir", ref_dir)
+
+        
     refIdentifier = 999 & 0xFFFFFFFF
     # arbitrary identifier, will not be stored but used only as type template. (uint32 as in checksum())
     # Iterate over all table kinds:
@@ -124,45 +133,28 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
         writers_dict[name]["pandas_dataframe"] = ref_df
     return writers_dict
 
-
-
-def get_dict_of_pathlist(directories=None, source=None):
+def get_grouped_table_paths_from_directory_list(directories):
     """
-    Returns a dictionary holding separate lists of all full paths of a table kind.
-    (with key: name (table kind), value = list).
-    # each containing of all of its existing full table paths.
-    :directories: list of (sub)directories which hold .csv files.
-    Example: ["path/plate_a/set_1" , "path/plate_a/set_2"]
-    :source: path to directories containing subdirectories.
-    Example: "path/plate_a"
+    Returns a dictionary holding a list of all full paths (as value) for every table kind (key).
+    Example: directories = ["path/plate_a/set_1" , "path/plate_a/set_2"] returns
+     grouped_table_paths = {"Cells": ["path/plate_a/set_1" , "path/plate_a/set_2"], ...
+     "Cytoplasm": ["path/plate_a/set_1" , "path/plate_a/set_2"]}
+     if set_1 and set_2 both contain the files "Cells.csv" and "Cytoplasm.csv" (and no other files).
+
+    :param directories: list of directories in which .csv files are stored, e.g. "path/plate_a/set_1" , "path/plate_a/set_2"].
     """
     # Notes:
-    # - designed to take *either* a list of directories *or* a single source path.
-    # - The argument "directories" allows to get all table paths from all directories in the list.
-    #   This was added as a help to test the function for corner cases. Can be removed.
-    #   Then the case distinction at the beginning can be removed as well!
     # - The argument "source" specifies the parent directory, from which all
     #  subdirectories will be read and sorted and used to get all full paths to
     #  all tables, separately for each table kind. This argument is used when
     #  the function is called from "open_writers()"", for the option 'sampling'.
-    # - The function returns a dictionary to "open_writers()"",
-    #   which is passed to "get_reference_paths()",
+    # - The function returns a dictionary to "open_writers()"". It is then passed to "get_reference_paths()",
     #   which samples paths from the lists and selects the reference table among them.
-    #- Attention: returns a dictionary with value = list, even if there is only a single element
-    #- We could include the old csv-validation (cytominer_database.utils.validate_csv_set(config_file, directory))
+    # - Attention: returns a dictionary with value = list, even if there is only a single element
+    # - Option: We could include the old csv-validation (cytominer_database.utils.validate_csv_set(config_file, directory))
 
     # initialize dictionary that will be returned
-    return_dict = {}
-    # case 1 : no arguments passed ---> Error
-    if source is None and directories is None:
-        print("Error: No arguments passed to get_dict_of_pathlist()")
-        return None
-    # case 2: Only "source"  was passed (and serves as parent directory)
-    # --> get list of subdirectories.
-    elif not directories:
-        directories = sorted(list(cytominer_database.utils.find_directories(source)))
-    # case 3 : list of specified folders was passed and can be used directly.
-
+    grouped_table_paths = {}
     # iterate over all (sub)directories.
     for directory in directories:
         # Get the names of all files in that directory (e.g. Cells.csv)
@@ -170,16 +162,17 @@ def get_dict_of_pathlist(directories=None, source=None):
         for filename in filenames:
             # get full path
             fullpath = os.path.join(directory, filename)
-            # get table kind name without .csv extension
-            name, _ = os.path.splitext(filename)
-            # standardize
-            name = name.capitalize()
+            name = cytominer_database.utils.get_name(fullpath) 
+
             # initialize dictionary entry if it does not exist yet
-            if name not in return_dict.keys():
-                return_dict[name] = []
-            # add path to list under the entry of its table kind
-            return_dict[name] += [fullpath]
-    return return_dict
+            if name not in grouped_table_paths.keys():
+                grouped_table_paths[name] = []
+            # extend the list of paths by current path
+            grouped_table_paths[name] += [fullpath]
+    return grouped_table_paths
+
+
+
 
 
 def get_dict_of_paths(folder):
@@ -188,21 +181,18 @@ def get_dict_of_paths(folder):
     :folder: path to folder that contains tables
     Example: "path/plate_a/special_set"
     """
-    # Note: similar to get_dict_of_pathlist(source, directories=None),
+    # Note: similar to get_grouped_table_paths(source, directories=None),
     # Difference: Dictionary values are a single table path for each table kind
     # that is contained in a single directory "folder".
     # Does not accept a list of directories as an input
     # and does not return a list of all table paths under a source directory.
     # We could include the old csv-validation (cytominer_database.utils.validate_csv_set(config_file, directory))
-
     return_dict = {}
     filenames = os.listdir(folder)
     for filename in filenames:
-        name, _ = os.path.splitext(filename)  # filename contains .csv extension
-        name    = name.capitalize()
-        # print("name = ",  name)
         fullpath = os.path.join(folder, filename)
-        return_dict[name] = fullpath  # note that the path can be overwritten here.
+        name = cytominer_database.utils.get_name(fullpath) # to prettify: check if name = cytominer_database.utils.get_name(filename) would also work
+        return_dict[name] = fullpath  # attention: path may be overwritten here.
     return return_dict
 
 def get_reference_paths(ref_fraction, full_paths):

@@ -42,34 +42,57 @@ Example::
 
     import cytominer_database.ingest
 
-    cytominer_database.ingest.seed(source, target, config)
+    cytominer_database.ingest.seed(source, target, config_path)
+
+    where
+    source = path/to/plate_a
+    target = path/to/output/directory
+    config_path = path/to/plate_a/ingest_config.ini
+Notes: 
+* seed() will run regardless of where the config-file was stored, as long as its' full path is passed. 
+This is not the case for the command-line command, where the config-file is specified only by the basename 
+(e.g. ingest_config.ini) and is assumed to reside in path/to/plate_a.
+
+* 'file_1.csv', ..., 'file_n.csv' is typically equivalent to 'Cells.csv', 'Cytoplasm.csv', 'Nuclei.csv', 'Image.csv', 'Object.csv'.
 
 """
 
 """
-* General Notes:
+* Extended explanations of how the PARQUET writer is used (see also the readme.rst).
 
-- before opening a writer we need to determine and set a fixed table schema, as given by pyarrow.Table.schema .
-We then force all tables to adhere to that schema by
-(1) performing the same type conversion
-(as selected in the config.ini and explicitly implemented by the conversion functions below, e.g by
-converting most column types int -> float (will be a small fraction of columns!))
-and by
-(2) using the .align method for pandas dataframes on all tables, with respect to the reference table.
-We do not allow implicit schema conversion (instead we assure the column headers and types are identical
- before we write to the table!) and we decided against
-the inclusion of functions that do automatic type-hierarchy-based casting (preserved as redundant functions).
-- We choose the reference table either based on random sampling (specified by a sampling fraction
-and carried out on all subfolders in the source folder, e.g. "plate_a/")
-or by using the tables in a prespecified folder. This option is selected in the config.ini as well.
+When opening a Parquet file with the Pyarrow.parquet.writer, we set one fixed table schema (pyarrow.Table.schema) for every table kind.
+and for each new table to be written to the open Parquet writer, schema compatibility is assured by aligning the dataframes. 
+The alignment assures that the new table will hold all columns present in the reference table, however, columns not present in the 
+reference table will be dropped from the new table. 
+Hence it is important to assure that the reference table has all columns that will be present in any of the tables of its kind. 
+Furthermore, the column types of columns with identical column names must agree. This has proven to be problematic
+when software further up the processing pipeline casts the types of its' output automatically. 
+The easiest solution for this is to convert all values in the .csv table to strings, however, this can be a disadvantage in the 
+processing tasks futher down the pipeline. The type incompatipility occurs infrequently though,
+ e.g. when a 0-valued column is cast as 'int', instead of 'float', which makes the table schema incompatible with
+  the table schema from files with non-zero values in the same column with a 'float'-type). 
+ Hence it is in our experience sufficient to convert integers to float-types. 
+ The type conversion is applied explicitly and directly to both the reference table before opening the writer,
+  and to any table before appending it to the open writer. 
+ The conversion type is set in the config file in the schema section, with key type_conversion.
+  Possible values are 'int2float' and 'all2string'. We do not use any automatic type-hierarchy-based casting
+ (although this code was developed in the preliminary colaboratory notebook). 
+ Note that schema incompatibilities are currently only solved for the Parquet option,
+  and are not resolved when writing the files to SQL with the SQLite option. 
 
-- names and paths of CSV Files are stored in and passed as dictionaries, where the key is the
-    capitalized table name (e.g. key = "Image" to store value ="path/set_1/image.csv").
-    To account for cases where the capitalization is inconsistent or where some CSV files are missing,
-    the dictionaries are built automatically from the basenames of existing CSV files in specified directories.
-    This means that per default, object.csv is also read and written. However, this can be surpressed by explicitly
-    excluding them in write.csv_to_sqlite() and write.csv_to_parquet().
+The reference table is set either based on random sampling (specified by a sampling fraction over all files
+in the subdirectories of the source folder (e.g. "plate_a/" -> files from set_1, ..., set_m)
+or by using the tables in a prespecified folder. This is specified in the config.ini file, 
+section "[schema]", key "reference_option", with values "reference_option = sample" or   
+"reference_option = path/to/reference/folder", which must be the path of the folder
+ containing the reference files (path is relative to source_directory.)
+The tables are sampled independently within each table kind and independent of other table kinds. 
 
+- To avoid errors from inconsistent capitalization of .csv file names, the keys of the reference dictionaries
+ (referencing the writer and the fixed schema) are built automatically from the basenames of existing CSV files
+ in specified directories. This means that per default, object.csv is also read and written.
+  However, this can be surpressed by explicitly excluding them in write.csv_to_sqlite() and write.csv_to_parquet().
+ 
 
 * Special cases
 
@@ -110,7 +133,7 @@ def seed(source, output_path, config_path, skip_image_prefix=True, directories=N
     Calls writer function. Closes ParquetWriter.
     :source: path to parent directory containing subdirectories, e.g. "path/plate_a/"
     :output_path: path of destination folder
-    :config_path: path to configuration file config.ini
+    :config_path: full path of configuration file, e.g. path/to/plate_a/ingest_config.ini
     :skip_image_prefix: Boolean value specifying if the column headers of
      the image.csv files should be prefixed with the table name ("Image").
     :directories: Pass subdirectories path list instead of generating a
