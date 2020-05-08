@@ -141,8 +141,8 @@ def seed(source, output_path, config_path, skip_image_prefix=True, directories=N
         # ----------------------------------- iterate over .csv's ---------------------------------------
         for input_path in csv_locations:
                 table_name = cytominer_database.utils.get_name(input_path)
-                dataframe = cytominer_database.load.get_and_modify_df(input_path, identifier, skip_image_prefix)
-                dataframe = cytominer_database.utils.type_convert_dataframe(dataframe, config, engine)
+                cytominer_database.load.get_and_modify_df(input_path, identifier, skip_image_prefix)
+                cytominer_database.utils.type_convert_dataframe(dataframe, config, engine)
                 cytominer_database.write.write_to_disk(dataframe, table_name, output_path, engine, writers_dict)
     # --------------------------------------- close writers ---------------------------------------------
     close_writers(writers_dict, engine)
