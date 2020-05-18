@@ -40,19 +40,29 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
     :skip_image_prefix: Boolean value specifying if the column headers of
      the image.csv files should be prefixed with the table name ("Image").
     """
+    print("------------- in open_writers(): --------------")
     writers_dict = {}  # nested dictionary: dict in dict
     engine = config_file["ingestion_engine"]["engine"]
     reference = config_file["schema"]["reference_option"]
 
-    print("engine = ", engine)
-    print("reference = ", reference)
-
     if engine == "SQLite": # no reference table needed
         return writers_dict
 
-    if reference == "sample": 
+    if reference != "sample" and os.path.isdir(os.path.join(source, reference)): # reference tables are given in folder 
+        #'reference' is a path to the folder containing all reference tables (no sampling)
+        reference_folder = os.path.join(source, reference)
+        assert os.path.isdir(reference_folder)
+        ref_dir = get_dict_of_paths(
+            reference_folder
+        )  # returns values as single string in a dict
+    else: #
+        if not os.path.isdir(os.path.join(source, reference)):
+        # user warning 
+         warnings.warn("{} is not a valid path for a reference file directory. The reference tables are sampled instead. Fix this by adjunsting config_file['schema']['reference_option']".format(os.path.join(source, reference)), UserWarning)
+        # proceed with sampling.
+        # "need to determine the reference tables first
         # Idea: sample from all tables contained in the subdirectories of source.
-        # Get all possible reference directories for each table kind, as stored in the dictionary
+        # Get all possible reference directories for each table kind, as stored in the dictionary"
         directories = sorted(list(cytominer_database.utils.find_directories(source)))
         grouped_full_paths = get_grouped_table_paths_from_directory_list(directories)
         # get sample size (as fraction of all available files) from config file
@@ -60,61 +70,32 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
         # build reference dictionary
         ref_dir = get_reference_paths(ref_fraction, grouped_full_paths)
 
-        # ---------------- print statements ----------------
-        # print("open_writers: reference == 'sample' ")
-        # print("ref_fraction", ref_fraction)
-        # print("grouped_full_paths", grouped_full_paths)
-        # print("ref_dir", ref_dir)
-        # --------------------------------------------------
+    # ---------------- print statements ----------------
+    # print("open_writers: reference == 'sample' ")
+    # print("ref_fraction", ref_fraction)
+    # print("grouped_full_paths", grouped_full_paths)
+    # print("ref_dir", ref_dir)
+    # --------------------------------------------------    
 
-    else: # elif os.path.isdir(os.path.join(source, reference))
-        print("reference == ", reference)
-        print("open_writers: reference != 'sample' ")
-        #'reference' is a path to the folder containing all reference tables (no sampling)
-        reference_folder = os.path.join(source, reference)
-        assert os.path.isdir(reference_folder)
-        ref_dir = get_dict_of_paths(
-            reference_folder
-        )  # returns values as single string in a dict
-        print("------------- in open_writers(): --------------")
-        print("ref_dir", ref_dir)
-
-        
     refIdentifier = 999 & 0xFFFFFFFF
     # arbitrary identifier, will not be stored but used only as type template. (uint32 as in checksum())
     # Iterate over all table kinds:
     for name, path in ref_dir.items():  # iterates over keys of the dictionary ref_dir
-        print("name", name)
-        print("path", path)
         # unpack path from [path]
         if isinstance(path, list):
             path = path[0]
-        print(
-            ">>>>>>>>>>>>>>>> In open_writers(): ", name, " <<<<<<<<<<<<<<<<<<<<<<<<,"
-        )
         # load dataframe
         ref_df = cytominer_database.load.get_and_modify_df(path, refIdentifier, skip_image_prefix)
-            
-  
+        # is also used in ingest.seed() 
+        cytominer_database.utils.type_convert_dataframe(ref_df, config_file, engine)
+    
         # ---------------------- temporary -------------------------------------
-        #refPyTable_before_conversion = pyarrow.Table.from_pandas(ref_df)
-        #ref_schema_before_conversion = refPyTable_before_conversion.schema[0]
-        print("------ In open_writers(): ref_schema_before_conversion --------")
+        # refPyTable_before_conversion = pyarrow.Table.from_pandas(ref_df)
+        # ref_schema_before_conversion = refPyTable_before_conversion.schema[0]
+        # print("------ In open_writers(): ref_schema_before_conversion --------")
         # print(ref_schema_before_conversion)
         # ----------------------------------------------------------------------
-        type_conversion = config_file["schema"]["type_conversion"]
-        print(
-            "------ In open_writers(): type_conversion: ", type_conversion, "--------"
-        )
-        if type_conversion == "int2float":
-            ref_df = cytominer_database.utils.convert_cols_int2float(
-                ref_df
-            )  # converts all columns int -> float (except for "TableNumber")
-            print("------ converted ref_pandas_df to float --------")
-        elif type_conversion == "all2string":
-            ref_df = cytominer_database.utils.convert_cols_2string(ref_df)
-            print("------ converted ref_pandas_df to string --------")
-
+        
         ref_table = pyarrow.Table.from_pandas(
             ref_df
         )
@@ -132,6 +113,22 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
         writers_dict[name]["schema"] = ref_schema
         writers_dict[name]["pandas_dataframe"] = ref_df
     return writers_dict
+    
+def convert_types(dataframe, config_file):
+    # type-convert based on config file setting 
+    type_conversion = config_file["schema"]["type_conversion"]
+    #print("------ In open_writers(): type_conversion: ", type_conversion, "--------")
+    if type_conversion == "int2float": # converts all columns int -> float (except for "TableNumber")
+        cytominer_database.utils.convert_cols_int2float(dataframe)  
+        # print("------ converted ref_pandas_df to float --------")
+    elif type_conversion == "all2string":
+        cytominer_database.utils.convert_cols_2string(dataframe)
+        # print("------ converted ref_pandas_df to string --------")
+
+
+
+
+
 
 def get_grouped_table_paths_from_directory_list(directories):
     """
@@ -170,9 +167,6 @@ def get_grouped_table_paths_from_directory_list(directories):
             # extend the list of paths by current path
             grouped_table_paths[name] += [fullpath]
     return grouped_table_paths
-
-
-
 
 
 def get_dict_of_paths(folder):

@@ -165,15 +165,13 @@ def type_convert_dataframe(dataframe, config_file, engine):
     :param dataframe: input file
     :config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
     """
-    if engine == "SQLite": # no conversion
-        return dataframe
-    # simple, explicit type conversion
-    type_conversion = config_file["schema"]["type_conversion"]
-    if type_conversion == "int2float":
-        dataframe = convert_cols_int2float(dataframe)
-    elif type_conversion == "all2string":
-        dataframe = convert_cols_2string(dataframe)
-    return dataframe
+    if engine == "Parquet": # convert. (Else: do nothing.)
+        type_conversion = config_file["schema"]["type_conversion"]
+        if type_conversion == "int2float":
+            convert_cols_int2float(dataframe)
+        elif type_conversion == "all2string":
+            convert_cols_2string(dataframe)
+
 
 def convert_cols_int2float(pandas_df):
     """
@@ -192,7 +190,7 @@ def convert_cols_int2float(pandas_df):
             if name in keep_int:
                 continue
             pandas_df[name] = pandas_df[name].astype("float")
-    return pandas_df
+
 
 
 def convert_cols_2string(dataframe):
@@ -204,7 +202,7 @@ def convert_cols_2string(dataframe):
     # and converts all values to type string
     for col_name in dataframe.columns:
         dataframe[col_name] = dataframe[col_name].astype("str")
-    return dataframe
+
 
 def get_name(file_path):
     """
