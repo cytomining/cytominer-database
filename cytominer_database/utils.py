@@ -158,13 +158,14 @@ def read_config(filename):
     return config
 
 
-def type_convert_dataframe(dataframe, config_file, engine):
+def type_convert_dataframe(dataframe, config_file):
     """
     Type casting of entire pandas dataframe.
     Calls conversion function based on specifications in configuration file.
     :param dataframe: input file
     :config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
     """
+    engine = config_file["ingestion_engine"]["engine"]
     if engine == "Parquet": # convert. (Else: do nothing.)
         type_conversion = config_file["schema"]["type_conversion"]
         if type_conversion == "int2float":
