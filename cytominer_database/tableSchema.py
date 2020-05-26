@@ -58,10 +58,9 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
     # arbitrary identifier, will not be stored but used only as type template. (uint32 as in checksum())
     # Iterate over all table kinds:
     for name, path in reference_directories.items():  # iterates over keys of the dictionary reference_directories
-        # unpack path from [path]
-        if isinstance(path, list):
-            path = path[0]
-        # load dataframe
+        # unpack path from [path] # if isinstance(path, list):
+        path = path[0]
+        # load dataframe. Attention: Unpack from list return argument
         ref_df = cytominer_database.load.get_and_modify_df(path, refIdentifier, skip_image_prefix)
         # is also used in ingest.seed() 
         cytominer_database.utils.type_convert_dataframe(ref_df, config_file)
@@ -92,7 +91,7 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
 def get_unique_reference_dirs(config_file, source):
     """
     Determines a unique reference table for every table kind and 
-    returns a dictionary with key: name (table kind), value = full path to reference table.
+    returns a dictionary with key: name (table kind), value = full path to reference table (as list with len() = 1).
 
     :param config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
     :param source: path to directory containing all parent folders of .csv files
@@ -109,17 +108,16 @@ def get_unique_reference_dirs(config_file, source):
             warnings.warn("{} is not a valid path for a reference file directory. The reference tables are sampled instead. Fix this by adjunsting config_file['schema']['reference_option']".format(os.path.join(source, reference)), UserWarning)
             reference = "sample" # proceed with sampling
     if reference == "sample": 
-        # "need to determine the reference tables first
         # Idea: sample from all tables contained in the subdirectories of source.
-        # Get all possible reference directories for each table kind, as stored in the dictionary"
+        # Get all possible reference directories for each table kind, as stored in the dictionary.
 
-        # get sample size (as fraction of all available files) from config file
+        # Get sample size (as fraction of all available files) from config file
         ref_fraction = float(config_file["schema"]["ref_fraction"])
-        # get directories
+        # Get directories list
         directories = sorted(list(cytominer_database.utils.find_directories(source)))
-        # get all full paths
+        # get all full paths stored as lists in a dictionary
         full_paths = get_table_paths_from_directory_list(directories)
-        # sample from all paths and determine reference 
+        # sample from all paths, determine reference paths, store in dictionary
         ref_dir = sample_reference_paths(ref_fraction, full_paths)
     return ref_dir
 
