@@ -23,13 +23,9 @@ import cytominer_database.load
 # The reference tables can either be loaded directly from a designated folder,
 # or sampled across all available data, as specified in the config_file.
 #
-# Also contains helper functions "get_grouped_table_paths()" and "get_dict_of_paths()"
-# to generate a list of paths
+# Also contains helper functions "get_table_paths()" to generate a list of paths
 # and the sampling function get_reference_paths().
 ################################################################################
-
-# To Do: merge functionality of get_grouped_table_paths_from_directory_list() and get_dict_of_paths() 
-# DIfference: One returns dict values = LIST of paths, the other returns a unique path element
 
 def open_writers(source, target, config_file, skip_image_prefix=True):
     """
@@ -46,14 +42,8 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
     if config_file["ingestion_engine"]["engine"] == "SQLite": # no reference table needed
         return None
 
-    reference_directories = get_unique_reference_dirs(config_file, source) #includes different steps, depending on config_file
-    # ---------------- print statements ----------------
-    # print("open_writers: reference == 'sample' ")
-    # print("ref_fraction", ref_fraction)
-    # print("grouped_full_paths", grouped_full_paths)
-    # print("ref_dir", ref_dir)
-    # --------------------------------------------------    
-    writers_dict = {}  # nested dictionary: dict in dict
+    reference_directories = get_unique_reference_dirs(config_file, source) #includes different steps, depending on config_file 
+    writers_dict = {} 
     refIdentifier = 999 & 0xFFFFFFFF
     # arbitrary identifier, will not be stored but used only as type template. (uint32 as in checksum())
     # Iterate over all table kinds:
@@ -64,19 +54,10 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
         ref_df = cytominer_database.load.get_and_modify_df(path, refIdentifier, skip_image_prefix)
         # is also used in ingest.seed() 
         cytominer_database.utils.type_convert_dataframe(ref_df, config_file)
-        # ---------------------- temporary -------------------------------------
-        # refPyTable_before_conversion = pyarrow.Table.from_pandas(ref_df)
-        # ref_schema_before_conversion = refPyTable_before_conversion.schema[0]
-        # print("------ In open_writers(): ref_schema_before_conversion --------")
-        # print(ref_schema_before_conversion)
-        # ----------------------------------------------------------------------
         ref_table = pyarrow.Table.from_pandas(
             ref_df
         )
         ref_schema = ref_table.schema
-        # print("------ In open_writers(): ref_schema (after conversion)")
-        # ref_schema_after_conversion = ref_schema[0]
-        # print(ref_schema_after_conversion)
         destination = os.path.join(
             target, name + ".parquet"
         )
@@ -146,12 +127,14 @@ def get_table_paths_from_directory_list(directories):
     table_paths = {}
     # iterate over all (sub)directories.
     for directory in directories:
-        # Get the names of all files in that directory (e.g. Cells.csv)
+        # Get all filenames in that directory (e.g. 'Cells.csv')
         filenames = os.listdir(directory)
         for filename in filenames:
-            # get full path
+            # get name (w/o extension, e.g. 'Cells') and full path (e.g. 'path/to/Cells.csv')
+            name, _ = os.path.splitext(filename)
+            name.capitalize()
             fullpath = os.path.join(directory, filename)
-            name = cytominer_database.utils.get_name(fullpath) 
+            #name = cytominer_database.utils.get_name(fullpath) 
 
             # initialize dictionary entry if it does not exist yet
             if name not in table_paths.keys():
