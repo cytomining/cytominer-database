@@ -144,8 +144,6 @@ def read_config(filename):
     config = configparser.ConfigParser()
 
     for config_filename in [
-    # pkg_resources.resource_filename() returns a true filesystem path for specified resource
-    # resource_filename(package_or_requirement, resource_name)
         pkg_resources.resource_filename("cytominer_database", "config/config_default.ini"),  # get default config file
         filename
     ]:
