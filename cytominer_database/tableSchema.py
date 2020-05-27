@@ -69,9 +69,7 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
         writers_dict[name]["pandas_dataframe"] = ref_df
     return writers_dict
 
-def get_path_dictionary(config_file, source):
-    # get_unique_reference_dirs
-    
+def get_path_dictionary(config_file, source):    
     """
     Determines a single reference directory for every table kind and 
     returns a dictionary with key: 'Capitalized_table_kind', value = 'full/path/to/reference_table.csv'
@@ -86,7 +84,7 @@ def get_path_dictionary(config_file, source):
             #'reference' is a path to the folder containing all reference tables (no sampling)
             # get_dict_of_paths() returns values as single string in a dict
             directory = [os.path.join(source, reference)] # note: input is a list 
-            ref_dir = directory_list_to_path_dictionary(directory)  
+            path_dictionary = directory_list_to_path_dictionary(directory)  
         else: 
             warnings.warn("{} is not a valid path for a reference file directory. The reference tables are sampled instead. Fix this by adjunsting config_file['schema']['reference_option']".format(os.path.join(source, reference)), UserWarning)
             reference = "sample" # proceed with sampling
@@ -101,8 +99,8 @@ def get_path_dictionary(config_file, source):
         # get all full paths stored as lists in a dictionary
         full_paths = directory_list_to_path_dictionary(directories)
         # sample from all paths, determine reference paths, store in dictionary
-        ref_dir = sample_reference_paths(ref_fraction, full_paths)
-    return ref_dir
+        path_dictionary = sample_reference_paths(ref_fraction, full_paths)
+    return path_dictionary
 
 def directory_list_to_path_dictionary(directories):
     """
@@ -164,7 +162,7 @@ def sample_reference_paths(ref_fraction, full_paths):
     # -------------------------------------------------
 
     # 0. initialize return dictionary
-    ref_dirs = {}
+    sampled_path_dictionary = {}
     # print("full_paths: " , full_paths)
     # 1. iterate over table types
     for filename, filepath in full_paths.items():  # iterate over table types
@@ -194,12 +192,12 @@ def sample_reference_paths(ref_fraction, full_paths):
                     # print("updated max_width = ", str(max_width))
                     max_width = df_row.shape[1]
                     # print("to max_width = ", str(max_width))
-                    ref_dirs[filename] = [path] # Note: Need list as dictionary value (to unify next steps)
+                    sampled_path_dictionary[filename] = [path] # Note: Need list as dictionary value (to unify next steps)
             elif sample_size < len(filepath) : # invalid file, but not all files were sampled yet
                 sample_size += 1 # get a substitute sample file
             else:
                 warnings.warn(" Not enough valid .csv files to compare the fraction={} of all .csv files (reference file sampling).".format(ref_fraction), UserWarning)
     print(" ------------------- Leaving get_reference_paths() -------------------")
-    return ref_dirs
+    return sampled_path_dictionary
 
 
