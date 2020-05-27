@@ -84,7 +84,7 @@ def get_unique_reference_dirs(config_file, source):
             #'reference' is a path to the folder containing all reference tables (no sampling)
             # get_dict_of_paths() returns values as single string in a dict
             directory = [os.path.join(source, reference)] # note: input is a list 
-            ref_dir = get_table_paths_from_directory_list(directory)  
+            ref_dir = directory_list_to_path_dictionary(directory)  
         else: 
             warnings.warn("{} is not a valid path for a reference file directory. The reference tables are sampled instead. Fix this by adjunsting config_file['schema']['reference_option']".format(os.path.join(source, reference)), UserWarning)
             reference = "sample" # proceed with sampling
@@ -97,12 +97,12 @@ def get_unique_reference_dirs(config_file, source):
         # Get directories list
         directories = sorted(list(cytominer_database.utils.find_directories(source)))
         # get all full paths stored as lists in a dictionary
-        full_paths = get_table_paths_from_directory_list(directories)
+        full_paths = directory_list_to_path_dictionary(directories)
         # sample from all paths, determine reference paths, store in dictionary
         ref_dir = sample_reference_paths(ref_fraction, full_paths)
     return ref_dir
 
-def get_table_paths_from_directory_list(directories):
+def directory_list_to_path_dictionary(directories):
     """
     Returns a dictionary holding a list of all full paths (as value) for every table kind (key).
     Example: directories = ["path/plate_a/set_1" , "path/plate_a/set_2"] returns
