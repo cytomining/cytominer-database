@@ -64,7 +64,7 @@ def add_prefix(name, dataframe):
     # add "name" prefix to column headers
     no_prefix = ["ImageNumber", "ObjectNumber", "TableNumber"]  # exception columns
     dataframe.columns = [
-        i if i in no_prefix else name + "_" + i for i in dataframe.columns
+        i if i in no_prefix else f"{name}_{i}" for i in dataframe.columns
     ]
     return dataframe
 
