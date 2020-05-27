@@ -132,10 +132,8 @@ def get_table_paths_from_directory_list(directories):
         for filename in filenames:
             # get name (w/o extension, e.g. 'Cells') and full path (e.g. 'path/to/Cells.csv')
             name, _ = os.path.splitext(filename)
-            name.capitalize()
+            name    = name.capitalize()
             fullpath = os.path.join(directory, filename)
-            #name = cytominer_database.utils.get_name(fullpath) 
-
             # initialize dictionary entry if it does not exist yet
             if name not in table_paths.keys():
                 table_paths[name] = []
