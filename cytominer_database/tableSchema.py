@@ -42,7 +42,7 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
     if config_file["ingestion_engine"]["engine"] == "SQLite": # no reference table needed
         return None
 
-    reference_directories = get_unique_reference_dirs(config_file, source) #includes different steps, depending on config_file 
+    reference_directories = get_path_dictionary(config_file, source) #includes different steps, depending on config_file 
     writers_dict = {} 
     refIdentifier = 999 & 0xFFFFFFFF
     # arbitrary identifier, will not be stored but used only as type template. (uint32 as in checksum())
@@ -69,7 +69,9 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
         writers_dict[name]["pandas_dataframe"] = ref_df
     return writers_dict
 
-def get_unique_reference_dirs(config_file, source):
+def get_path_dictionary(config_file, source):
+    # get_unique_reference_dirs
+    
     """
     Determines a single reference directory for every table kind and 
     returns a dictionary with key: 'Capitalized_table_kind', value = 'full/path/to/reference_table.csv'
