@@ -52,7 +52,6 @@ Cytominer-Database is currently limited to the following measurement file kinds:
 Cells.csv, Cytoplasm.csv, Nuclei.csv, Image.csv, Object.csv.
 The [filenames] section in the configuration file saves the correct basename of existing measurement files
 (this may be important in the case of inconsistent capitalization).
-# TODO: Are there any other reasons for the [filenames] section?
 
 The [database_engine] section
 -----------------------------
@@ -64,7 +63,6 @@ The [database_engine] section
 
 The [database_engine] section specifies the backend. Possible key-value pairs are:
 **engine** = *SQLite* or **engine** = *Parquet*.
-[Potential ToDo: Delete Section and introduce a command flag]
 
 The [schema] section
 --------------------
@@ -87,9 +85,11 @@ This section is used only if the files are ingested to Parquet format and was
 developed to handle the special cases in which tables that cannot be concatenated automatically.
 
 There are two options for the key **reference_option**:
-The first option is to create a designated folder containing one .csv reference file for every kind of file ("Cytoplasm.csv", "Nuclei.csv", ...) and save the folder path in the config file as **reference_option** = *path/to/reference/folder*, where the path is relative to the source_directory from the ingest command.
+The first option is to create a designated folder containing one .csv reference file for every kind of file ("Cytoplasm.csv", "Nuclei.csv", ...)
+ and save the folder path in the config file as **reference_option** = *path/to/reference/folder*,
+  where the path is relative to the source_directory from the ingest command.
 These reference files' schema will determine the schema of the Parquet file into which all .csv files of its kind will be ingested.
-Therefore, the reference files must be carefully selected to be complete in the number of columns and possess correct column names and types.
+.. warning:: This option relies on manual selection, hence the chosen reference files must be checked explicitly: Make sure the .csv files are complete in the number of columns and contain no NaN values.
 
 Alternatively, the reference files can be found automatically from a sampled subset of all existing files.
 This is the case if **reference_option** = *sample* is set.

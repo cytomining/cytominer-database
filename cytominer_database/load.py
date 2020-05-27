@@ -56,19 +56,18 @@ def load_df(input):
 
 def add_prefix(name, dataframe):
     """
-    Modifies dataframe by adding a header prefix to existing columns.
+    Modifies dataframe by adding a header prefix to existing columns (adds "name" prefix to column headers)
 
     :param name: table name
     :param dataframe: dataframe to be modified
     """
-    # add "name" prefix to column headers
     no_prefix = ["ImageNumber", "ObjectNumber", "TableNumber"]  # exception columns
     dataframe.columns = [
         i if i in no_prefix else f"{name}_{i}" for i in dataframe.columns
     ]
     return dataframe
 
-# add_tableNumber(dataframe, input, identifier)
+
 def add_tableNumber(dataframe, identifier):
     """
     Modifies dataframe by adding a new column "TableNumber" containing the identifier. 
@@ -84,17 +83,3 @@ def add_tableNumber(dataframe, identifier):
     # print("In get_df(): name = {} ; dataframe.shape = {}".format(name, dataframe.shape))
     # ------------------------------------------------------------
     return dataframe
-
-
-
-# not needed anymore:
-def __format__(name, header):
-    """
-    Adds a prefix to a column header. Returns modified header.
-    :param name: string of table name
-    :param header: column header
-    """
-    # exclude specific column headers
-    if header in ["TableNumber", "ImageNumber", "ObjectNumber"]:
-        return header
-    return "{}_{}".format(name, header)

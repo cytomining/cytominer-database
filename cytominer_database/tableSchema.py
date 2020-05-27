@@ -71,8 +71,8 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
 
 def get_unique_reference_dirs(config_file, source):
     """
-    Determines a unique reference table for every table kind and 
-    returns a dictionary with key: name (table kind), value = full path to reference table (as list with len() = 1).
+    Determines a single reference directory for every table kind and 
+    returns a dictionary with key: 'Capitalized_table_kind', value = 'full/path/to/reference_table.csv'
 
     :param config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
     :param source: path to directory containing all parent folders of .csv files
