@@ -124,7 +124,6 @@ from sqlalchemy import create_engine
 import pyarrow
 import pyarrow.parquet as pq
 import pyarrow.csv
-import numpy as np
 import collections
 import numpy as np
 import cytominer_database
