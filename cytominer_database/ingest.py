@@ -68,43 +68,7 @@ def into(input, output, name, identifier, skip_table_prefix=False):
     :param skip_table_prefix: True if the prefix of the table name should be excluded
      from the names of columns.
     """
-    """
-    with backports.tempfile.TemporaryDirectory() as directory:
-        source = os.path.join(directory, os.path.basename(input))
 
-        # create a temporary CSV file which is identical to the input CSV file
-        # but with the column names prefixed with the name of the compartment
-        # (or `Image`, if this is an image CSV file, and `skip_table_prefix` is False)
-        with open(input, "r") as fin, open(source, "w") as fout:
-            reader = csv.reader(fin)
-            writer = csv.writer(fout)
-            headers = next(reader)
-
-            if not skip_table_prefix:
-                headers = [__format__(name, header) for header in headers]
-
-            # The first column is `TableNumber`, which is the unique identifier for the image CSV
-            headers = ["TableNumber"] + headers
-
-            writer.writerow(headers)
-
-            [writer.writerow([identifier] + row) for row in reader]
-
-        # Now ingest the temp CSV file (with the modified column names) into the database backend
-        # the rows of the CSV file are inserted into a table with name `name`.
-        with warnings.catch_warnings():
-            # Suppress the following warning on Python 3:
-            #
-            #   /usr/local/lib/python3.6/site-packages/odo/utils.py:128: DeprecationWarning: inspect.getargspec() is
-            #     deprecated, use inspect.signature() or inspect.getfullargspec()
-            warnings.simplefilter("ignore", category=DeprecationWarning)
-
-            engine = create_engine(output)
-            con = engine.connect()
-
-            df = pd.read_csv(source, index_col=0)
-    """
-        
     with warnings.catch_warnings():
         # Suppress the following warning on Python 3:
         #
@@ -126,8 +90,8 @@ def into(input, output, name, identifier, skip_table_prefix=False):
         # add TableNumber
         number_of_rows, _ = df.shape
         table_number_column = [identifier] * number_of_rows  # create additional column
-        df.insert(0, "TableNumber", table_number_column, allow_duplicates=False)    
-        print("In into(): df.shape is ", df.shape) 
+        df.insert(0, "TableNumber", table_number_column, allow_duplicates=False)
+        print("In into(): df.shape is ", df.shape)
         df.to_sql(name=name, con=con, if_exists="append", index = False)
 
 def checksum(pathname, buffer_size=65536):
