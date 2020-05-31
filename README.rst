@@ -91,7 +91,6 @@ where the path is relative to the source_directory from the ingest command.
 These reference files' schema will determine the schema of the Parquet file into which all .csv files of its kind will be ingested.
 
 .. warning:: 
-
   This option relies on manual selection, hence the chosen reference files must be checked explicitly:
   Make sure the .csv files are complete in the number of columns and contain no NaN values.
 
