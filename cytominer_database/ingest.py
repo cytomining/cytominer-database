@@ -121,7 +121,7 @@ def into(input, output, name, identifier, skip_table_prefix=False):
         if not skip_table_prefix:
             no_prefix = ["ImageNumber", "ObjectNumber"]  # exception columns
             df.columns = [
-                i if i in no_prefix else name + "_" + i for i in df.columns
+                i if i in no_prefix else f"{name}_{i}" for i in df.columns
             ]
         # add TableNumber
         number_of_rows, _ = df.shape
