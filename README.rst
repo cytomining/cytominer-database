@@ -61,7 +61,8 @@ The [database_engine] section
   [ingestion_engine]
   engine = Parquet      #or: SQLite
 
-The [database_engine] section specifies the backend. Possible key-value pairs are:
+The [database_engine] section specifies the backend.
+Possible key-value pairs are:
 **engine** = *SQLite* or **engine** = *Parquet*.
 
 The [schema] section
