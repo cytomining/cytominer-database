@@ -21,5 +21,4 @@ tests/__pycache__/
 .pytest_cache/
 *.ipynb
 .DS_Store
-.vscode/settings.json
-.vscode/launch.json
+.vscode/
