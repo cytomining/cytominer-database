@@ -104,8 +104,7 @@ all tables are compared in width. This key is only used if "reference_option=sam
 
 Lastly, the key **type_conversion** determines how the schema types are handled in the case of disagreement.
 The default value is *int2float*, for which all integer columns are converted to floats.
-This has been proven helpful for trivial columns (0-valued column), which may be of "int" type
-and cannot be written into the same table as non-trivial files with non-zero float values.
+This has been proven helpful for trivial columns (0-valued column), which may be of "int" type and cannot be written into the same table as non-trivial files with non-zero float values.
 Automatic type conversion can be avoided by converting all values to string-type.
 This can be done by setting **type_conversion** = *all2string*.
 However, the loss of type information might be a disadvantage in downstream tasks.
