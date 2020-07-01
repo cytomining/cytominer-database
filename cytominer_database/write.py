@@ -1,4 +1,3 @@
-import os
 import csv
 import click
 import warnings

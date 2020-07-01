@@ -1,4 +1,4 @@
-import os
+import os.path
 import csv
 import click
 import warnings
