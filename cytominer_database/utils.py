@@ -195,7 +195,7 @@ def convert_cols_int2float(pandas_df):
 
             pandas_df[name] = pandas_df[name].astype("float")
     if not conversion_flag:
-        warnings.warn(UserWarning("No values were type-converted (no int-valued columns found).")        
+        warnings.warn(UserWarning("No values were type-converted (no int-valued columns found)."))       
 
 
 
