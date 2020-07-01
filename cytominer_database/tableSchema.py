@@ -176,16 +176,13 @@ def sample_reference_paths(ref_fraction, full_paths):
 
     # 0. initialize return dictionary
     sampled_path_dictionary = {}
-    # print("full_paths: " , full_paths)
     # 1. iterate over table types
     for filename, filepath in full_paths.items():  # iterate over table types
-        # print("--------------------- In get_reference_paths(): Getting ref for table type : ", key, "---------------------")
         # 2. Permute the table list at random
         np.random.shuffle(filepath)
         # 3. get first n items corresponding to fraction of files to be tested (among the number of all tables present for that table kind)
         # --------------------------- constants ----------------------------------
         sample_size = int(np.ceil(ref_fraction * len(filepath)))
-        # print("sample_size", str(sample_size))
         # --------------------------- variables ----------------------------------
         max_width = 0
         # ------------------------------------------------------------------------
@@ -197,14 +194,10 @@ def sample_reference_paths(ref_fraction, full_paths):
             # if cytominer_database.utils.validate_csv(path) == "No errors.": ---> does not work
             if cytominer_database.utils.validate_csv(path):
                 df_row = pd.read_csv(path, nrows=1)
-                # print("df_row", df_row)
-                # print("df_row.shape[1]", df_row.shape[1])
                 # check if it beats current best (widest table)
                 if df_row.shape[1] > max_width:  # note: .shape returns [length, width]
                     # update
-                    # print("updated max_width = ", str(max_width))
                     max_width = df_row.shape[1]
-                    # print("to max_width = ", str(max_width))
                     sampled_path_dictionary[filename] = [
                         path
                     ]  # Note: Need list as dictionary value (to unify next steps)
@@ -219,5 +212,4 @@ def sample_reference_paths(ref_fraction, full_paths):
                     ),
                     UserWarning,
                 )
-    print(" ------------------- Leaving get_reference_paths() -------------------")
     return sampled_path_dictionary
