@@ -35,8 +35,7 @@ will ingest the CSV files nested under source_directory into a SQLite backend
 
 How to use the configuration file
 =================================
-The configuration file ingest_config.ini must be located in the source_directory
-and can be modified to specify the ingestion.
+The configuration file ingest_config.ini must be located in the source_directory and can be modified to specify the ingestion.
 There are three different sections.
 
 The [filenames] section
