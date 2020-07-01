@@ -75,15 +75,11 @@ The [schema] section
  ref_fraction     = 1              #or: any decimal value in [0, 1]
  type_conversion  = int2float      #or: all2string
 
-The [schema] section specifies how to manage incompatibilities in the table schema
-of the files.
-In that case, a Parquet file is fixed to a schema with which it was first opened,
-i.e. by the first file which is written (the reference file). To append the data
-of all .csv files of that file-kind, it is important to assure the reference file
-satisfies certain incompatibility requirements, e.g. does not miss any columns
-and all existing files can be automatically converted to the reference schema.
-This section is used only if the files are ingested to Parquet format and was
-developed to handle the special cases in which tables that cannot be concatenated automatically.
+The [schema] section specifies how to manage incompatibilities in the table schema of the files.
+In that case, a Parquet file is fixed to a schema with which it was first opened, i.e. by the first file which is written (the reference file).
+To append the data of all .csv files of that file-kind, it is important to assure the reference file satisfies certain incompatibility requirements.
+For example, make sure the reference file does not miss any columns and all existing files can be automatically converted to the reference schema.
+Note: This section is used only if the files are ingested to Parquet format and was developed to handle the special cases in which tables that cannot be concatenated automatically.
 
 There are two options for the key **reference_option**:
 
