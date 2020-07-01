@@ -47,7 +47,7 @@ The [filenames] section
   image   = image.csv      #or: Image.csv
   object  = object.csv     #or: Object.csv
 
-Cytominer-Database is currently limited to the following measurement file kinds:
+cytominer-database is currently limited to the following measurement file kinds:
 Cells.csv, Cytoplasm.csv, Nuclei.csv, Image.csv, Object.csv.
 The [filenames] section in the configuration file saves the correct basename of existing measurement files.
 This may be important in the case of inconsistent capitalization.
