@@ -181,15 +181,13 @@ def convert_cols_int2float(pandas_df):
     Converts all columns with type 'int' to 'float'.
     :pandas_df: Pandas dataframe
     """
+    # Strict int-type columns: Do not convert these columns from int to float.
+    KEEP_INT = ["ImageNumber", "ObjectNumber", "TableNumber"]
 
-    # iterates over the columns of the input Pandas dataframe
-    # and converts int-types to float.
     for i in range(len(pandas_df.columns)):
         if pandas_df.dtypes[i] == "int":
             name = pandas_df.columns[i]  # column headers
-            # Strict int-type columns: Do not convert these columns from int to float
-            keep_int = ["ImageNumber", "ObjectNumber", "TableNumber"]
-            if name in keep_int:
+            if name in KEEP_INT:
                 continue
             pandas_df[name] = pandas_df[name].astype("float")
 
