@@ -171,6 +171,8 @@ def type_convert_dataframe(dataframe, config_file):
             convert_cols_int2float(dataframe)
         elif type_conversion == "all2string":
             convert_cols_2string(dataframe)
+        else: 
+
 
 
 def convert_cols_int2float(pandas_df):
@@ -184,8 +186,7 @@ def convert_cols_int2float(pandas_df):
     for i in range(len(pandas_df.columns)):
         if pandas_df.dtypes[i] == "int":
             name = pandas_df.columns[i]  # column headers
-            ####################################################################
-            # Exception: Do not convert these columns from int to float
+            # Strict int-type columns: Do not convert these columns from int to float
             keep_int = ["ImageNumber", "ObjectNumber", "TableNumber"]
             if name in keep_int:
                 continue
