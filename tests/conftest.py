@@ -1,6 +1,4 @@
-import os
 import pytest
-
 
 def pytest_addoption(parser): # where is this used?
     parser.addoption("--dataset", action="store", help="dataset to test")

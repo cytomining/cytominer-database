@@ -1,4 +1,4 @@
-import os
+import os.path
 
 import backports.tempfile
 import cytominer_database.munge
