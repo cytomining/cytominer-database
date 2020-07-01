@@ -91,11 +91,10 @@ These reference files' schema will determine the schema of the Parquet file into
 
 Alternatively, the reference files can be found automatically from a sampled subset of all existing files.
 This is the case if **reference_option** = *sample* is set.
-A subset of all files is sampled uniformly at random and the first table with
-the maximum number of columns among all sampled .csv files is chosen as the reference table.
-If this case, an additional key **ref_fraction** can be set, which specifies the fraction of files
-sampled among all files. The default value is **ref_fraction** = *1* , for which
-all tables are compared in width. This key is only used if "reference_option=sample".
+A subset of all files is sampled uniformly at random and the first table with the maximum number of columns among all sampled .csv files is chosen as the reference table.
+If this case, an additional key **ref_fraction** can be set, which specifies the fraction of files sampled among all files.
+The default value is **ref_fraction** = *1* , for which all tables are compared in width.
+This key is only used if "reference_option=sample".
 
 Lastly, the key **type_conversion** determines how the schema types are handled in the case of disagreement.
 The default value is *int2float*, for which all integer columns are converted to floats.
