@@ -44,8 +44,6 @@ Example:
  'file_1.csv', ..., 'file_n.csv' could be equivalent to 'Cells.csv', 'Cytoplasm.csv', 'Nuclei.csv', 'Image.csv', 'Object.csv'.
 
 """
-
-import os
 import csv
 import click
 import zlib
