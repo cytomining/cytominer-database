@@ -79,7 +79,7 @@ def into(input, output, name, identifier, skip_table_prefix=False):
         con = engine.connect()
 
         df = pd.read_csv(input)
-        # add "name"prefix to column headers
+        # add "name" prefix to column headers
         if not skip_table_prefix:
             no_prefix = ["ImageNumber", "ObjectNumber"]  # exception columns
             df.columns = [
