@@ -183,13 +183,20 @@ def convert_cols_int2float(pandas_df):
     """
     # Strict int-type columns: Do not convert these columns from int to float.
     KEEP_INT = ["ImageNumber", "ObjectNumber", "TableNumber"]
+    conversion_flag = False
 
     for i in range(len(pandas_df.columns)):
         if pandas_df.dtypes[i] == "int":
             name = pandas_df.columns[i]  # column headers
             if name in KEEP_INT:
                 continue
+            elif not conversion_flag:
+                conversion_flag = True
+
             pandas_df[name] = pandas_df[name].astype("float")
+    if not conversion_flag:
+        warnings.warn(UserWarning("No values were type-converted (no int-valued columns found).")        
+
 
 
 
