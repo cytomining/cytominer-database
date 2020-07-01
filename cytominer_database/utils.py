@@ -172,6 +172,7 @@ def type_convert_dataframe(dataframe, config_file):
         elif type_conversion == "all2string":
             convert_cols_2string(dataframe)
         else: 
+            raise ValueError("Incorrect 'type_conversion' specification in your configuration file. Please set the value to 'int2float' or 'all2string', as documented in the README. ")
 
 
 
