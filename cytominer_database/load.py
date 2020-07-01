@@ -56,17 +56,20 @@ def load_df(input):
     return dataframe
 
 
-def add_prefix(name, dataframe):
+def add_prefix(prefix, dataframe):
     """
     Modifies dataframe by adding a header prefix to existing columns (adds "name" prefix to column headers)
 
-    :param name: table name
+    :param prefix: table name to be prefixed
     :param dataframe: dataframe to be modified
     """
     no_prefix = ["ImageNumber", "ObjectNumber", "TableNumber"]  # exception columns
-    dataframe.columns = [
-        i if i in no_prefix else f"{name}_{i}" for i in dataframe.columns
-    ]
+    prefixed_column_labels = []
+    for col in dataframe.columns: 
+        if col in no_prefix:
+            prefixed_column_labels += [col]
+        else:
+            prefixed_column_labels += [f"{prefix}_{col}"]
     return dataframe
 
 
