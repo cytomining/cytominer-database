@@ -40,17 +40,10 @@ def test_seed(dataset):
 
         for blob in ingest:
             table_name = blob["table"].capitalize()
-
             target = "sqlite:///{}".format(str(sqlite_file))
             engine = create_engine(target)
             con = engine.connect()
-
-            # df = pd.read_sql(sql=table_name, con=con, index_col=0)
             df = pd.read_sql(sql=table_name, con=con)
-            print("In test(). Reading table: {}".format(table_name))
-            print(df[:])
-            print("df.shape[0] , blob['nrows'] : ", df.shape[0], blob["nrows"])
-            print("df.shape[1] , blob['ncols'] : ", df.shape[1], blob["ncols"])
 
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1

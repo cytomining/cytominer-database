@@ -29,7 +29,6 @@ def test_seed(dataset, config_choice):
         if engine_type == "Parquet":
             # create output directory
             target = os.path.join(temp_dir, "test_parquet_output")
-            print("Parquet target = ", target)
             try:
                 os.stat(target)
             except:
@@ -38,7 +37,6 @@ def test_seed(dataset, config_choice):
         elif engine_type == "SQLite":
             sqlite_file = os.path.join(temp_dir, "test.db")
             target = "sqlite:///{}".format(str(sqlite_file))
-            print("SQL target = ", target)
 
         # run program
         cytominer_database.ingest_incl_parquet.seed(
@@ -63,15 +61,7 @@ def test_seed(dataset, config_choice):
                 engine = create_engine(target)
                 con = engine.connect()
                 df = pd.read_sql(sql=table_name, con=con)
-
-            print(
-                "In test_ingest_incl_parquet(). Loading from target = {}, reading table_name = {}".format(
-                    target, table_name
-                )
-            )
-            print(df[:])
-            print("df.shape[0] , blob['nrows'] : ", df.shape[0], blob["nrows"])
-            print("df.shape[1] , blob['ncols'] : ", df.shape[1], str(blob["ncols"] + 1))
+                
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1
 

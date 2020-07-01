@@ -87,7 +87,6 @@ def into(input, output, name, identifier, skip_table_prefix=False):
         number_of_rows, _ = df.shape
         table_number_column = [identifier] * number_of_rows  # create additional column
         df.insert(0, "TableNumber", table_number_column, allow_duplicates=False)
-        print("In into(): df.shape is ", df.shape)
         df.to_sql(name=name, con=con, if_exists="append", index=False)
 
 

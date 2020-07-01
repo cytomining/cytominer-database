@@ -39,7 +39,6 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
      the image.csv files should be prefixed with the table name ("Image").
     :writers_dict: dictionary referencing the writers (return argument)
     """
-    print("------------- in open_writers(): --------------")
     if (
         config_file["ingestion_engine"]["engine"] == "SQLite"
     ):  # no reference table needed
@@ -169,7 +168,6 @@ def sample_reference_paths(ref_fraction, full_paths):
     :full_paths: dictionary containing a list of all full table paths for each table kind
     Example: {Image: [path/plate_a/set_1/image.csv, path/plate_a/set_2/image.csv,... ], Cells: [path/plate_a/set_1/Cells.csv, ...], ...}
     """
-    print(" ------------------- Entering get_reference_paths() -------------------")
     # Note: returns full paths (not parent directories)
     # -------------------------------------------------
     #  - samples only among directories in which that table kind exists.
