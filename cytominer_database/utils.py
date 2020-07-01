@@ -162,7 +162,7 @@ def type_convert_dataframe(dataframe, config_file):
     Type casting of entire pandas dataframe.
     Calls conversion function based on specifications in configuration file.
     :param dataframe: input file
-    :config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
+    :param config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
     """
     engine = config_file["ingestion_engine"]["engine"]
     if engine == "Parquet": # convert. (Else: do nothing.)
@@ -179,43 +179,56 @@ def type_convert_dataframe(dataframe, config_file):
 def convert_cols_int2float(pandas_df):
     """
     Converts all columns with type 'int' to 'float'.
-    :pandas_df: Pandas dataframe
+    :param pandas_df: Pandas dataframe
     """
     # Strict int-type columns: Do not convert these columns from int to float.
     KEEP_INT = ["ImageNumber", "ObjectNumber", "TableNumber"]
-    conversion_flag = False
+    conversion_flag = True
 
     for i in range(len(pandas_df.columns)):
         if pandas_df.dtypes[i] == "int":
             name = pandas_df.columns[i]  # column headers
             if name in KEEP_INT:
                 continue
-            elif not conversion_flag:
-                conversion_flag = True
-
-            pandas_df[name] = pandas_df[name].astype("float")
-    if not conversion_flag:
+            elif conversion_flag:
+                conversion_flag = False
+            try:
+                pandas_df[name] = pandas_df[name].astype("float")
+            except ValueError:
+                print("Column '{}' (type: {}) could not be converted to 'float'. ".format(name, pandas_df.dtypes[i]))
+                continue
+    if conversion_flag:
         warnings.warn(UserWarning("No values were type-converted (no int-valued columns found)."))       
-
-
 
 
 def convert_cols_2string(dataframe):
     """
-    Converts all column types to 'string'.
-    :dataframe: Pandas dataframe
+    Iterates over the columns of a Pandas dataframe
+    and converts all values to type 'string'
+
+    :param dataframe: Pandas dataframe
     """
     # iterates over the columns of the input Pandas dataframe
     # and converts all values to type string
-    for col_name in dataframe.columns:
-        dataframe[col_name] = dataframe[col_name].astype("str")
+    conversion_flag = True
+    for i, col_name in enumerate(dataframe.columns):
+        try:
+            dataframe[col_name] = dataframe[col_name].astype("str")
+            if conversion_flag:
+                conversion_flag = False
+        except ValueError:
+            print("Column '{}' (type: {}) could not be converted to 'string'. ".format(col_name, dataframe[col_name].dtypes[i]))
+            continue    
+    if conversion_flag:
+        warnings.warn(UserWarning("No values were type-converted (no int-valued columns found)."))       
+
 
 
 def get_name(file_path):
     """
     Returns the capitalized basename of a file path (without the file extension).
 
-    :file_path: Pandas dataframe
+    :param file_path: Pandas dataframe
     """
     name, _ = os.path.splitext(os.path.basename(file_path))
     return name.capitalize()
