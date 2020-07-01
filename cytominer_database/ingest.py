@@ -37,7 +37,7 @@ Example::
     cytominer_database.ingest.seed(source, target, config)
 """
 
-import os
+import os.path
 import csv
 import click
 import warnings
