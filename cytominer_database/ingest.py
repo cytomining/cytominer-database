@@ -79,7 +79,6 @@ def into(input, output, name, identifier, skip_table_prefix=False):
         con = engine.connect()
 
         df = pd.read_csv(input)
-        #print(df['Index'])
         # add "name"prefix to column headers
         if not skip_table_prefix:
             no_prefix = ["ImageNumber", "ObjectNumber"]  # exception columns
