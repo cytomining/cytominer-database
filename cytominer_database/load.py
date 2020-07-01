@@ -70,6 +70,7 @@ def add_prefix(prefix, dataframe):
             prefixed_column_labels += [col]
         else:
             prefixed_column_labels += ["{}_{}".format(prefix, col)]
+        dataframe.columns = prefixed_column_labels    
     return dataframe
 
 
