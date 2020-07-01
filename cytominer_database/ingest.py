@@ -82,15 +82,14 @@ def into(input, output, name, identifier, skip_table_prefix=False):
         # add "name" prefix to column headers
         if not skip_table_prefix:
             no_prefix = ["ImageNumber", "ObjectNumber"]  # exception columns
-            df.columns = [
-                i if i in no_prefix else name + "_" + i for i in df.columns
-            ]
+            df.columns = [i if i in no_prefix else name + "_" + i for i in df.columns]
         # add TableNumber
         number_of_rows, _ = df.shape
         table_number_column = [identifier] * number_of_rows  # create additional column
         df.insert(0, "TableNumber", table_number_column, allow_duplicates=False)
         print("In into(): df.shape is ", df.shape)
-        df.to_sql(name=name, con=con, if_exists="append", index = False)
+        df.to_sql(name=name, con=con, if_exists="append", index=False)
+
 
 def checksum(pathname, buffer_size=65536):
     """
@@ -109,7 +108,8 @@ def checksum(pathname, buffer_size=65536):
 
             result = zlib.crc32(buffer, result)
 
-    return result & 0xffffffff
+    return result & 0xFFFFFFFF
+
 
 def seed(source, target, config_path, skip_image_prefix=True):
     """
@@ -129,7 +129,9 @@ def seed(source, target, config_path, skip_image_prefix=True):
     for directory in directories:
         # get the image CSV and the CSVs for each of the compartments
         try:
-            compartments, image = cytominer_database.utils.validate_csv_set(config_file, directory)
+            compartments, image = cytominer_database.utils.validate_csv_set(
+                config_file, directory
+            )
         except IOError as e:
             click.echo(e)
             continue
@@ -145,8 +147,13 @@ def seed(source, target, config_path, skip_image_prefix=True):
 
         # ingest the image CSV
         try:
-            into(input=image, output=target, name=name.capitalize(), identifier=identifier,
-                 skip_table_prefix=skip_image_prefix)
+            into(
+                input=image,
+                output=target,
+                name=name.capitalize(),
+                identifier=identifier,
+                skip_table_prefix=skip_image_prefix,
+            )
         except sqlalchemy.exc.DatabaseError as e:
             click.echo(e)
             continue
@@ -155,4 +162,9 @@ def seed(source, target, config_path, skip_image_prefix=True):
         for compartment in compartments:
             name, _ = os.path.splitext(os.path.basename(compartment))
 
-            into(input=compartment, output=target, name=name.capitalize(), identifier=identifier)
+            into(
+                input=compartment,
+                output=target,
+                name=name.capitalize(),
+                identifier=identifier,
+            )

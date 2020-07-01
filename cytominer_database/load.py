@@ -13,7 +13,7 @@ import numpy as np
 import collections
 import numpy as np
 import cytominer_database
-import cytominer_database.utils 
+import cytominer_database.utils
 
 
 def get_and_modify_df(input, identifier, skip_image_prefix):
@@ -31,7 +31,7 @@ def get_and_modify_df(input, identifier, skip_image_prefix):
     # get table name
     name = cytominer_database.utils.get_name(input)
     # add prefix to column names unless marked for skipping
-    if (not skip_image_prefix) and name in ['Image', 'Object']:
+    if (not skip_image_prefix) and name in ["Image", "Object"]:
         add_prefix(name, dataframe)
     # add identifier as an additional column called tableNumber
     add_tableNumber(dataframe, identifier)
@@ -47,11 +47,14 @@ def load_df(input):
     """
     # exit for files which are not valid (redundant check)
     if not cytominer_database.utils.validate_csv(input):
-        warnings.warn("CSV could not be validated in get_df() for {}".format(input), UserWarning)
+        warnings.warn(
+            "CSV could not be validated in get_df() for {}".format(input), UserWarning
+        )
         return
     # read into DF
     dataframe = pd.read_csv(input)  # do not use index_col=0 !
     return dataframe
+
 
 def add_prefix(name, dataframe):
     """
@@ -77,5 +80,5 @@ def add_tableNumber(dataframe, identifier):
     number_of_rows, _ = dataframe.shape
     table_number_column = [identifier] * number_of_rows  # create additional column
     dataframe.insert(0, "TableNumber", table_number_column, allow_duplicates=False)
-    
+
     return dataframe

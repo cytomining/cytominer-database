@@ -30,7 +30,7 @@ def find_directories(directory):
         os.path.join(directory, x)
         for x in os.listdir(directory)
         if os.path.isdir(os.path.join(directory, x))
-        ]
+    ]
 
 
 def validate_csv(csvfile):
@@ -59,7 +59,9 @@ def validate_csv(csvfile):
         return False
 
     with tempfile.TemporaryFile(mode="w+") as tmpfile:
-        csvclean = csvkit.utilities.csvclean.CSVClean(args=["-n", csvfile], output_file=tmpfile)
+        csvclean = csvkit.utilities.csvclean.CSVClean(
+            args=["-n", csvfile], output_file=tmpfile
+        )
 
         csvclean.run()
 
@@ -89,7 +91,11 @@ def validate_csv_set(config, directory):
     image_csv = os.path.join(directory, config["filenames"]["image"])
 
     if not os.path.isfile(image_csv):
-        raise IOError("{} not found in {}. Skipping.".format(config["filenames"]["image"], directory))
+        raise IOError(
+            "{} not found in {}. Skipping.".format(
+                config["filenames"]["image"], directory
+            )
+        )
 
     # get the CSV file for each compartment
     compartment_csvs = collect_csvs(config, directory)
@@ -101,8 +107,16 @@ def validate_csv_set(config, directory):
 
     # if any CSV is invalid, throw an error
     if not all(file_checks.values()):
-        invalid_files = ",".join([os.path.basename(filename) for (filename, valid) in file_checks.items() if not valid])
-        raise IOError("Some files were invalid: {}. Skipping {}.".format(invalid_files, directory))
+        invalid_files = ",".join(
+            [
+                os.path.basename(filename)
+                for (filename, valid) in file_checks.items()
+                if not valid
+            ]
+        )
+        raise IOError(
+            "Some files were invalid: {}. Skipping {}.".format(invalid_files, directory)
+        )
 
     return compartment_csvs, image_csv
 
@@ -125,7 +139,9 @@ def collect_csvs(config, directory):
 
     for filename_option in ["experiment", "image", "object"]:
         if config.has_option("filenames", filename_option):
-            config_filenames.append(os.path.join(directory, config["filenames"][filename_option]))
+            config_filenames.append(
+                os.path.join(directory, config["filenames"][filename_option])
+            )
 
     filenames = glob.glob(os.path.join(directory, "*.csv"))
 
@@ -144,15 +160,18 @@ def read_config(filename):
     config = configparser.ConfigParser()
 
     for config_filename in [
-
-        pkg_resources.resource_filename("cytominer_database", "config/config_default.ini"),  # get default config file
-        filename
+        pkg_resources.resource_filename(
+            "cytominer_database", "config/config_default.ini"
+        ),  # get default config file
+        filename,
     ]:
         try:
             with open(config_filename, "r") as fd:
                 config.read_file(fd)
         except IOError as e:
-            logger.warning("Unable to read configuration file: {}.".format(config_filename))
+            logger.warning(
+                "Unable to read configuration file: {}.".format(config_filename)
+            )
 
     return config
 
@@ -165,15 +184,16 @@ def type_convert_dataframe(dataframe, config_file):
     :param config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
     """
     engine = config_file["ingestion_engine"]["engine"]
-    if engine == "Parquet": # convert. (Else: do nothing.)
+    if engine == "Parquet":  # convert. (Else: do nothing.)
         type_conversion = config_file["schema"]["type_conversion"]
         if type_conversion == "int2float":
             convert_cols_int2float(dataframe)
         elif type_conversion == "all2string":
             convert_cols_2string(dataframe)
-        else: 
-            raise ValueError("Incorrect 'type_conversion' specification in your configuration file. Please set the value to 'int2float' or 'all2string', as documented in the README. ")
-
+        else:
+            raise ValueError(
+                "Incorrect 'type_conversion' specification in your configuration file. Please set the value to 'int2float' or 'all2string', as documented in the README. "
+            )
 
 
 def convert_cols_int2float(pandas_df):
@@ -195,10 +215,16 @@ def convert_cols_int2float(pandas_df):
             try:
                 pandas_df[name] = pandas_df[name].astype("float")
             except ValueError:
-                print("Column '{}' (type: {}) could not be converted to 'float'. ".format(name, pandas_df.dtypes[i]))
+                print(
+                    "Column '{}' (type: {}) could not be converted to 'float'. ".format(
+                        name, pandas_df.dtypes[i]
+                    )
+                )
                 continue
     if conversion_flag:
-        warnings.warn(UserWarning("No values were type-converted (no int-valued columns found)."))       
+        warnings.warn(
+            UserWarning("No values were type-converted (no int-valued columns found).")
+        )
 
 
 def convert_cols_2string(dataframe):
@@ -217,11 +243,16 @@ def convert_cols_2string(dataframe):
             if conversion_flag:
                 conversion_flag = False
         except ValueError:
-            print("Column '{}' (type: {}) could not be converted to 'string'. ".format(col_name, dataframe[col_name].dtypes[i]))
-            continue    
+            print(
+                "Column '{}' (type: {}) could not be converted to 'string'. ".format(
+                    col_name, dataframe[col_name].dtypes[i]
+                )
+            )
+            continue
     if conversion_flag:
-        warnings.warn(UserWarning("No values were type-converted (no int-valued columns found)."))       
-
+        warnings.warn(
+            UserWarning("No values were type-converted (no int-valued columns found).")
+        )
 
 
 def get_name(file_path):
@@ -232,4 +263,3 @@ def get_name(file_path):
     """
     name, _ = os.path.splitext(os.path.basename(file_path))
     return name.capitalize()
-

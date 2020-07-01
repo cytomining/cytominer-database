@@ -28,13 +28,13 @@ def write_to_disk(dataframe, table_name, output_path, engine, writers_dict):
     :param writers_dict: dictionary storing references to the opened Parquet writer and schema
     """
 
-    if engine == 'SQLite':
+    if engine == "SQLite":
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=DeprecationWarning)
             engine = create_engine(output_path)
             con = engine.connect()
-            dataframe.to_sql(name=table_name, con=con, if_exists="append",  index = False)
-    elif engine == 'Parquet':
+            dataframe.to_sql(name=table_name, con=con, if_exists="append", index=False)
+    elif engine == "Parquet":
         ref_dataframe = writers_dict[table_name]["pandas_dataframe"]
         dataframe, _ = dataframe.align(ref_dataframe, join="right", axis=1)
         # read into pyarrow table format

@@ -54,7 +54,10 @@ def test_run(dataset, runner):
             assert df.shape[1] == blob["ncols"] + 1
 
             if table_name.lower() != "image":
-                assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == blob["nrows"]
+                assert (
+                    df.groupby(["TableNumber", "ImageNumber"]).size().sum()
+                    == blob["nrows"]
+                )
 
 
 def test_run_defaults(cellpainting, runner):
@@ -89,4 +92,7 @@ def test_run_defaults(cellpainting, runner):
             assert df.shape[1] == blob["ncols"] + 1
 
             if table_name.lower() != "image":
-                assert df.groupby(["TableNumber", "ImageNumber"]).size().sum() == blob["nrows"]
+                assert (
+                    df.groupby(["TableNumber", "ImageNumber"]).size().sum()
+                    == blob["nrows"]
+                )

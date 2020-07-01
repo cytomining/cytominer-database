@@ -48,7 +48,9 @@ def munge(config_path, source, target=None):
 
     for directory in directories:
         try:
-            obj = pd.read_csv(os.path.join(directory, config["filenames"]["object"]), header=[0, 1])
+            obj = pd.read_csv(
+                os.path.join(directory, config["filenames"]["object"]), header=[0, 1]
+            )
 
         except IOError as e:
             click.echo(e)
@@ -62,24 +64,28 @@ def munge(config_path, source, target=None):
         if not os.path.exists(target_directory):
             os.makedirs(target_directory)
 
-        for compartment_name in set(obj.columns.get_level_values(0).tolist()) - {'Image'}:
+        for compartment_name in set(obj.columns.get_level_values(0).tolist()) - {
+            "Image"
+        }:
 
             # select columns of the compartment
-            compartment = pd.concat([obj['Image'], obj[compartment_name]], axis=1)
+            compartment = pd.concat([obj["Image"], obj[compartment_name]], axis=1)
 
             # Create a new column
-            compartment['ObjectNumber'] = compartment['Number_Object_Number']
+            compartment["ObjectNumber"] = compartment["Number_Object_Number"]
 
             cols = compartment.columns.tolist()
 
             # Move ImageNumber and ObjectNumber to the front
 
-            cols.insert(0, cols.pop(cols.index('ObjectNumber')))
+            cols.insert(0, cols.pop(cols.index("ObjectNumber")))
 
-            cols.insert(0, cols.pop(cols.index('ImageNumber')))
+            cols.insert(0, cols.pop(cols.index("ImageNumber")))
 
             compartment = compartment.loc[:, cols]
 
-            compartment.to_csv(os.path.join(target_directory, compartment_name + '.csv'), index=False)
+            compartment.to_csv(
+                os.path.join(target_directory, compartment_name + ".csv"), index=False
+            )
 
     return valid_directories

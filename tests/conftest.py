@@ -1,17 +1,22 @@
 import pytest
 
-def pytest_addoption(parser): # where is this used?
+
+def pytest_addoption(parser):  #  where is this used?
     parser.addoption("--dataset", action="store", help="dataset to test")
 
 
-def pytest_generate_tests(metafunc): # where is this used?
+def pytest_generate_tests(metafunc):  #  where is this used?
     if "dataset" in metafunc.fixturenames:
         if metafunc.config.option.dataset is None:
-            metafunc.parametrize("dataset", ["htqc", "cellpainting", "qc"], indirect=True)
+            metafunc.parametrize(
+                "dataset", ["htqc", "cellpainting", "qc"], indirect=True
+            )
         else:
             assert metafunc.config.option.dataset in ["htqc", "cellpainting", "qc"]
 
-            metafunc.parametrize("dataset", [metafunc.config.option.dataset], indirect=True)
+            metafunc.parametrize(
+                "dataset", [metafunc.config.option.dataset], indirect=True
+            )
 
 
 @pytest.fixture
@@ -27,29 +32,14 @@ def cellpainting():
         "data_dir": "tests/data_b",
         "image_csv": "Image.csv",
         "ingest": [
-            {
-                "ncols": 586,
-                "nrows": 40,
-                "table": "Cells"
-            },
-            {
-                "ncols": 572,
-                "nrows": 40,
-                "table": "Cytoplasm"
-            },
-            {
-                "ncols": 6,
-                "nrows": 4,
-                "table": "image"
-            },
-            {
-                "ncols": 595,
-                "nrows": 40,
-                "table": "Nuclei"
-            }
+            {"ncols": 586, "nrows": 40, "table": "Cells"},
+            {"ncols": 572, "nrows": 40, "table": "Cytoplasm"},
+            {"ncols": 6, "nrows": 4, "table": "image"},
+            {"ncols": 595, "nrows": 40, "table": "Nuclei"},
         ],
-        "munge": False
+        "munge": False,
     }
+
 
 @pytest.fixture
 def htqc():
@@ -65,28 +55,12 @@ def htqc():
         "munged_dir": "tests/data_a_munged",
         "image_csv": "image.csv",
         "ingest": [
-            {
-                "ncols": 294,
-                "nrows": 40,
-                "table": "Cells"
-            },
-            {
-                "ncols": 279,
-                "nrows": 40,
-                "table": "Cytoplasm"
-            },
-            {
-                "ncols": 229,
-                "nrows": 8,
-                "table": "image"
-            },
-            {
-                "ncols": 287,
-                "nrows": 40,
-                "table": "Nuclei"
-            }
+            {"ncols": 294, "nrows": 40, "table": "Cells"},
+            {"ncols": 279, "nrows": 40, "table": "Cytoplasm"},
+            {"ncols": 229, "nrows": 8, "table": "image"},
+            {"ncols": 287, "nrows": 40, "table": "Nuclei"},
         ],
-        "munge": True
+        "munge": True,
     }
 
 
@@ -101,14 +75,8 @@ def qc():
         "config": None,
         "data_dir": "tests/data_c",
         "image_csv": "Image.csv",
-        "ingest": [
-            {
-                "nrows": 8,
-                "ncols": 229,
-                "table": "Image"
-            }
-        ],
-        "munge": True
+        "ingest": [{"nrows": 8, "ncols": 229, "table": "Image"}],
+        "munge": True,
     }
 
 
@@ -121,15 +89,16 @@ def dataset(request):
     dataset_param = request.param
 
     if dataset_param == "htqc":
-        return request.getfixturevalue('htqc')
+        return request.getfixturevalue("htqc")
 
     if dataset_param == "cellpainting":
-        return request.getfixturevalue('cellpainting')
+        return request.getfixturevalue("cellpainting")
 
     if dataset_param == "qc":
-        return request.getfixturevalue('qc')
+        return request.getfixturevalue("qc")
 
     raise ValueError("No such dataset: {}".format(request.param))
+
 
 @pytest.fixture
 def engine_choice(request):
@@ -140,10 +109,9 @@ def engine_choice(request):
     engine_param = request.param
 
     if engine_param == "Parquet":
-        return request.getfixturevalue('Parquet')
+        return request.getfixturevalue("Parquet")
 
     if engine_param == "SQLite":
-        return request.getfixturevalue('SQLite')
-
+        return request.getfixturevalue("SQLite")
 
     raise ValueError("No such dataset: {}".format(request.param))

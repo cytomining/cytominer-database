@@ -61,6 +61,7 @@ import cytominer_database.utils
 import cytominer_database.write
 import cytominer_database.tableSchema
 
+
 def seed(source, output_path, config_path, skip_image_prefix=True, directories=None):
     """
     Main function. Loads configuration. Opens ParquetWriter.
@@ -78,17 +79,19 @@ def seed(source, output_path, config_path, skip_image_prefix=True, directories=N
     engine = config["ingestion_engine"]["engine"]
 
     # get dictionary that contains [name]["writer"], [name]["schema"], [name]["pandas_dataframe"]
-    writers_dict = cytominer_database.tableSchema.open_writers(source, output_path, config, skip_image_prefix)
+    writers_dict = cytominer_database.tableSchema.open_writers(
+        source, output_path, config, skip_image_prefix
+    )
     # lists the subdirectories that contain CSV files
     if not directories:
-        directories = sorted(
-            list(cytominer_database.utils.find_directories(source))
-        ) 
+        directories = sorted(list(cytominer_database.utils.find_directories(source)))
     # ----------------------------- iterate over subfolders in source folder------------------------------------
     for directory in directories:
         # ....................... get input .csv file paths ......................
         try:
-            compartments, image = cytominer_database.utils.validate_csv_set(config, directory)
+            compartments, image = cytominer_database.utils.validate_csv_set(
+                config, directory
+            )
         except IOError as e:
             click.echo(e)
             continue
@@ -97,12 +100,18 @@ def seed(source, output_path, config_path, skip_image_prefix=True, directories=N
         csv_locations = [image] + compartments
         # ----------------------------------- iterate over .csv's ---------------------------------------
         for input_path in csv_locations:
-                table_name = cytominer_database.utils.get_name(input_path)
-                dataframe = cytominer_database.load.get_and_modify_df(input_path, identifier, skip_image_prefix)
-                cytominer_database.utils.type_convert_dataframe(dataframe, config)
-                cytominer_database.write.write_to_disk(dataframe, table_name, output_path, engine, writers_dict)
+            table_name = cytominer_database.utils.get_name(input_path)
+            dataframe = cytominer_database.load.get_and_modify_df(
+                input_path, identifier, skip_image_prefix
+            )
+            cytominer_database.utils.type_convert_dataframe(dataframe, config)
+            cytominer_database.write.write_to_disk(
+                dataframe, table_name, output_path, engine, writers_dict
+            )
     # --------------------------------------- close writers ---------------------------------------------
     close_writers(writers_dict, engine)
+
+
 # --------------------------------------------- end ---------------------------------------------------
 
 
@@ -115,6 +124,7 @@ def close_writers(writers_dict, engine):
     if engine == "Parquet":
         for name in writers_dict.keys():
             writers_dict[name]["writer"].close()
+
 
 def checksum(pathname, buffer_size=65536):
     """

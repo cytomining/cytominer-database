@@ -19,13 +19,14 @@ import cytominer_database.load
 
 ################################################################################
 # Contains "open_writers()"" to generate the dictionary containing the
-# reference data ("writer dictionary"), from which the table schemata will be generated.
+#  reference data ("writer dictionary"), from which the table schemata will be generated.
 # The reference tables can either be loaded directly from a designated folder,
 # or sampled across all available data, as specified in the config_file.
 #
 # Also contains helper functions "get_table_paths()" to generate a list of paths
 # and the sampling function get_reference_paths().
 ################################################################################
+
 
 def open_writers(source, target, config_file, skip_image_prefix=True):
     """
@@ -39,28 +40,35 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
     :writers_dict: dictionary referencing the writers (return argument)
     """
     print("------------- in open_writers(): --------------")
-    if config_file["ingestion_engine"]["engine"] == "SQLite": # no reference table needed
+    if (
+        config_file["ingestion_engine"]["engine"] == "SQLite"
+    ):  # no reference table needed
         return None
 
-    reference_directories = get_path_dictionary(config_file, source) #includes different steps, depending on config_file 
-    writers_dict = {} 
+    reference_directories = get_path_dictionary(
+        config_file, source
+    )  # includes different steps, depending on config_file
+    writers_dict = {}
     refIdentifier = 999 & 0xFFFFFFFF
     # arbitrary identifier, will not be stored but used only as type template. (uint32 as in checksum())
     # Iterate over all table kinds:
-    for name, path in reference_directories.items():  # iterates over keys of the dictionary reference_directories
+    for (
+        name,
+        path,
+    ) in (
+        reference_directories.items()
+    ):  # iterates over keys of the dictionary reference_directories
         # unpack path from [path] # if isinstance(path, list):
         path = path[0]
         # load dataframe. Attention: Unpack from list return argument
-        ref_df = cytominer_database.load.get_and_modify_df(path, refIdentifier, skip_image_prefix)
-        # is also used in ingest.seed() 
+        ref_df = cytominer_database.load.get_and_modify_df(
+            path, refIdentifier, skip_image_prefix
+        )
+        #  is also used in ingest.seed()
         cytominer_database.utils.type_convert_dataframe(ref_df, config_file)
-        ref_table = pyarrow.Table.from_pandas(
-            ref_df
-        )
+        ref_table = pyarrow.Table.from_pandas(ref_df)
         ref_schema = ref_table.schema
-        destination = os.path.join(
-            target, name + ".parquet"
-        )
+        destination = os.path.join(target, name + ".parquet")
         writers_dict[name] = {}
         writers_dict[name]["writer"] = pq.ParquetWriter(
             destination, ref_schema, flavor={"spark"}
@@ -69,7 +77,8 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
         writers_dict[name]["pandas_dataframe"] = ref_df
     return writers_dict
 
-def get_path_dictionary(config_file, source):    
+
+def get_path_dictionary(config_file, source):
     """
     Determines a single reference directory for every table kind and 
     returns a dictionary with key: 'Capitalized_table_kind', value = 'full/path/to/reference_table.csv'
@@ -79,16 +88,23 @@ def get_path_dictionary(config_file, source):
     """
     reference = config_file["schema"]["reference_option"]
 
-    if reference != "sample": # reference tables are given in folder with full path os.path.join(source, reference)
-        if os.path.isdir(os.path.join(source, reference)): 
+    if (
+        reference != "sample"
+    ):  # reference tables are given in folder with full path os.path.join(source, reference)
+        if os.path.isdir(os.path.join(source, reference)):
             #'reference' is a path to the folder containing all reference tables (no sampling)
             # get_dict_of_paths() returns values as single string in a dict
-            directory = [os.path.join(source, reference)] # note: input is a list 
-            path_dictionary = directory_list_to_path_dictionary(directory)  
-        else: 
-            warnings.warn("{} is not a valid path for a reference file directory. The reference tables are sampled instead. Fix this by adjunsting config_file['schema']['reference_option']".format(os.path.join(source, reference)), UserWarning)
-            reference = "sample" # proceed with sampling
-    if reference == "sample": 
+            directory = [os.path.join(source, reference)]  #  note: input is a list
+            path_dictionary = directory_list_to_path_dictionary(directory)
+        else:
+            warnings.warn(
+                "{} is not a valid path for a reference file directory. The reference tables are sampled instead. Fix this by adjunsting config_file['schema']['reference_option']".format(
+                    os.path.join(source, reference)
+                ),
+                UserWarning,
+            )
+            reference = "sample"  # proceed with sampling
+    if reference == "sample":
         # Idea: sample from all tables contained in the subdirectories of source.
         # Get all possible reference directories for each table kind, as stored in the dictionary.
 
@@ -101,6 +117,7 @@ def get_path_dictionary(config_file, source):
         # sample from all paths, determine reference paths, store in dictionary
         path_dictionary = sample_reference_paths(ref_fraction, full_paths)
     return path_dictionary
+
 
 def directory_list_to_path_dictionary(directories):
     """
@@ -132,7 +149,7 @@ def directory_list_to_path_dictionary(directories):
         for filename in filenames:
             # get name (w/o extension, e.g. 'Cells') and full path (e.g. 'path/to/Cells.csv')
             name, _ = os.path.splitext(filename)
-            name    = name.capitalize()
+            name = name.capitalize()
             fullpath = os.path.join(directory, filename)
             # initialize dictionary entry if it does not exist yet
             if name not in table_paths.keys():
@@ -140,8 +157,6 @@ def directory_list_to_path_dictionary(directories):
             # extend the list of paths by current path
             table_paths[name] += [fullpath]
     return table_paths
-
-
 
 
 def sample_reference_paths(ref_fraction, full_paths):
@@ -168,7 +183,7 @@ def sample_reference_paths(ref_fraction, full_paths):
     for filename, filepath in full_paths.items():  # iterate over table types
         # print("--------------------- In get_reference_paths(): Getting ref for table type : ", key, "---------------------")
         # 2. Permute the table list at random
-        np.random.shuffle(filepath) 
+        np.random.shuffle(filepath)
         # 3. get first n items corresponding to fraction of files to be tested (among the number of all tables present for that table kind)
         # --------------------------- constants ----------------------------------
         sample_size = int(np.ceil(ref_fraction * len(filepath)))
@@ -192,12 +207,19 @@ def sample_reference_paths(ref_fraction, full_paths):
                     # print("updated max_width = ", str(max_width))
                     max_width = df_row.shape[1]
                     # print("to max_width = ", str(max_width))
-                    sampled_path_dictionary[filename] = [path] # Note: Need list as dictionary value (to unify next steps)
-            elif sample_size < len(filepath) : # invalid file, but not all files were sampled yet
-                sample_size += 1 # get a substitute sample file
+                    sampled_path_dictionary[filename] = [
+                        path
+                    ]  # Note: Need list as dictionary value (to unify next steps)
+            elif sample_size < len(
+                filepath
+            ):  #  invalid file, but not all files were sampled yet
+                sample_size += 1  # get a substitute sample file
             else:
-                warnings.warn(" Not enough valid .csv files to compare the fraction={} of all .csv files (reference file sampling).".format(ref_fraction), UserWarning)
+                warnings.warn(
+                    " Not enough valid .csv files to compare the fraction={} of all .csv files (reference file sampling).".format(
+                        ref_fraction
+                    ),
+                    UserWarning,
+                )
     print(" ------------------- Leaving get_reference_paths() -------------------")
     return sampled_path_dictionary
-
-
