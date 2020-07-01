@@ -1,7 +1,6 @@
 import os.path
-
-import pytest
 import pandas as pd
+import pytest
 import click.testing
 import backports.tempfile
 from sqlalchemy import create_engine

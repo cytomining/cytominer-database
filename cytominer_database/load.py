@@ -77,8 +77,5 @@ def add_tableNumber(dataframe, identifier):
     number_of_rows, _ = dataframe.shape
     table_number_column = [identifier] * number_of_rows  # create additional column
     dataframe.insert(0, "TableNumber", table_number_column, allow_duplicates=False)
-
-    # ---------------------- for debugging ---------------------- 
-    # print("In get_df(): name = {} ; dataframe.shape = {}".format(name, dataframe.shape))
-    # ------------------------------------------------------------
+    
     return dataframe
