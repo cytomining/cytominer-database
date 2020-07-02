@@ -61,7 +61,6 @@ def test_seed(dataset, config_choice):
                 engine = create_engine(target)
                 con = engine.connect()
                 df = pd.read_sql(sql=table_name, con=con)
-                
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1
 
