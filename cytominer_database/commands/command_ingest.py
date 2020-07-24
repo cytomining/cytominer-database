@@ -49,25 +49,18 @@ table e.g. use  `Metadata_Plate` instead of \
 """,
 )
 @click.option(
-    "--engine",
-    default='sqlite',
+    "--parquet",
+    default=False,
     help="""\
-Selects the backend engine \
-and the output format; \
-Options: 'sqlite', 'parquet' \
-(Default: 'sqlite').
+Selects Parquet as output format. \
 """,
 )
 
-def command(source, target, config_file, munge, skip_image_prefix, engine):
+def command(source, target, config_file, munge, skip_image_prefix, parquet):
     if munge:
         cytominer_database.munge.munge(config_path=config_file, source=source)
 
-    if engine == 'sqlite':
-        cytominer_database.ingest.seed(source, target, config_file, skip_image_prefix)
-
-
-    elif engine == 'parquet':
+    elif parquet:
         cytominer_database.ingest_parquet.seed(source, target, config_file, skip_image_prefix)
 
 
