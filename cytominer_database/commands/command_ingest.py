@@ -48,8 +48,29 @@ table e.g. use  `Metadata_Plate` instead of \
 `Image_Metadata_Plate` (Default: true).
 """,
 )
-def command(source, target, config_file, munge, skip_image_prefix):
+@click.option(
+    "--engine",
+    default='sqlite',
+    help="""\
+Selects the backend engine \
+and the output format; \
+Options: 'sqlite', 'parquet' \
+(Default: 'sqlite').
+""",
+)
+
+def command(source, target, config_file, munge, skip_image_prefix, engine):
     if munge:
         cytominer_database.munge.munge(config_path=config_file, source=source)
 
-    cytominer_database.ingest.seed(source, target, config_file, skip_image_prefix)
+    if engine == 'sqlite':
+        cytominer_database.ingest.seed(source, target, config_file, skip_image_prefix)
+
+
+    elif engine == 'parquet':
+        cytominer_database.ingest_parquet.seed(source, target, config_file, skip_image_prefix)
+
+
+
+
+
