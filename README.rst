@@ -24,14 +24,20 @@ centralized database in which to store these measurements. A more scalable appro
 “batch” of images, and then later merge these CSVs.
 
 cytominer-database ingest reads these CSVs, checks for errors, then ingests
-them into a database backend, including
-SQLite, MySQL, PostgresSQL, and several other backends supported by odo.
+them into a database backend. The default backend is `SQLite`.
 
 .. code-block:: sh
 
 	cytominer-database ingest source_directory sqlite:///backend.sqlite -c ingest_config.ini
 
-will ingest the CSV files nested under source_directory into a SQLite backend
+will ingest the CSV files nested under source_directory into a `SQLite` backend
+To select the `Parquet` backend add a `--parquet` flag:
+
+.. code-block:: sh
+
+	cytominer-database ingest source_directory sqlite:///backend.sqlite -c ingest_config.ini --parquet
+
+The ingest_config.ini file then needs to be adjusted to contain the `Parquet` specifications.
 
 How to use the configuration file
 =================================
