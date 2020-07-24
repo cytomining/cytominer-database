@@ -48,8 +48,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'cytominer_database'
-copyright = '2017, Claire McQuin,Allen Goodman,Shantanu Singh'
-author = 'Claire McQuin,Allen Goodman,Shantanu Singh'
+copyright = '2020, Claire McQuin,Allen Goodman,Shantanu Singh'
+author = 'Claire McQuin,Allen Goodman,Shantanu Singh, Frances Hubis'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -153,6 +153,3 @@ texinfo_documents = [
      author, 'cytominer_database', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
-
