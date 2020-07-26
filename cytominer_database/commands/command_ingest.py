@@ -48,20 +48,12 @@ table e.g. use  `Metadata_Plate` instead of \
 `Image_Metadata_Plate` (Default: true).
 """,
 )
-@click.option(
-    "--parquet",
-    default=False,
-    help="""\
-Selects Parquet as output format. \
-""",
-)
 
-def command(source, target, config_file, munge, skip_image_prefix, parquet):
+def command(source, target, config_file, munge, skip_image_prefix):
     if munge:
         cytominer_database.munge.munge(config_path=config_file, source=source)
 
-    elif parquet:
-        cytominer_database.ingest_parquet.seed(source, target, config_file, skip_image_prefix)
+    cytominer_database.ingest.seed(source, target, config_file, skip_image_prefix)
 
 
 
