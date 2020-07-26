@@ -6,7 +6,7 @@ import backports.tempfile
 from sqlalchemy import create_engine
 
 import cytominer_database.command
-import cytominer_database.commands.command_ingest 
+import cytominer_database.commands.command_ingest
 import cytominer_database.commands.command_ingest_variable_engine
 
 
@@ -61,6 +61,7 @@ def test_run(dataset, runner):
                     == blob["nrows"]
                 )
 
+
 def test_run_variable_engine_default(dataset, runner):
     # By default: --no-variable-engine flag--> sqlite engine --> sqlite config file
     DEFAULT_CONFIG_FILE = "config_SQLite.ini"
@@ -72,14 +73,19 @@ def test_run_variable_engine_default(dataset, runner):
         sqlite_file = os.path.join(temp_dir, "test.db")
         opts += ["sqlite:///{}".format(sqlite_file)]
         # config_file
-        opts += ["--config-file", os.path.join(dataset["data_dir"], DEFAULT_CONFIG_FILE)]
+        opts += [
+            "--config-file",
+            os.path.join(dataset["data_dir"], DEFAULT_CONFIG_FILE),
+        ]
         # munge
         if dataset["munge"]:
             opts += ["--munge"]
         else:
             opts += ["--no-munge"]
         # run command
-        result = runner.invoke(cytominer_database.commands.command_ingest_variable_engine.command, opts)
+        result = runner.invoke(
+            cytominer_database.commands.command_ingest_variable_engine.command, opts
+        )
         # test outcome
         assert result.exit_code == 0, result.output
 
@@ -101,6 +107,7 @@ def test_run_variable_engine_default(dataset, runner):
                     == blob["nrows"]
                 )
 
+
 def test_run_variable_engine_sqlite(dataset, runner):
     CONFIG_CHOICE = "config_SQLite.ini"
     # SOURCE
@@ -119,7 +126,9 @@ def test_run_variable_engine_sqlite(dataset, runner):
         # variable engine
         opts += ["--variable-engine"]
         # run command
-        result = runner.invoke(cytominer_database.commands.command_ingest_variable_engine.command, opts)
+        result = runner.invoke(
+            cytominer_database.commands.command_ingest_variable_engine.command, opts
+        )
         # test outcome
         assert result.exit_code == 0, result.output
 
@@ -169,7 +178,9 @@ def test_run_variable_engine_parquet(dataset, runner):
         opts += ["--variable-engine"]
 
         # run command
-        result = runner.invoke(cytominer_database.commands.command_ingest_variable_engine.command, opts)
+        result = runner.invoke(
+            cytominer_database.commands.command_ingest_variable_engine.command, opts
+        )
         # test outcome
         assert result.exit_code == 0, result.output
 

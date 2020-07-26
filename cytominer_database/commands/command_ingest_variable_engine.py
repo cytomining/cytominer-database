@@ -6,6 +6,7 @@ import pkg_resources
 import cytominer_database.ingest
 import cytominer_database.ingest_variable_engine
 import cytominer_database.munge
+
 """
 Runs new code (ingest_variable_engine.py instead of ingest.py).
 Two backend engines are available: Sqlite and Parquet. 
@@ -14,6 +15,7 @@ In terms of the command (and testing the command),
 the config file name needs to be specified 
 (each backend choice has its own config file).
 """
+
 
 @click.command(
     "ingest_new",
@@ -56,7 +58,6 @@ table e.g. use  `Metadata_Plate` instead of \
 `Image_Metadata_Plate` (Default: true).
 """,
 )
-
 @click.option(
     "--skip-image-prefix/--no-skip-image-prefix",
     default=True,
@@ -77,19 +78,13 @@ which backend engine is used (path of which is passed as a flag).\
 Default: False (--no-variable-engine) 
 """,
 )
-
 def command(source, target, config_file, munge, skip_image_prefix, variable_engine):
     if munge:
         cytominer_database.munge.munge(config_path=config_file, source=source)
 
     if variable_engine:
-        cytominer_database.ingest_variable_engine.seed(source, target, config_file, skip_image_prefix)
+        cytominer_database.ingest_variable_engine.seed(
+            source, target, config_file, skip_image_prefix
+        )
     else:
         cytominer_database.ingest.seed(source, target, config_file, skip_image_prefix)
-
-
-
-
-
-
-

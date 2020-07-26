@@ -85,9 +85,9 @@ def into(input, output, name, identifier, skip_table_prefix=False):
             prefixed_columns = []
             for col in df.columns:
                 if col in no_prefix:
-                    prefixed_columns +=[col]
+                    prefixed_columns += [col]
                 else:
-                    prefixed_columns += ["{}_{}".format(name, col)]    
+                    prefixed_columns += ["{}_{}".format(name, col)]
             df.columns = prefixed_columns
         # add TableNumber
         number_of_rows, _ = df.shape

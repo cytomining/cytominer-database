@@ -195,6 +195,7 @@ def type_convert_dataframe(dataframe, config_file):
                 "Incorrect 'type_conversion' specification in your configuration file. Please set the value to 'int2float' or 'all2string', as documented in the README. "
             )
 
+
 def convert_cols_int2float(pandas_df):
     """
     Converts all columns with type 'int' to 'float'.
@@ -222,8 +223,10 @@ def convert_cols_int2float(pandas_df):
                 continue
     if conversion_flag:
         warnings.warn(
-            UserWarning("No values were type-converted (no int-valued columns found)."))
-        
+            UserWarning("No values were type-converted (no int-valued columns found).")
+        )
+
+
 def convert_cols_2string(dataframe):
     """
     Iterates over the columns of a Pandas dataframe
