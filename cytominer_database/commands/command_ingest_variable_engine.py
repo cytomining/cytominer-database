@@ -4,10 +4,10 @@ import os
 import pkg_resources
 
 import cytominer_database.ingest
-import cytominer_database.ingest_parquet
+import cytominer_database.ingest_variable_engine
 import cytominer_database.munge
 """
-Runs new code (ingest_parquet.py instead of ingest.py).
+Runs new code (ingest_variable_engine.py instead of ingest.py).
 Two backend engines are available: Sqlite and Parquet. 
 In effect, these options are read from the config file.
 In terms of the command (and testing the command), 
@@ -83,7 +83,7 @@ def command(source, target, config_file, munge, skip_image_prefix, variable_engi
         cytominer_database.munge.munge(config_path=config_file, source=source)
 
     if variable_engine:
-        cytominer_database.ingest_parquet.seed(source, target, config_file, skip_image_prefix)
+        cytominer_database.ingest_variable_engine.seed(source, target, config_file, skip_image_prefix)
     else:
         cytominer_database.ingest.seed(source, target, config_file, skip_image_prefix)
 

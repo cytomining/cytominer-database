@@ -5,7 +5,7 @@ import backports.tempfile
 from sqlalchemy import create_engine
 
 # import cytominer_database.ingest
-import cytominer_database.ingest_parquet
+import cytominer_database.ingest_variable_engine
 import cytominer_database.munge
 import pytest
 
@@ -39,7 +39,7 @@ def test_seed(dataset, config_choice):
             target = "sqlite:///{}".format(str(sqlite_file))
 
         # run program
-        cytominer_database.ingest_parquet.seed(
+        cytominer_database.ingest_variable_engine.seed(
             config_path=config_path, source=data_dir, output_path=target
         )
         # necessary ?
