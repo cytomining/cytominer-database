@@ -48,6 +48,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'cytominer_database'
+
 copyright = '2020, Allen Goodman, Claire McQuin, Shantanu Singh, Gregory Way'
 author = 'Allen Goodman, Claire McQuin, Shantanu Singh, Gregory Way, Frances Hubis'
 
