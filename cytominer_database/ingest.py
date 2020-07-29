@@ -119,11 +119,11 @@ def checksum(pathname, buffer_size=65536):
 def seed(source, target, config_path, skip_image_prefix=True):
     """
     Read CSV files into a database backend.
-
-    :param config_file: Configuration file.
     :param source: Directory containing subdirectories that contain CSV files.
     :param target: Connection string for the database.
-    :param  : True if the prefix of image table name should be excluded
+    :param config_path: Configuration file.
+
+    :param skip_image_prefix: True if the prefix of image table name should be excluded
      from the names of columns from per image table
     """
     config_file = cytominer_database.utils.read_config(config_path)
