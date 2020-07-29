@@ -4,7 +4,7 @@ project = "cytominer_database"
 version = "0.3.3"
 
 # Note about authors:
-# setuptools makes it difficult to have multiple authors 
+# setuptools makes it difficult to have multiple authors
 # https://stackoverflow.com/a/10005265
 # instead, the full author list is in `setup.cfg`
 
