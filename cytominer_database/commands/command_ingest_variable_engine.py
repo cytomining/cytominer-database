@@ -59,16 +59,6 @@ table e.g. use  `Metadata_Plate` instead of \
 """,
 )
 @click.option(
-    "--skip-image-prefix/--no-skip-image-prefix",
-    default=True,
-    help="""\
-True if the prefix of image table name should be \
-excluded from the names of columns from per image \
-table e.g. use  `Metadata_Plate` instead of \
-`Image_Metadata_Plate` (Default: true).
-""",
-)
-@click.option(
     "--variable-engine/--no-variable-engine",
     default=False,
     help="""\
