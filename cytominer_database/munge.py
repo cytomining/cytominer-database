@@ -1,6 +1,5 @@
 import logging
 import os
-
 import click
 import pandas as pd
 
@@ -9,7 +8,7 @@ import cytominer_database.utils
 logger = logging.getLogger(__name__)
 
 
-def munge(config_file, source, target=None):
+def munge(config_path, source, target=None):
     """
     Searches ``source`` for directories containing a CSV file corresponding to
     per-object measurements, then splits the CSV file into one CSV file per compartment.
@@ -18,7 +17,7 @@ def munge(config_file, source, target=None):
     Cytoplasm, and Nuclei. ``munge`` will split this CSV file into 3 CSV files:
     Cells.csv, Cytoplasm.csv, and Nuclei.csv.
 
-    :param config_file: Configuration file.
+    :param config_path: Path to configuration file.
 
     :param source: Directory containing subdirectories that contain an object CSV file.
 
@@ -33,7 +32,7 @@ def munge(config_file, source, target=None):
         cytominer_database.munge.munge(source, target, config)
     """
 
-    config = cytominer_database.utils.read_config(config_file)
+    config = cytominer_database.utils.read_config(config_path)
 
     if not target:
         target = source
@@ -49,7 +48,9 @@ def munge(config_file, source, target=None):
 
     for directory in directories:
         try:
-            obj = pd.read_csv(os.path.join(directory, config["filenames"]["object"]), header=[0, 1])
+            obj = pd.read_csv(
+                os.path.join(directory, config["filenames"]["object"]), header=[0, 1]
+            )
 
         except IOError as e:
             click.echo(e)
@@ -63,24 +64,28 @@ def munge(config_file, source, target=None):
         if not os.path.exists(target_directory):
             os.makedirs(target_directory)
 
-        for compartment_name in set(obj.columns.get_level_values(0).tolist()) - {'Image'}:
+        for compartment_name in set(obj.columns.get_level_values(0).tolist()) - {
+            "Image"
+        }:
 
             # select columns of the compartment
-            compartment = pd.concat([obj['Image'], obj[compartment_name]], axis=1)
+            compartment = pd.concat([obj["Image"], obj[compartment_name]], axis=1)
 
             # Create a new column
-            compartment['ObjectNumber'] = compartment['Number_Object_Number']
+            compartment["ObjectNumber"] = compartment["Number_Object_Number"]
 
             cols = compartment.columns.tolist()
 
             # Move ImageNumber and ObjectNumber to the front
 
-            cols.insert(0, cols.pop(cols.index('ObjectNumber')))
+            cols.insert(0, cols.pop(cols.index("ObjectNumber")))
 
-            cols.insert(0, cols.pop(cols.index('ImageNumber')))
+            cols.insert(0, cols.pop(cols.index("ImageNumber")))
 
             compartment = compartment.loc[:, cols]
 
-            compartment.to_csv(os.path.join(target_directory, compartment_name + '.csv'), index=False)
+            compartment.to_csv(
+                os.path.join(target_directory, compartment_name + ".csv"), index=False
+            )
 
     return valid_directories
