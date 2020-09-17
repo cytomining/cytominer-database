@@ -101,6 +101,7 @@ def checksum(pathname, buffer_size=65536):
     Generate a 32-bit unique identifier for a file.
 
     :param buffer_size: buffer size
+    :param pathname: input file
     """
     with open(pathname, "rb") as stream:
         result = zlib.crc32(bytes(0))
