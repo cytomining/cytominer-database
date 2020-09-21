@@ -3,7 +3,6 @@ import configparser
 import os
 import pkg_resources
 
-import cytominer_database.ingest
 import cytominer_database.ingest_variable_engine
 import cytominer_database.munge
 
