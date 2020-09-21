@@ -60,7 +60,15 @@ import cytominer_database.write
 import cytominer_database.tableSchema
 
 
-def seed(source, output_path, config_path, skip_image_prefix=True, directories=None):
+
+def seed(
+    source,
+    output_path,
+    config_path,
+    skip_image_prefix=True,
+    directories=None,
+    sqlite=False,
+    parquet=False):
     """
     Main function. Loads configuration. Opens ParquetWriter.
     Calls writer function. Closes ParquetWriter.
@@ -74,7 +82,7 @@ def seed(source, output_path, config_path, skip_image_prefix=True, directories=N
 
     """
     config = cytominer_database.utils.read_config(config_path)
-    engine = config["ingestion_engine"]["engine"]
+    engine = get_engine(sqlite=sqlite, parquet=parquet)
 
     # get dictionary that contains [name]["writer"], [name]["schema"], [name]["pandas_dataframe"]
     writers_dict = cytominer_database.tableSchema.open_writers(
@@ -138,3 +146,24 @@ def checksum(pathname, buffer_size=65536):
                 break
             result = zlib.crc32(buffer, result)
     return result & 0xFFFFFFFF
+
+
+def get_engine(sqlite=False, parquet=False):
+    """
+    
+    :param sqlite: True if sqlite is selected as backend
+    :param parquet: True is parquet is selected as backend
+    
+    """
+    if sqlite and engine: 
+        raise ValueError(
+        " Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
+        )
+    elif sqlite:
+        engine = "SQLite"
+    elif parquet:
+        engine = "Parquet"
+    else: # default
+        engine = "SQLite"
+    
+    return engine
