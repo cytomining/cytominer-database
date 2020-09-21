@@ -30,7 +30,7 @@ recommended engine, but ingest will likely also work with PostgreSQL and MySQL.
 |       ...
 |       file_n.csv
 
-Example::
+Example:
 
     cytominer_database.ingest.seed(source, target, config_path)
 
