@@ -157,7 +157,7 @@ def get_engine(sqlite=False, parquet=False):
     """
     if sqlite and engine: 
         raise ValueError(
-        " Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
+        "Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
         )
     elif sqlite:
         engine = "SQLite"
