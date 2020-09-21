@@ -4,7 +4,6 @@ import pytest
 import click.testing
 import backports.tempfile
 from sqlalchemy import create_engine
-import cytominer_database.command
 import cytominer_database.commands.command_ingest_variable_engine
 
 
