@@ -63,7 +63,7 @@ def test_seed_sqlite(dataset):
 
         # run program
         cytominer_database.ingest_variable_engine.seed(
-            config_path=config_path, source=data_dir, output_path=target, sqlite=True4
+            config_path=config_path, source=data_dir, output_path=target, sqlite=True
         )
 
         assert os.path.exists(str(sqlite_file))
