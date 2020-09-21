@@ -12,12 +12,12 @@ def runner():
     return click.testing.CliRunner()
 
 def test_run_variable_engine_sqlite(dataset, runner):
-    CONFIG_CHOICE = "config_SQLite.ini"
+    CONFIG_CHOICE = "config.ini"
     # SOURCE
     opts = [dataset["data_dir"]]
     with backports.tempfile.TemporaryDirectory() as temp_dir:
         # TARGET
-        sqlite_file = os.path.join(temp_dir, "test.db")
+        sqlite_file = os.path.join(temp_dir, "test_sqlite_output.db")
         opts += ["sqlite:///{}".format(sqlite_file)]
         # config_file
         opts += ["--config-file", os.path.join(dataset["data_dir"], CONFIG_CHOICE)]
@@ -26,8 +26,8 @@ def test_run_variable_engine_sqlite(dataset, runner):
             opts += ["--munge"]
         else:
             opts += ["--no-munge"]
-        # variable engine
-        opts += ["--variable-engine"]
+        # sqlite backend
+        opts += ["--sqlite"]
         # run command
         result = runner.invoke(
             cytominer_database.commands.command_ingest_variable_engine.command, opts
@@ -55,7 +55,7 @@ def test_run_variable_engine_sqlite(dataset, runner):
 
 
 def test_run_variable_engine_parquet(dataset, runner):
-    CONFIG_CHOICE = "config_Parquet.ini"
+    CONFIG_CHOICE = "config.ini"
     # SOURCE
     opts = [dataset["data_dir"]]
 
@@ -78,7 +78,7 @@ def test_run_variable_engine_parquet(dataset, runner):
         else:
             opts += ["--no-munge"]
         # engine
-        opts += ["--variable-engine"]
+        opts += ["--parquet"]
 
         # run command
         result = runner.invoke(
