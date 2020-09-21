@@ -57,6 +57,7 @@ table e.g. use  `Metadata_Plate` instead of \
 `Image_Metadata_Plate` (Default: true).
 """,
 )
+
 @click.option(
     "--variable-engine/--no-variable-engine",
     default=False,
@@ -67,13 +68,36 @@ which backend engine is used (path of which is passed as a flag).\
 Default: False (--no-variable-engine) 
 """,
 )
-def command(source, target, config_file, munge, skip_image_prefix, variable_engine):
+
+@click.option(
+    "--parquet/--no-parquet",
+    default=False,
+    help="""\
+True if Parquet backend is selected (files are ingested to be Parquet files).
+Default: False (--no-parquet) 
+""",
+)
+
+@click.option(
+    "--sqlite/--no-sqlite",
+    default=False,
+    help="""\
+True if SQLite backend is selected (files are ingested to be Parquet files).
+Default: False (--no-sqlite) 
+""",
+)
+
+
+def command(source, target, config_file, munge, skip_image_prefix, parquet, sqlite):
     if munge:
         cytominer_database.munge.munge(config_path=config_file, source=source)
 
-    if variable_engine:
-        cytominer_database.ingest_variable_engine.seed(
-            source, target, config_file, skip_image_prefix
+    if parquet and sqlite:
+        raise ValueError(
+                " Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
+            )
+
+    cytominer_database.ingest_variable_engine.seed(
+        source, target, config_file, skip_image_prefix, parquet, sqlite
         )
-    else:
-        cytominer_database.ingest.seed(source, target, config_file, skip_image_prefix)
+
