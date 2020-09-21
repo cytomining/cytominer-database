@@ -176,24 +176,25 @@ def read_config(filename):
     return config
 
 
-def type_convert_dataframe(dataframe, config_file):
+def type_convert_dataframe(dataframe, engine, config):
     """
-    Type casting of entire pandas dataframe.
+    Type casting of entire pandas dataframe (only used for Parquet backend)
     Calls conversion function based on specifications in configuration file.
     :param dataframe: input file
-    :param config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
+    :param engine: specifies backend ('SQLite' or 'Parquet')
+    :param config: configuration file.
     """
-    engine = config_file["ingestion_engine"]["engine"]
-    if engine == "Parquet":  # convert. (Else: do nothing.)
-        type_conversion = config_file["schema"]["type_conversion"]
-        if type_conversion == "int2float":
-            convert_cols_int2float(dataframe)
-        elif type_conversion == "all2string":
-            convert_cols_2string(dataframe)
-        else:
-            raise ValueError(
-                "Incorrect 'type_conversion' specification in your configuration file. Please set the value to 'int2float' or 'all2string', as documented in the README. "
-            )
+    if engine == "SQLite":
+        return
+    type_conversion = config["schema"]["type_conversion"]
+    if type_conversion == "int2float":
+        convert_cols_int2float(dataframe)
+    elif type_conversion == "all2string":
+        convert_cols_2string(dataframe)
+    else:
+        raise ValueError(
+            "Incorrect 'type_conversion' specification in your configuration file. Please set the value to 'int2float' or 'all2string', as documented in the README. "
+        )
 
 
 def convert_cols_int2float(pandas_df):
