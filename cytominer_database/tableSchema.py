@@ -28,20 +28,19 @@ import cytominer_database.load
 ################################################################################
 
 
-def open_writers(source, target, config_file, skip_image_prefix=True):
+def open_writers(source, target, config_file, engine, skip_image_prefix=True):
     """
     Determines, loads reference tables and openes them as ParquetWriters.
     Returns a dictionary referencing the writers.
     :param source: path to directory containing all parent folders of .csv files
     :target: output file path
     :config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
+    :engine: specifies backend ('SQLite' or 'Parquet')
     :skip_image_prefix: Boolean value specifying if the column headers of
      the image.csv files should be prefixed with the table name ("Image").
     :writers_dict: dictionary referencing the writers (return argument)
     """
-    if (
-        config_file["ingestion_engine"]["engine"] == "SQLite"
-    ):  # no reference table needed
+    if engine == "SQLite":  # no reference table needed
         return None
 
     reference_directories = get_path_dictionary(
@@ -64,7 +63,7 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
             path, refIdentifier, skip_image_prefix
         )
         #  is also used in ingest.seed()
-        cytominer_database.utils.type_convert_dataframe(ref_df, config_file)
+        cytominer_database.utils.type_convert_dataframe(ref_df, engine, config_file)
         ref_table = pyarrow.Table.from_pandas(ref_df)
         ref_schema = ref_table.schema
         destination = os.path.join(target, name + ".parquet")
@@ -77,15 +76,15 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
     return writers_dict
 
 
-def get_path_dictionary(config_file, source):
+def get_path_dictionary(config, source):
     """
     Determines a single reference directory for every table kind and 
     returns a dictionary with key: 'Capitalized_table_kind', value = 'full/path/to/reference_table.csv'
 
-    :param config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
+    :param config: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
     :param source: path to directory containing all parent folders of .csv files
     """
-    reference = config_file["schema"]["reference_option"]
+    reference = config["schema"]["reference_option"]
 
     if (
         reference != "sample"
@@ -108,7 +107,7 @@ def get_path_dictionary(config_file, source):
         # Get all possible reference directories for each table kind, as stored in the dictionary.
 
         # Get sample size (as fraction of all available files) from config file
-        ref_fraction = float(config_file["schema"]["ref_fraction"])
+        ref_fraction = float(config["schema"]["ref_fraction"])
         # Get directories list
         directories = sorted(list(cytominer_database.utils.find_directories(source)))
         # get all full paths stored as lists in a dictionary
