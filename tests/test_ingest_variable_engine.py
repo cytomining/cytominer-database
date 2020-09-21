@@ -131,7 +131,7 @@ def test_seed_incompatible_engine(dataset):
         sqlite_file = os.path.join(temp_dir, "test_incomp.db")
         target = "sqlite:///{}".format(str(sqlite_file))
         # Make sure a ValueError is raised
-        with pytest.raises('ValueError') as exc_info:
+        with pytest.raises(ValueError) as exc_info:
             cytominer_database.ingest_variable_engine.seed(
                 config_path=config_path,
                 source=data_dir,
