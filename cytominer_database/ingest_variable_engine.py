@@ -86,7 +86,7 @@ def seed(
 
     # get dictionary that contains [name]["writer"], [name]["schema"], [name]["pandas_dataframe"]
     writers_dict = cytominer_database.tableSchema.open_writers(
-        source, output_path, config, skip_image_prefix
+        source, output_path, config, engine, skip_image_prefix
     )
     # lists the subdirectories that contain CSV files
     if not directories:
@@ -110,7 +110,7 @@ def seed(
             dataframe = cytominer_database.load.get_and_modify_df(
                 input_path, identifier, skip_image_prefix
             )
-            cytominer_database.utils.type_convert_dataframe(dataframe, config)
+            cytominer_database.utils.type_convert_dataframe(dataframe=dataframe,engine=engine, config=config) # only for Parquet
             cytominer_database.write.write_to_disk(
                 dataframe, table_name, output_path, engine, writers_dict
             )
@@ -155,7 +155,7 @@ def get_engine(sqlite=False, parquet=False):
     :param parquet: True is parquet is selected as backend
     
     """
-    if sqlite and engine: 
+    if sqlite and parquet: 
         raise ValueError(
         "Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
         )
