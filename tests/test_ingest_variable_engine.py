@@ -4,7 +4,6 @@ import pandas as pd
 import backports.tempfile
 from sqlalchemy import create_engine
 
-# import cytominer_database.ingest
 import cytominer_database.ingest_variable_engine
 import cytominer_database.munge
 import pytest
