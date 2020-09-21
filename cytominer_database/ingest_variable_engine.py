@@ -32,8 +32,6 @@ recommended engine, but ingest will likely also work with PostgreSQL and MySQL.
 
 Example::
 
-    import cytominer_database.ingest
-
     cytominer_database.ingest.seed(source, target, config_path)
 
     where
