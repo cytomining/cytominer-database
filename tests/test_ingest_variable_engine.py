@@ -9,16 +9,11 @@ import cytominer_database.munge
 import pytest
 
 
-@pytest.mark.parametrize("config_choice", ["config_Parquet.ini", "config_SQLite.ini"])
-def test_seed(dataset, config_choice):
+@pytest.mark.parametrize("engine_type", ["Parquet", "SQLite"])
+def test_seed(dataset, engine_type):
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
     ingest = dataset["ingest"]
-    config_path = os.path.join(data_dir, config_choice)
-    # Get database engine option
-    # (for this we need to read the config file from the path here already!)
-    config_file = cytominer_database.utils.read_config(config_path)
-    engine_type = config_file["ingestion_engine"]["engine"]
 
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
