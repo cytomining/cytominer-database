@@ -66,7 +66,6 @@ def seed(
     output_path,
     config_path,
     skip_image_prefix=True,
-    directories=None,
     sqlite=False,
     parquet=False):
     """
@@ -77,8 +76,8 @@ def seed(
     :config_path: full path of configuration file, e.g. path/to/plate_a/ingest_config.ini
     :skip_image_prefix: Boolean value specifying if the column headers of
      the image.csv files should be prefixed with the table name ("Image").
-    :directories: Pass subdirectories path list instead of generating a
-        path list from the source path. Added to test special cases. Can be removed.
+    :sqlite: True if SQLite is used as backend engine
+    :parquet: True if Parquet is used as backend engine
 
     """
     config = cytominer_database.utils.read_config(config_path)
@@ -89,8 +88,7 @@ def seed(
         source, output_path, config, engine, skip_image_prefix
     )
     # lists the subdirectories that contain CSV files
-    if not directories:
-        directories = sorted(list(cytominer_database.utils.find_directories(source)))
+    directories = sorted(list(cytominer_database.utils.find_directories(source)))
     # ----------------------------- iterate over subfolders in source folder------------------------------------
     for directory in directories:
         # ....................... get input .csv file paths ......................
