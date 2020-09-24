@@ -11,6 +11,7 @@ import cytominer_database.commands.command_ingest_variable_engine
 def runner():
     return click.testing.CliRunner()
 
+
 def test_run_variable_engine_sqlite(dataset, runner):
     CONFIG_CHOICE = "config.ini"
     # SOURCE
@@ -84,7 +85,9 @@ def test_run_variable_engine_parquet(dataset, runner):
 
         # run command
         result = runner.invoke(
-            cytominer_database.commands.command_ingest_variable_engine.command, opts, catch_exceptions=True
+            cytominer_database.commands.command_ingest_variable_engine.command,
+            opts,
+            catch_exceptions=True
             # cytominer_database.commands.command_ingest_variable_engine.command, opts, catch_exceptions=False
         )
         assert result.exit_code == 0, result.output
@@ -104,4 +107,3 @@ def test_run_variable_engine_parquet(dataset, runner):
                     df.groupby(["TableNumber", "ImageNumber"]).size().sum()
                     == blob["nrows"]
                 )
-

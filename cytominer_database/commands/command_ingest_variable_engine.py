@@ -57,7 +57,6 @@ table e.g. use  `Metadata_Plate` instead of \
 `Image_Metadata_Plate` (Default: true).
 """,
 )
-
 @click.option(
     "--parquet/--no-parquet",
     default=False,
@@ -66,7 +65,6 @@ True if Parquet backend is selected (files are ingested to be Parquet files).
 Default: False (--no-parquet) 
 """,
 )
-
 @click.option(
     "--sqlite/--no-sqlite",
     default=False,
@@ -75,29 +73,19 @@ True if SQLite backend is selected (files are ingested to be Parquet files).
 Default: False (--no-sqlite) 
 """,
 )
-
-
-def command(source,
-            target,
-            config_file,
-            munge,
-            skip_image_prefix,
-            parquet,
-            sqlite):
+def command(source, target, config_file, munge, skip_image_prefix, parquet, sqlite):
     if munge:
         cytominer_database.munge.munge(config_path=config_file, source=source)
-    
+
     if parquet and sqlite:
         raise ValueError(
-                " Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
-            )
+            " Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
+        )
     cytominer_database.ingest_variable_engine.seed(
         source=source,
         output_path=target,
         config_path=config_file,
         skip_image_prefix=skip_image_prefix,
         sqlite=sqlite,
-        parquet=parquet
-        )
-
-
+        parquet=parquet,
+    )

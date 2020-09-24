@@ -12,9 +12,8 @@ import pytest
 def test_seed_parquet(dataset):
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
-    ingest = dataset["ingest"]    
+    ingest = dataset["ingest"]
     config_path = os.path.join(data_dir, "config.ini")
-
 
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
@@ -46,12 +45,12 @@ def test_seed_parquet(dataset):
                     == blob["nrows"]
                 )
 
+
 def test_seed_sqlite(dataset):
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
     ingest = dataset["ingest"]
     config_path = os.path.join(data_dir, "config.ini")
-
 
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
@@ -82,6 +81,7 @@ def test_seed_sqlite(dataset):
                     == blob["nrows"]
                 )
 
+
 def test_seed_default(dataset):
     # Default of cytominer_database.ingest_variable_engine.seed(...) is sqlite=True and parquet=False
     # (defined in cytominer_database.get_engine())
@@ -89,7 +89,6 @@ def test_seed_default(dataset):
     munge = dataset["munge"]
     ingest = dataset["ingest"]
     config_path = os.path.join(data_dir, "config.ini")
-
 
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
@@ -124,7 +123,7 @@ def test_seed_incompatible_engine(dataset):
     # tests if an error is thrown when both engines 'sqlite=True' and 'parquet=True'
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
-    ingest = dataset["ingest"] 
+    ingest = dataset["ingest"]
     config_path = os.path.join(data_dir, "config.ini")
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
@@ -137,7 +136,10 @@ def test_seed_incompatible_engine(dataset):
                 source=data_dir,
                 output_path=target,
                 sqlite=True,
-                parquet=True
-                )
+                parquet=True,
+            )
             assert exc_info.type is ValueError
-            assert exc_info.value.args[0] == "Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
+            assert (
+                exc_info.value.args[0]
+                == "Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
+            )

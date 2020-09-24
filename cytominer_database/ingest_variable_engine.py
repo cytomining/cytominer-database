@@ -60,14 +60,14 @@ import cytominer_database.write
 import cytominer_database.tableSchema
 
 
-
 def seed(
     source,
     output_path,
     config_path,
     skip_image_prefix=True,
     sqlite=False,
-    parquet=False):
+    parquet=False,
+):
     """
     Main function. Loads configuration. Opens ParquetWriter.
     Calls writer function. Closes ParquetWriter.
@@ -108,7 +108,9 @@ def seed(
             dataframe = cytominer_database.load.get_and_modify_df(
                 input_path, identifier, skip_image_prefix
             )
-            cytominer_database.utils.type_convert_dataframe(dataframe=dataframe,engine=engine, config=config) # only for Parquet
+            cytominer_database.utils.type_convert_dataframe(
+                dataframe=dataframe, engine=engine, config=config
+            )  # only for Parquet
             cytominer_database.write.write_to_disk(
                 dataframe, table_name, output_path, engine, writers_dict
             )
@@ -153,15 +155,15 @@ def get_engine(sqlite=False, parquet=False):
     :param parquet: True is parquet is selected as backend
     
     """
-    if sqlite and parquet: 
+    if sqlite and parquet:
         raise ValueError(
-        "Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
+            "Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
         )
     elif sqlite:
         engine = "SQLite"
     elif parquet:
         engine = "Parquet"
-    else: # default
+    else:  # default
         engine = "SQLite"
-    
+
     return engine
