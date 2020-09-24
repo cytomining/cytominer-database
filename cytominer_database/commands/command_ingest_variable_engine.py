@@ -59,17 +59,6 @@ table e.g. use  `Metadata_Plate` instead of \
 )
 
 @click.option(
-    "--variable-engine/--no-variable-engine",
-    default=False,
-    help="""\
-True if multiple backend engines (SQLite or Parquet)\
-can be selected. The config file then determines
-which backend engine is used (path of which is passed as a flag).\
-Default: False (--no-variable-engine) 
-""",
-)
-
-@click.option(
     "--parquet/--no-parquet",
     default=False,
     help="""\
@@ -88,16 +77,27 @@ Default: False (--no-sqlite)
 )
 
 
-def command(source, target, config_file, munge, skip_image_prefix, parquet, sqlite):
+def command(source,
+            target,
+            config_file,
+            munge,
+            skip_image_prefix,
+            parquet,
+            sqlite):
     if munge:
         cytominer_database.munge.munge(config_path=config_file, source=source)
-
+    
     if parquet and sqlite:
         raise ValueError(
                 " Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
             )
-
     cytominer_database.ingest_variable_engine.seed(
-        source, target, config_file, skip_image_prefix, parquet, sqlite
+        source=source,
+        output_path=target,
+        config_path=config_file,
+        skip_image_prefix=skip_image_prefix,
+        sqlite=sqlite,
+        parquet=parquet
         )
+
 

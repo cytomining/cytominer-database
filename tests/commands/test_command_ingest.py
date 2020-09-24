@@ -28,6 +28,7 @@ def test_run_variable_engine_sqlite(dataset, runner):
             opts += ["--no-munge"]
         # sqlite backend
         opts += ["--sqlite"]
+        opts += ["--no-parquet"]
         # run command
         result = runner.invoke(
             cytominer_database.commands.command_ingest_variable_engine.command, opts
@@ -79,12 +80,13 @@ def test_run_variable_engine_parquet(dataset, runner):
             opts += ["--no-munge"]
         # engine
         opts += ["--parquet"]
+        opts += ["--no-sqlite"]
 
         # run command
         result = runner.invoke(
-            cytominer_database.commands.command_ingest_variable_engine.command, opts
+            cytominer_database.commands.command_ingest_variable_engine.command, opts, catch_exceptions=True
+            # cytominer_database.commands.command_ingest_variable_engine.command, opts, catch_exceptions=False
         )
-        # test outcome
         assert result.exit_code == 0, result.output
 
         for blob in dataset["ingest"]:
