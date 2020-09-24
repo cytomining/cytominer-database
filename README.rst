@@ -30,14 +30,20 @@ them into a database backend. The default backend is `SQLite`.
 
 	cytominer-database ingest source_directory sqlite:///backend.sqlite -c ingest_config.ini
 
+or, equivalently,  
+.. code-block:: sh
+
+	cytominer-database ingest source_directory sqlite:///backend.sqlite -c ingest_config.ini --sqlite
+
 will ingest the CSV files nested under source_directory into a `SQLite` backend
-To select the `Parquet` backend add a `--parquet` flag:
+
+Use the `--parquet` flag instead to select the `Parquet` backend:
 
 .. code-block:: sh
 
 	cytominer-database ingest source_directory sqlite:///backend.sqlite -c ingest_config.ini --parquet
 
-The ingest_config.ini file then needs to be adjusted to contain the `Parquet` specifications.
+The ingest_config.ini file can then be adjusted to different schema options in the section `schema`.
 
 How to use the configuration file
 =================================
@@ -58,18 +64,6 @@ Cells.csv, Cytoplasm.csv, Nuclei.csv, Image.csv, Object.csv.
 The [filenames] section in the configuration file saves the correct basename of existing measurement files.
 This may be important in the case of inconsistent capitalization.
 
-The [database_engine] section
------------------------------
-
-.. code-block::
-
-  [ingestion_engine]
-  engine = Parquet      #or: SQLite
-
-The [database_engine] section specifies the backend.
-Possible key-value pairs are:
-**engine** = *SQLite* or **engine** = *Parquet*.
-
 The [schema] section
 --------------------
 
@@ -80,7 +74,7 @@ The [schema] section
  ref_fraction     = 1              #or: any decimal value in [0, 1]
  type_conversion  = int2float      #or: all2string
 
-The [schema] section specifies how to manage incompatibilities in the table schema of the files.
+The [schema] section specifies how to manage incompatibilities in the table schema of the files. Currently it is only used for the Parquet backend.
 In that case, a Parquet file is fixed to a schema with which it was first opened, i.e. by the first file which is written (the reference file).
 To append the data of all .csv files of that file-kind, it is important to assure the reference file satisfies certain incompatibility requirements.
 For example, make sure the reference file does not miss any columns and all existing files can be automatically converted to the reference schema.
