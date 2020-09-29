@@ -49,7 +49,7 @@ def htqc():
     - 1 image CSV
     - munging required
     """
-    return {
+    return { 
         "config": "config_Parquet.ini",
         "data_dir": "tests/data_a",
         "munged_dir": "tests/data_a_munged",

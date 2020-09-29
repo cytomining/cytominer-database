@@ -89,7 +89,6 @@ def validate_csv_set(config, directory):
 
     # get the image CSV
     image_csv = os.path.join(directory, config["filenames"]["image"])
-
     if not os.path.isfile(image_csv):
         raise IOError(
             "{} not found in {}. Skipping.".format(
@@ -176,7 +175,7 @@ def read_config(filename):
     return config
 
 
-def type_convert_dataframe(dataframe, engine, config):
+def type_convert_dataframe(dataframe, config):
     """
     Type casting of entire pandas dataframe (only used for Parquet backend)
     Calls conversion function based on specifications in configuration file.
@@ -184,8 +183,6 @@ def type_convert_dataframe(dataframe, engine, config):
     :param engine: specifies backend ('SQLite' or 'Parquet')
     :param config: configuration file.
     """
-    if engine == "SQLite":
-        return
     type_conversion = config["schema"]["type_conversion"]
     if type_conversion == "int2float":
         convert_cols_int2float(dataframe)

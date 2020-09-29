@@ -82,11 +82,17 @@ def seed(
     """
     config = cytominer_database.utils.read_config(config_path)
     engine = get_engine(sqlite=sqlite, parquet=parquet)
+    if engine == "Parquet":  # reference table currently only implemented for SQLite
+        # get dictionary that contains [name]["writer"], [name]["schema"], [name]["pandas_dataframe"]
+        writer_dict = cytominer_database.tableSchema.get_ref_dict(
+            source, config, skip_image_prefix
+        )
+        # open writers
+        print("target = ", output_path)
+        cytominer_database.tableSchema.open_writer(writer_dict=writer_dict, target=output_path)
+    elif engine == "SQLite":
+        writer_dict = None
 
-    # get dictionary that contains [name]["writer"], [name]["schema"], [name]["pandas_dataframe"]
-    writers_dict = cytominer_database.tableSchema.open_writers(
-        source, output_path, config, engine, skip_image_prefix
-    )
     # lists the subdirectories that contain CSV files
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
     # ----------------------------- iterate over subfolders in source folder------------------------------------
@@ -108,28 +114,22 @@ def seed(
             dataframe = cytominer_database.load.get_and_modify_df(
                 input_path, identifier, skip_image_prefix
             )
-            cytominer_database.utils.type_convert_dataframe(
-                dataframe=dataframe, engine=engine, config=config
-            )  # only for Parquet
+            if engine == "Parquet": # only implemented for Parquet
+                cytominer_database.utils.type_convert_dataframe(
+                    dataframe=dataframe, config=config
+                ) 
             cytominer_database.write.write_to_disk(
-                dataframe, table_name, output_path, engine, writers_dict
+                dataframe, table_name, output_path, engine, writer_dict
             )
     # --------------------------------------- close writers ---------------------------------------------
-    close_writers(writers_dict, engine)
+    if engine == "Parquet":
+        cytominer_database.tableSchema.close_writer(writer_dict)
 
 
 # --------------------------------------------- end ---------------------------------------------------
 
 
-def close_writers(writers_dict, engine):
-    """
-    Close the Parquet writers
-    :param writers_dict: dictionary containing the references to the writers of every table kind
-    :param engine: "Parquet" or "SQLite
-    """
-    if engine == "Parquet":
-        for name in writers_dict.keys():
-            writers_dict[name]["writer"].close()
+
 
 
 def checksum(pathname, buffer_size=65536):
