@@ -8,6 +8,7 @@ import cytominer_database.ingest_variable_engine
 import cytominer_database.munge
 import cytominer_database.tableSchema
 import pytest
+import click
 
 
 def test_seed_parquet_shape(dataset):
@@ -43,12 +44,14 @@ def test_seed_parquet_shape(dataset):
                 assert (
                     df.groupby(["TableNumber", "ImageNumber"]).size().sum()
                     == blob["nrows"]
-                )
+              )
+           
 def test_seed_parquet(dataset):
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
     ingest = dataset["ingest"]
     config_path = os.path.join(data_dir, "config.ini")
+    config_file = cytominer_database.utils.read_config(config_path)
 
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
@@ -69,21 +72,27 @@ def test_seed_parquet(dataset):
         # build reference dict
         reference_dict = cytominer_database.tableSchema.get_ref_dict(
                     source=data_dir,
-                    config_file=cytominer_database.utils.read_config(config_path),
+                    config_file=config_file,
                     skip_image_prefix=True )
         # get identifiers and build dictionary of processed Tables
         directories = sorted(list(cytominer_database.utils.find_directories(data_dir)))
         processed_tables = {} #processed_tables[identifier][compartment] stores the modified dataframes loaded for comparison
         for directory in directories:
+            # Some of the test files contain invalid files which were skipped in the ingestion. 
+            # These should not be compared
+            print("In test_ingest_variable_engine.py: directory = {} ".format(directory))
+
+            if os.path.basename(directory) in dataset["skipped_dirs"]:
+                continue
             image_csv = os.path.join(directory, dataset["image_csv"])
             identifier = cytominer_database.ingest_variable_engine.checksum(image_csv)
             processed_tables[identifier] = {}
             for blob in ingest:
-                compartment_name = blob["table"] 
+                compartment_name = blob["table"]
                 compartment_path = os.path.join(directory, compartment_name + ".csv")
-                # load and process: prefix and additional 'TableNumber' column
+                # load and process: prefix and additional 'TableNumber' column 
                 processed_df = cytominer_database.load.get_and_modify_df(
-                                        input=compartment_path,
+                                        input = compartment_path,
                                         identifier = identifier,
                                         skip_image_prefix = True )
                 # align with reference dataframe
