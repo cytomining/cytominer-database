@@ -88,7 +88,6 @@ def seed(
             source, config, skip_image_prefix
         )
         # open writers
-        print("target = ", output_path)
         cytominer_database.tableSchema.open_writer(writer_dict=writer_dict, target=output_path)
     elif engine == "SQLite":
         writer_dict = None
@@ -127,10 +126,6 @@ def seed(
 
 
 # --------------------------------------------- end ---------------------------------------------------
-
-
-
-
 
 def checksum(pathname, buffer_size=65536):
     """
