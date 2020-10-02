@@ -50,7 +50,6 @@ import backports.tempfile
 import sqlalchemy.exc
 from sqlalchemy import create_engine
 import pyarrow
-import pyarrow.parquet as pq
 import pyarrow.csv
 import collections
 import numpy as np
@@ -88,7 +87,9 @@ def seed(
             source, config, skip_image_prefix
         )
         # open writers
-        cytominer_database.tableSchema.open_writer(writer_dict=writer_dict, target=output_path)
+        cytominer_database.tableSchema.open_writer(
+            writer_dict=writer_dict, target=output_path
+        )
     elif engine == "SQLite":
         writer_dict = None
 
@@ -113,10 +114,10 @@ def seed(
             dataframe = cytominer_database.load.get_and_modify_df(
                 input_path, identifier, skip_image_prefix
             )
-            if engine == "Parquet": # only implemented for Parquet
+            if engine == "Parquet":  # only implemented for Parquet
                 cytominer_database.utils.type_convert_dataframe(
                     dataframe=dataframe, config=config
-                ) 
+                )
             cytominer_database.write.write_to_disk(
                 dataframe, table_name, output_path, engine, writer_dict
             )
@@ -126,6 +127,7 @@ def seed(
 
 
 # --------------------------------------------- end ---------------------------------------------------
+
 
 def checksum(pathname, buffer_size=65536):
     """

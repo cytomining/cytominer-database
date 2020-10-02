@@ -8,7 +8,7 @@ import backports.tempfile
 import sqlalchemy.exc
 from sqlalchemy import create_engine
 import pyarrow
-import pyarrow.parquet as pq
+import pyarrow.parquet
 import pyarrow.csv
 import numpy as np
 import collections
@@ -39,11 +39,12 @@ def get_ref_dict(source, config_file, skip_image_prefix=True):
     :writer_dict: dictionary referencing the writer (return argument)
     """
 
-    reference_directories = get_path_dictionary(
-        config_file, source
-    ) 
+    reference_directories = get_path_dictionary(config_file, source)
     # initialize writer dictionary
-    writer_dict = {"TableNames" : [], "ref_dirs" : reference_directories, }
+    writer_dict = {
+        "TableNames": [],
+        "ref_dirs": reference_directories,
+    }
     refIdentifier = 999 & 0xFFFFFFFF
     # arbitrary identifier, will not be stored but used only as type template. (uint32 as in checksum())
     # Iterate over all table kinds:
@@ -68,28 +69,24 @@ def get_ref_dict(source, config_file, skip_image_prefix=True):
         writer_dict[name]["pandas_dataframe"] = ref_df
     return writer_dict
 
+
 def open_writer(writer_dict, target):
-    print("In open_writer(): target = ", target)
-    for (
-            name,
-            path,
-        ) in (
-            writer_dict["ref_dirs"].items()
-        ):
+    for (name, path,) in writer_dict["ref_dirs"].items():
         full_target = os.path.join(target, name + ".parquet")
         ref_schema = writer_dict[name]["schema"]
-        writer_dict[name]["writer"] = pq.ParquetWriter(
+        writer_dict[name]["writer"] = pyarrow.parquet.ParquetWriter(
             full_target, ref_schema, flavor={"spark"}
         )
+
+
 def close_writer(writer_dict):
     """
     Close the Parquet writers
     :param writer_dict: dictionary containing the references to the writers of every table kind
     """
     for name in writer_dict["TableNames"]:
-        print("name= ", name)
-        print("writer_dict[name]['writer'] = {} ".format(writer_dict[name]['writer']))
         writer_dict[name]["writer"].close()
+
 
 def get_path_dictionary(config, source):
     """
