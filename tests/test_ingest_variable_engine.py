@@ -9,6 +9,7 @@ import cytominer_database.munge
 import cytominer_database.tableSchema
 import pytest
 import click
+import pyarrow.parquet
 
 
 def test_seed_parquet_shape(dataset):
@@ -34,7 +35,6 @@ def test_seed_parquet_shape(dataset):
         assert os.path.exists(str(target))
         for blob in ingest:
             table_name = blob["table"].capitalize()
-            # df = pd.read_parquet(path=target, engine ='pyarrow') # ignore column 0 (columns=[1:])? Column 0 should be read only as an index (index_col=0) ?
             basename = ".".join([table_name, "parquet"])
             compartment_path = os.path.join(target, basename)
             df = pd.read_parquet(path=compartment_path)
@@ -44,8 +44,9 @@ def test_seed_parquet_shape(dataset):
                 assert (
                     df.groupby(["TableNumber", "ImageNumber"]).size().sum()
                     == blob["nrows"]
-              )
-           
+                )
+
+
 def test_seed_parquet(dataset):
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
@@ -71,51 +72,57 @@ def test_seed_parquet(dataset):
         assert os.path.exists(str(target))
         # build reference dict
         reference_dict = cytominer_database.tableSchema.get_ref_dict(
-                    source=data_dir,
-                    config_file=config_file,
-                    skip_image_prefix=True )
+            source=data_dir, config_file=config_file, skip_image_prefix=True
+        )
         # get identifiers and build dictionary of processed Tables
         directories = sorted(list(cytominer_database.utils.find_directories(data_dir)))
-        processed_tables = {} #processed_tables[identifier][compartment] stores the modified dataframes loaded for comparison
+        processed_tables = (
+            {}
+        )  # processed_tables[identifier][compartment] stores the modified dataframes loaded for comparison
         for directory in directories:
-            # Some of the test files contain invalid files which were skipped in the ingestion. 
-            # These should not be compared
-            print("In test_ingest_variable_engine.py: directory = {} ".format(directory))
-
+            # The test should compare only files which were not skipped during ingestion:
             if os.path.basename(directory) in dataset["skipped_dirs"]:
                 continue
             image_csv = os.path.join(directory, dataset["image_csv"])
             identifier = cytominer_database.ingest_variable_engine.checksum(image_csv)
             processed_tables[identifier] = {}
-            for blob in ingest:
+            for blob in ingest:  # iterate over compartment types
                 compartment_name = blob["table"]
                 compartment_path = os.path.join(directory, compartment_name + ".csv")
-                # load and process: prefix and additional 'TableNumber' column 
+                #  1) load and 2) modify: 2A) add 'TableNumber' column and 2B) optionally add prefix
                 processed_df = cytominer_database.load.get_and_modify_df(
-                                        input = compartment_path,
-                                        identifier = identifier,
-                                        skip_image_prefix = True )
-                # align with reference dataframe
-                ref_dataframe = reference_dict[compartment_name.capitalize()]["pandas_dataframe"]
-                aligned_and_processed_dataframe, _ = processed_df.align(ref_dataframe, join="right", axis=1)
-                # store in dictionary for comparison with written Parquet files
-                processed_tables[identifier][compartment_name] = aligned_and_processed_dataframe
-        # now read written Parquet files
+                    input=compartment_path,
+                    identifier=identifier,
+                    skip_image_prefix=True,
+                )
+                # 2C) Alignment with reference table
+                ref_dataframe = reference_dict[compartment_name.capitalize()][
+                    "pandas_dataframe"
+                ]
+                aligned_and_processed_dataframe, _ = processed_df.align(
+                    ref_dataframe, join="right", axis=1
+                )
+                # 3) Type conversion
+                cytominer_database.utils.type_convert_dataframe(
+                    dataframe=aligned_and_processed_dataframe, config=config_file
+                )
+                # 4) Store modified table in dictionary for comparison with written Parquet files
+                processed_tables[identifier][
+                    compartment_name
+                ] = aligned_and_processed_dataframe
+        # now: read written Parquet files
         for blob in ingest:
-            compartment_name = blob["table"].capitalize()
+            compartment_name = blob["table"]
             # df = pd.read_parquet(path=target, engine ='pyarrow') # ignore column 0 (columns=[1:])? Column 0 should be read only as an index (index_col=0) ?
             basename = ".".join([compartment_name, "parquet"])
             compartment_path = os.path.join(target, basename)
-            df = pd.read_parquet(path=compartment_path)
-
-            # get df
-            
-            # to verify table content, we need to add all modifications that were introduced before writing the tables:
-            # 1) added column TableNumber 
-            # 2) type conversions
-            # 3) added columns for tables with missing columns (not present in test data yet)
-
-
+            written_parquet = pyarrow.parquet.ParquetFile(compartment_path)
+            # slice into groups
+            sliced_df = slice_parquet_tables(written_parquet)
+            for sliced in sliced_df:
+                id = sliced.loc[0, "TableNumber"]
+                # compare with corresponding file
+                assert processed_tables[id][compartment_name].equals(sliced)
 
 
 def slice_parquet_tables(written_parquet):
@@ -123,14 +130,10 @@ def slice_parquet_tables(written_parquet):
     This function splits up the concatenated Parquet file (which was written to disk)
     and returns a list of Pandas dataframes.
     """
-    written_pandas = []
+    sliced_df = []
     for i in range(written_parquet.num_row_groups):
-        written_pandas.append(written_parquet.read_row_group(i).to_pandas())
-    return written_pandas
-
-#def modify_parquet_file():
-
-
+        sliced_df.append(written_parquet.read_row_group(i).to_pandas())
+    return sliced_df
 
 
 def test_seed_sqlite_shape(dataset):
@@ -196,7 +199,7 @@ def test_seed_default_shape(dataset):
             engine = create_engine(target)
             con = engine.connect()
             df = pd.read_sql(sql=table_name, con=con)
-            # check shape 
+            # check shape
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1
 
