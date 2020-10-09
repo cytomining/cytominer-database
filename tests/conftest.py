@@ -28,7 +28,8 @@ def cellpainting():
     - No object.csv and therefore no munging
     """
     return {
-        "config": "config_Parquet.ini",
+        "config": "config.ini", # default
+        "config_ref": "config_ref.ini", # reference option for schema is set to "path/to/reference/folder"
         "data_dir": "tests/data_b",
         "image_csv": "Image.csv",
         "ingest": [
@@ -39,6 +40,7 @@ def cellpainting():
         ],
         "munge": False,
         "skipped_dirs": ["E17-4", "J21-2", "N23-5"],
+        "dropped_cols_optional": ["E17-4", "J21-2", "N23-5"],
     }
 
 
@@ -64,7 +66,7 @@ def htqc():
     - munging required
     """
     return {
-        "config": "config_Parquet.ini",
+        "config": "config.ini",
         "data_dir": "tests/data_a",
         "munged_dir": "tests/data_a_munged",
         "image_csv": "image.csv",
