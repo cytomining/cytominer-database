@@ -1,5 +1,4 @@
 import os
-
 import pandas as pd
 import backports.tempfile
 from sqlalchemy import create_engine
@@ -7,16 +6,21 @@ from sqlalchemy import create_engine
 import cytominer_database.ingest_variable_engine
 import cytominer_database.munge
 import cytominer_database.tableSchema
+import cytominer_database.config
 import pytest
 import click
 import pyarrow.parquet
-
 
 def test_seed_parquet_shape(dataset):
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
     ingest = dataset["ingest"]
-    config_path = os.path.join(data_dir, "config.ini")
+    config_path = dataset["config"]
+    if config_path:
+        config_path = os.path.join(data_dir,  config_path)
+    else:
+        config_path = "config_default.ini"
+    config_file = cytominer_database.utils.read_config(config_path)
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
 
@@ -51,7 +55,11 @@ def test_seed_parquet(dataset):
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
     ingest = dataset["ingest"]
-    config_path = os.path.join(data_dir, "config.ini")
+    config_path = dataset["config"]
+    if config_path:
+        config_path = os.path.join(data_dir,  config_path)
+    else:
+        config_path = "config_default.ini"
     config_file = cytominer_database.utils.read_config(config_path)
 
     if munge:
@@ -140,7 +148,11 @@ def test_seed_sqlite_shape(dataset):
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
     ingest = dataset["ingest"]
-    config_path = os.path.join(data_dir, "config.ini")
+    config_path = dataset["config"]
+    if config_path:
+        config_path = os.path.join(data_dir,  config_path)
+    else:
+        config_path = "config_default.ini"
 
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
@@ -178,7 +190,12 @@ def test_seed_default_shape(dataset):
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
     ingest = dataset["ingest"]
-    config_path = os.path.join(data_dir, "config.ini")
+    config_path = dataset["config"]
+    if config_path:
+        config_path = os.path.join(data_dir,  config_path)
+    else:
+        config_path = "config_default.ini"
+    config_file = cytominer_database.utils.read_config(config_path)
 
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
@@ -216,7 +233,12 @@ def test_seed_incompatible_engine(dataset):
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
     ingest = dataset["ingest"]
-    config_path = os.path.join(data_dir, "config.ini")
+    config_path = dataset["config"]
+    if config_path:
+        config_path = os.path.join(data_dir,  config_path)
+    else:
+        config_path = "config_default.ini"
+    config_file = cytominer_database.utils.read_config(config_path)
 
     with backports.tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test_incomp.db")
@@ -235,3 +257,5 @@ def test_seed_incompatible_engine(dataset):
                 exc_info.value.args[0]
                 == "Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
             )
+
+
