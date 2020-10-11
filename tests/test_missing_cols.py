@@ -13,7 +13,6 @@ import pyarrow.parquet
 
 
 
-@pytest.mark.usefixtures('cellpainting')
 def test_missing_cols_parquet(dataset):
     """
     This function will load the dataset as Pandas dataframe and
