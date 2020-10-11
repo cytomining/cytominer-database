@@ -11,17 +11,6 @@ import pytest
 import click
 import pyarrow.parquet
 
-"""
-@pytest.mark.parametrize(
-    "context, expected_response_code",
-    [
-        (pytest.fixture_request("default_context"), 0),
-        (pytest.fixture_request("extra_context"), 0),
-    ],
-)
-"""
-
-
 @pytest.mark.parametrize(
     "ref_fraction,number_of_repetitions",
     [
