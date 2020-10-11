@@ -148,7 +148,6 @@ def directory_list_to_path_dictionary(directories):
     # - The function returns a dictionary to "open_writer()"". It is then passed to "get_reference_paths()",
     #   which samples paths from the lists and selects the reference table among them.
     # - Attention: returns a dictionary with value = list, even if there is only a single element
-    # - Option: We could include the old csv-validation (cytominer_database.utils.validate_csv_set(config_file, directory))
 
     # initialize dictionary that will be returned
     table_paths = {}
@@ -174,8 +173,6 @@ def sample_reference_paths(ref_fraction, full_paths):
     Samples a subset of all existing full paths and determines the reference table among them.
     Returns a dictionary with key: name (table kind), value = full path to reference table.
     :param ref_fraction: fraction of all paths to be compared (relative sample set size).
-    :param source:
-    
     :full_paths: dictionary containing a list of all full table paths for each table kind
     Example: {Image: [path/plate_a/set_1/image.csv, path/plate_a/set_2/image.csv,... ], Cells: [path/plate_a/set_1/Cells.csv, ...], ...}
     """
