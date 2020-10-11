@@ -28,8 +28,8 @@ def cellpainting():
     - No object.csv and therefore no munging
     """
     return {
-        "config": "config.ini", # default
-        "config_ref": "config_ref.ini", # reference option for schema is set to "path/to/reference/folder"
+        "config": "config.ini",  # default
+        "config_ref": "config_ref.ini",  # reference option for schema is set to "path/to/reference/folder"
         "data_dir": "tests/data_b",
         "image_csv": "Image.csv",
         "ingest": [
@@ -116,7 +116,3 @@ def dataset(request):
         return request.getfixturevalue("qc")
 
     raise ValueError("No such dataset: {}".format(request.param))
-
-
-
- 

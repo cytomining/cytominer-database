@@ -11,13 +11,14 @@ import pytest
 import click
 import pyarrow.parquet
 
+
 def test_seed_parquet_shape(dataset):
     data_dir = dataset["data_dir"]
     munge = dataset["munge"]
     ingest = dataset["ingest"]
     config_path = dataset["config"]
     if config_path:
-        config_path = os.path.join(data_dir,  config_path)
+        config_path = os.path.join(data_dir, config_path)
     else:
         config_path = "config_default.ini"
     config_file = cytominer_database.utils.read_config(config_path)
@@ -57,7 +58,7 @@ def test_seed_parquet(dataset):
     ingest = dataset["ingest"]
     config_path = dataset["config"]
     if config_path:
-        config_path = os.path.join(data_dir,  config_path)
+        config_path = os.path.join(data_dir, config_path)
     else:
         config_path = "config_default.ini"
     config_file = cytominer_database.utils.read_config(config_path)
@@ -150,7 +151,7 @@ def test_seed_sqlite_shape(dataset):
     ingest = dataset["ingest"]
     config_path = dataset["config"]
     if config_path:
-        config_path = os.path.join(data_dir,  config_path)
+        config_path = os.path.join(data_dir, config_path)
     else:
         config_path = "config_default.ini"
 
@@ -192,7 +193,7 @@ def test_seed_default_shape(dataset):
     ingest = dataset["ingest"]
     config_path = dataset["config"]
     if config_path:
-        config_path = os.path.join(data_dir,  config_path)
+        config_path = os.path.join(data_dir, config_path)
     else:
         config_path = "config_default.ini"
     config_file = cytominer_database.utils.read_config(config_path)
@@ -235,7 +236,7 @@ def test_seed_incompatible_engine(dataset):
     ingest = dataset["ingest"]
     config_path = dataset["config"]
     if config_path:
-        config_path = os.path.join(data_dir,  config_path)
+        config_path = os.path.join(data_dir, config_path)
     else:
         config_path = "config_default.ini"
     config_file = cytominer_database.utils.read_config(config_path)
@@ -257,5 +258,3 @@ def test_seed_incompatible_engine(dataset):
                 exc_info.value.args[0]
                 == "Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
             )
-
-

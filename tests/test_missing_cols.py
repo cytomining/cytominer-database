@@ -12,7 +12,6 @@ import click
 import pyarrow.parquet
 
 
-
 def test_missing_cols_parquet(dataset):
     """
     This function will load the dataset as Pandas dataframe and
@@ -34,7 +33,7 @@ def test_missing_cols_parquet(dataset):
     ingest = dataset["ingest"]
     config_path = dataset["config"]
     if config_path:
-        config_path = os.path.join(data_dir,  config_path)
+        config_path = os.path.join(data_dir, config_path)
     else:
         config_path = "config_default.ini"
     config_file = cytominer_database.utils.read_config(config_path)
@@ -107,7 +106,6 @@ def test_missing_cols_parquet(dataset):
                 id = sliced.loc[0, "TableNumber"]
                 # compare with corresponding file
                 assert processed_tables[id][compartment_name].equals(sliced)
-
 
 
 def slice_parquet_tables(written_parquet):
