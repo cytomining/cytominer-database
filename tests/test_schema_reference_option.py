@@ -11,6 +11,7 @@ import pytest
 import click
 import pyarrow.parquet
 
+
 @pytest.mark.parametrize(
     "ref_fraction,number_of_repetitions",
     [
