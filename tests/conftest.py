@@ -40,10 +40,9 @@ def cellpainting():
         ],
         "munge": False,
         "skipped_dirs": ["E17-4", "J21-2", "N23-5"],
-        "dropped_cols_optional": ["E17-4", "J21-2", "N23-5"],
+        # "dropped_cols_optional": ["E17-4", "J21-2", "N23-5"],
     }
-
-
+ 
 """
 Note: Some of the tables in "tests/data_b" were manipulated on purpose to check the handling of erronuous files.
 In that case the utils.validate_csv_set() should raise an IO-error, and the entire directory
@@ -55,6 +54,30 @@ Some files were invalid: Cells.csv,Nuclei.csv. Skipping tests/data_b/E17-4.
 Some files were invalid: Cells.csv. Skipping tests/data_b/J21-2.
 Some files were invalid: Image.csv. Skipping tests/data_b/N23-5.
 """
+
+ @pytest.fixture
+def  missing_columns():
+    """
+    Return configuration for a modified Cell Painting dataset.
+    - 3 compartments CSVs: Cells, Cytoplasm, Nuclei
+    - 1 image CSV
+    - No object.csv and therefore no munging
+    From cellpainting(), but "E17-4", "J21-2", "N23-5" have been removed (lightweight)
+    and the two columns of 'A01-1' were deleted.
+    """
+    return {
+        "config": "config.ini",  # default
+        "data_dir": "tests/data_b_lightweight",
+        "image_csv": "Image.csv",
+        "ingest": [
+            {"ncols": 586, "nrows": 40, "table": "Cells"},
+            {"ncols": 572, "nrows": 40, "table": "Cytoplasm"},
+            {"ncols": 6, "nrows": 4, "table": "image"},
+            {"ncols": 595, "nrows": 40, "table": "Nuclei"},
+        ],
+        "munge": False,
+        "skipped_dirs": ["E17-4", "J21-2", "N23-5"],
+    }  
 
 
 @pytest.fixture

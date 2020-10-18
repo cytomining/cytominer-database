@@ -37,7 +37,7 @@ def test_schema_ref_option_parquet(cellpainting, ref_fraction, number_of_repetit
      the case where the reference file is determined after comparing the dimensions
      of a subset of all tables sampled uniformly at random. 
      
-    This is tested only on data_b ("cellpainting") because the random sampling
+    Without loss of generality this is tested only on data_b ("cellpainting") because the random sampling
      of the reference table relies on there being many files to sample from,
       most of which are complete (no missing columns or type imcompatibilities).
 
