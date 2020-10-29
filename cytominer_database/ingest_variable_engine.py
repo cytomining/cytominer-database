@@ -38,7 +38,7 @@ Example:
     source = path/to/plate_a
     target = path/to/output/directory
     config_path = path/to/plate_a/ingest_config.ini
-Example: 
+Example:
  'file_1.csv', ..., 'file_n.csv' could be equivalent to 'Cells.csv', 'Cytoplasm.csv', 'Nuclei.csv', 'Image.csv', 'Object.csv'.
 
 """
@@ -70,6 +70,7 @@ def seed(
     """
     Main function. Loads configuration. Opens ParquetWriter.
     Calls writer function. Closes ParquetWriter.
+
     :source: path to parent directory containing subdirectories, e.g. "path/plate_a/"
     :output_path: path of destination folder
     :config_path: full path of configuration file, e.g. path/to/plate_a/ingest_config.ini
@@ -81,23 +82,37 @@ def seed(
     """
     config = cytominer_database.utils.read_config(config_path)
     engine = get_engine(sqlite=sqlite, parquet=parquet)
-    if engine == "Parquet":  # reference table currently only implemented for SQLite
-        # get dictionary that contains [name]["writer"], [name]["schema"], [name]["pandas_dataframe"]
+
+    # Setup writer and connection depending on specified engine
+    if engine == "Parquet":
+        # Get dictionary that contains:
+        # [name]["writer"], [name]["schema"], [name]["pandas_dataframe"]
         writer_dict = cytominer_database.tableSchema.get_ref_dict(
             source, config, skip_image_prefix
         )
-        # open writers
+
+        # Open writers
         cytominer_database.tableSchema.open_writer(
             writer_dict=writer_dict, target=output_path
         )
+
+        # No "connection" needed for Parquet
+        connection = None
+
     elif engine == "SQLite":
+        # No writers needed for SQLite
         writer_dict = None
+
+        # Setup connection to the SQLite backend
+        sql_engine = create_engine(output_path)
+        connection = sql_engine.connect()
 
     # lists the subdirectories that contain CSV files
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
-    # ----------------------------- iterate over subfolders in source folder------------------------------------
+
+    # Iterate over subfolders in source folder
     for directory in directories:
-        # ....................... get input .csv file paths ......................
+        # Get input .csv file paths
         try:
             compartments, image = cytominer_database.utils.validate_csv_set(
                 config, directory
@@ -108,25 +123,33 @@ def seed(
 
         identifier = checksum(image)
         csv_locations = [image] + compartments
-        # ----------------------------------- iterate over .csv's ---------------------------------------
+
+        # Iterate over compartment and image .csv files
         for input_path in csv_locations:
             table_name = cytominer_database.utils.get_name(input_path)
             dataframe = cytominer_database.load.get_and_modify_df(
                 input_path, identifier, skip_image_prefix
             )
-            if engine == "Parquet":  # only implemented for Parquet
+
+            # Ensure dtype integrity (only implemented for parquet)
+            if engine == "Parquet":
                 cytominer_database.utils.type_convert_dataframe(
                     dataframe=dataframe, config=config
                 )
+
+            # Write the csv files to disk
             cytominer_database.write.write_to_disk(
-                dataframe, table_name, output_path, engine, writer_dict
+                dataframe=dataframe,
+                table_name=table_name,
+                output_path=output_path,
+                connection=connection,
+                engine=engine,
+                writers_dict=writer_dict,
             )
-    # --------------------------------------- close writers ---------------------------------------------
+
+    # Close writers after writing (Parquet only)
     if engine == "Parquet":
         cytominer_database.tableSchema.close_writer(writer_dict)
-
-
-# --------------------------------------------- end ---------------------------------------------------
 
 
 def checksum(pathname, buffer_size=65536):
@@ -147,10 +170,10 @@ def checksum(pathname, buffer_size=65536):
 
 def get_engine(sqlite=False, parquet=False):
     """
-    
+
     :param sqlite: True if sqlite is selected as backend
     :param parquet: True is parquet is selected as backend
-    
+
     """
     if sqlite and parquet:
         raise ValueError(

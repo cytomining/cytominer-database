@@ -30,7 +30,7 @@ import cytominer_database.load
 
 def get_ref_dict(source, config_file, skip_image_prefix=True):
     """
-    Determines, loads reference tables and openes them as ParquetWriter.
+    Determines, loads reference tables and opens them as ParquetWriter.
     Returns a dictionary referencing the writers.
     :param source: path to directory containing all parent folders of .csv files
     :config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
@@ -90,7 +90,7 @@ def close_writer(writer_dict):
 
 def get_path_dictionary(config, source):
     """
-    Determines a single reference directory for every table kind and 
+    Determines a single reference directory for every table kind and
     returns a dictionary with key: 'Capitalized_table_kind', value = 'full/path/to/reference_table.csv'
 
     :param config: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
