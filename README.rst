@@ -12,30 +12,30 @@ cytominer-database
 
 cytominer-database provides command-line tools for organizing measurements extracted from images.
 
-Software tools such as CellProfiler can extract hundreds of measurements from millions of cells in a typical
-high-throughput imaging experiment. The measurements are stored across thousands of CSV files.
+Software tools such as CellProfiler can extract hundreds of measurements from millions of cells in a typical high-throughput imaging experiment.
+The measurements are stored across thousands of CSV files.
 
 cytominer-database helps you organize these data into a single database backend, such as SQLite.
 
 Why cytominer-database?
 =======================
-While tools like CellProfiler can store measurements directly in databases, it is usually infeasible to create a
-centralized database in which to store these measurements. A more scalable approach is to create a set of CSVs per
-“batch” of images, and then later merge these CSVs.
+While tools like CellProfiler can store measurements directly in databases, it is usually infeasible to create a centralized database in which to store these measurements.
+A more scalable approach is to create a set of CSVs per “batch” of images, and then later merge these CSVs.
 
-cytominer-database ingest reads these CSVs, checks for errors, then ingests
-them into a database backend. The default backend is `SQLite`.
+cytominer-database ingest reads these CSVs, checks for errors, then ingests them into a database backend.
+The default backend is `SQLite`.
 
 .. code-block:: sh
 
 	cytominer-database ingest source_directory sqlite:///backend.sqlite -c ingest_config.ini
 
-or, equivalently,  
+or, equivalently,
+
 .. code-block:: sh
 
 	cytominer-database ingest source_directory sqlite:///backend.sqlite -c ingest_config.ini --sqlite
 
-will ingest the CSV files nested under source_directory into a `SQLite` backend
+will ingest the CSV files nested under source_directory into a `SQLite` backend.
 
 Use the `--parquet` flag instead to select the `Parquet` backend:
 
@@ -74,7 +74,8 @@ The [schema] section
  ref_fraction     = 1              #or: any decimal value in [0, 1]
  type_conversion  = int2float      #or: all2string
 
-The [schema] section specifies how to manage incompatibilities in the table schema of the files. Currently it is only used for the Parquet backend.
+The [schema] section specifies how to manage incompatibilities in the table schema of the files.
+Currently it is only used for the Parquet backend.
 In that case, a Parquet file is fixed to a schema with which it was first opened, i.e. by the first file which is written (the reference file).
 To append the data of all .csv files of that file-kind, it is important to assure the reference file satisfies certain incompatibility requirements.
 For example, make sure the reference file does not miss any columns and all existing files can be automatically converted to the reference schema.
@@ -84,7 +85,6 @@ There are two options for the key **reference_option**:
 
 The first option is to create a designated folder containing one .csv reference file for every kind of file ("Cytoplasm.csv", "Nuclei.csv", ...) and save the folder path in the config file as **reference_option** = *path/to/reference/folder*, where the path is relative to the source_directory from the ingest command.
 These reference files' schema will determine the schema of the Parquet file into which all .csv files of its kind will be ingested.
-
 
 **This option relies on manual selection, hence the chosen reference files must be checked explicitly: Make sure the .csv files are complete in the number of columns and contain no NaN values.**
 
