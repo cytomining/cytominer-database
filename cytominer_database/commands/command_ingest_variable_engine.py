@@ -8,16 +8,16 @@ import cytominer_database.munge
 
 """
 Runs new code (ingest_variable_engine.py instead of ingest.py).
-Two backend engines are available: Sqlite and Parquet. 
+Two backend engines are available: Sqlite and Parquet.
 In effect, these options are read from the config file.
-In terms of the command (and testing the command), 
-the config file name needs to be specified 
+In terms of the command (and testing the command),
+the config file name needs to be specified
 (each backend choice has its own config file).
 """
 
 
 @click.command(
-    "ingest_new",
+    "ingest",
     help="""\
 Import CSV files into a database.
 
@@ -62,7 +62,7 @@ table e.g. use  `Metadata_Plate` instead of \
     default=False,
     help="""\
 True if Parquet backend is selected (files are ingested to be Parquet files).
-Default: False (--no-parquet) 
+Default: False (--no-parquet)
 """,
 )
 @click.option(
@@ -70,7 +70,7 @@ Default: False (--no-parquet)
     default=False,
     help="""\
 True if SQLite backend is selected (files are ingested to be Parquet files).
-Default: False (--no-sqlite) 
+Default: False (--no-sqlite)
 """,
 )
 def command(source, target, config_file, munge, skip_image_prefix, parquet, sqlite):
