@@ -13,6 +13,15 @@ def runner():
     return click.testing.CliRunner()
 
 
+def test_help(runner):
+    result = runner.invoke(
+        cytominer_database.commands.command_ingest_variable_engine.command,
+        ["ingest", "--help"],
+    )
+    print(result.output)
+    assert "ingest [OPTIONS] SOURCE TARGET" in result.output
+
+
 def test_run_variable_engine_sqlite(dataset, runner):
     CONFIG_CHOICE = "config.ini"
     # SOURCE
