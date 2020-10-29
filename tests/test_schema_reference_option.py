@@ -1,33 +1,16 @@
-import pytest
 import os
+import pytest
 import pandas as pd
-import backports.tempfile
-from sqlalchemy import create_engine
+import pyarrow.parquet
 
 import cytominer_database.ingest_variable_engine
 import cytominer_database.munge
 import cytominer_database.tableSchema
-import pytest
-import click
-import pyarrow.parquet
 
 
 @pytest.mark.parametrize(
     "ref_fraction,number_of_repetitions",
-    [
-        (0.5, 1),
-        (0.6, 1),
-        (0.8, 1),
-        (1.0, 1),
-        (0.5, 10),
-        (0.6, 10),
-        (0.8, 10),
-        (1.0, 10),
-        (0.5, 50),
-        (0.6, 50),
-        (0.8, 50),
-        (1.0, 50),
-    ],
+    [(0.5, 1), (0.6, 1), (0.5, 10), (0.6, 10), (0.5, 50), (0.6, 50),],
 )
 def test_schema_ref_option_parquet(cellpainting, ref_fraction, number_of_repetitions):
     """
@@ -35,11 +18,11 @@ def test_schema_ref_option_parquet(cellpainting, ref_fraction, number_of_repetit
      of the config file. More speciifically, it compares the ingestion process
      in the case where the reference file is given explicitly as a path and
      the case where the reference file is determined after comparing the dimensions
-     of a subset of all tables sampled uniformly at random. 
-     
+     of a subset of all tables sampled uniformly at random.
+
     Without loss of generality this is tested only on data_b ("cellpainting") because the random sampling
      of the reference table relies on there being many files to sample from,
-      most of which are complete (no missing columns or type imcompatibilities).
+      most of which are complete (no missing columns or type incompatibilities).
 
     """
     munge = cellpainting["munge"]
@@ -73,10 +56,10 @@ def get_reference_dicts(data, ref_fraction=None, number_of_repetitions=None):
     """
     Helper function used in test_schema_ref_option_parquet().
     Returns a list of n=number_of_repetitions reference dictionaries
-    which were determined by sampling a subset of size ref_fraction. 
+    which were determined by sampling a subset of size ref_fraction.
     If the optional parameters are not provided, the function returns a reference dictionary
     which is generated from the fixed reference tables stored under 'path/to/reference_tables',
-    as specified in the configuration file. 
+    as specified in the configuration file.
     """
     data_dir = data["data_dir"]
     if ref_fraction is not None:  # For the sampling-based approach:

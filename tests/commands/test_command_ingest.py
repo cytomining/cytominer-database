@@ -1,9 +1,10 @@
-import os.path
-import pandas as pd
+import os
 import pytest
+import tempfile
+import pandas as pd
 import click.testing
-import backports.tempfile
 from sqlalchemy import create_engine
+
 import cytominer_database.commands.command_ingest_variable_engine
 
 
@@ -16,7 +17,7 @@ def test_run_variable_engine_sqlite(dataset, runner):
     CONFIG_CHOICE = "config.ini"
     # SOURCE
     opts = [dataset["data_dir"]]
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         # TARGET
         sqlite_file = os.path.join(temp_dir, "test_sqlite_output.db")
         opts += ["sqlite:///{}".format(sqlite_file)]
@@ -61,14 +62,11 @@ def test_run_variable_engine_parquet(dataset, runner):
     # SOURCE
     opts = [dataset["data_dir"]]
 
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         # TARGET
         # create output directory
         target = os.path.join(temp_dir, "test_parquet_output")
-        try:
-            os.stat(target)
-        except:
-            os.mkdir(target)
+        os.makedirs(target, exist_ok=True)
         opts += [target]
 
         # config_file

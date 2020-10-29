@@ -1,9 +1,8 @@
-import os.path
-
-import backports.tempfile
-import cytominer_database.munge
+import os
+import tempfile
 import pandas as pd
-import pandas.util.testing
+
+import cytominer_database.munge
 
 
 def test_munge(dataset):
@@ -12,7 +11,7 @@ def test_munge(dataset):
 
     config_file = os.path.join(dataset["data_dir"], "config.ini")
 
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         valid_directories = cytominer_database.munge.munge(
             config_path=config_file, source=dataset["data_dir"], target=temp_dir
         )
@@ -32,4 +31,4 @@ def test_munge(dataset):
                     )
                 )
 
-                pandas.util.testing.assert_frame_equal(input_csv, output_csv)
+                pd.testing.assert_frame_equal(input_csv, output_csv)

@@ -1,15 +1,13 @@
 import os
+import pytest
+import tempfile
 import pandas as pd
-import backports.tempfile
+import pyarrow.parquet
 from sqlalchemy import create_engine
 
-import cytominer_database.ingest_variable_engine
 import cytominer_database.munge
 import cytominer_database.tableSchema
-import cytominer_database.config
-import pytest
-import click
-import pyarrow.parquet
+import cytominer_database.ingest_variable_engine
 
 
 def test_seed_parquet_shape(dataset):
@@ -17,27 +15,28 @@ def test_seed_parquet_shape(dataset):
     munge = dataset["munge"]
     ingest = dataset["ingest"]
     config_path = dataset["config"]
+
     if config_path:
         config_path = os.path.join(data_dir, config_path)
     else:
         config_path = "config_default.ini"
+
     config_file = cytominer_database.utils.read_config(config_path)
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
 
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         # create output directory
         target = os.path.join(temp_dir, "test_parquet_output")
-        try:
-            os.stat(target)
-        except:
-            os.mkdir(target)
+        os.makedirs(target, exist_ok=True)
+
         # run program
         cytominer_database.ingest_variable_engine.seed(
             config_path=config_path, source=data_dir, output_path=target, parquet=True
         )
 
         assert os.path.exists(str(target))
+
         for blob in ingest:
             table_name = blob["table"].capitalize()
             basename = ".".join([table_name, "parquet"])
@@ -57,32 +56,34 @@ def test_seed_parquet(dataset):
     munge = dataset["munge"]
     ingest = dataset["ingest"]
     config_path = dataset["config"]
+
     if config_path:
         config_path = os.path.join(data_dir, config_path)
     else:
         config_path = "config_default.ini"
+
     config_file = cytominer_database.utils.read_config(config_path)
 
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
 
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         # create output directory
         target = os.path.join(temp_dir, "test_parquet_output")
-        try:
-            os.stat(target)
-        except:
-            os.mkdir(target)
+        os.makedirs(target, exist_ok=True)
+
         # run program
         cytominer_database.ingest_variable_engine.seed(
             config_path=config_path, source=data_dir, output_path=target, parquet=True
         )
 
         assert os.path.exists(str(target))
+
         # build reference dict
         reference_dict = cytominer_database.tableSchema.get_ref_dict(
             source=data_dir, config_file=config_file, skip_image_prefix=True
         )
+
         # get identifiers and build dictionary of processed Tables
         directories = sorted(list(cytominer_database.utils.find_directories(data_dir)))
         processed_tables = (
@@ -158,7 +159,7 @@ def test_seed_sqlite_shape(dataset):
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
 
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         # create output directory
         sqlite_file = os.path.join(temp_dir, "test.db")
         target = "sqlite:///{}".format(str(sqlite_file))
@@ -201,7 +202,7 @@ def test_seed_default_shape(dataset):
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
 
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test.db")
         target = "sqlite:///{}".format(str(sqlite_file))
 
@@ -241,7 +242,7 @@ def test_seed_incompatible_engine(dataset):
         config_path = "config_default.ini"
     config_file = cytominer_database.utils.read_config(config_path)
 
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test_incomp.db")
         target = "sqlite:///{}".format(str(sqlite_file))
         # Make sure a ValueError is raised
