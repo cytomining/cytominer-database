@@ -132,7 +132,7 @@ def seed(source, target, config_path, skip_image_prefix=True):
     # list the subdirectories that contain CSV files
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
     
-    engine = create_engine(output, poolclass=NullPool)
+    engine = create_engine(target, poolclass=NullPool)
     con = engine.connect()
 
     for directory in directories:
