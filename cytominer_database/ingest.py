@@ -47,6 +47,7 @@ import pandas as pd
 import backports.tempfile
 import sqlalchemy.exc
 from sqlalchemy import create_engine
+from sqlalchemy.pool import NullPool
 
 import cytominer_database.utils
 
@@ -75,7 +76,7 @@ def into(input, output, name, identifier, skip_table_prefix=False):
         #   /usr/local/lib/python3.6/site-packages/odo/utils.py:128: DeprecationWarning: inspect.getargspec() is
         #     deprecated, use inspect.signature() or inspect.getfullargspec()
         warnings.simplefilter("ignore", category=DeprecationWarning)
-        engine = create_engine(output)
+        engine = create_engine(output, poolclass=NullPool)
         con = engine.connect()
 
         df = pd.read_csv(input)
@@ -94,6 +95,7 @@ def into(input, output, name, identifier, skip_table_prefix=False):
         table_number_column = [identifier] * number_of_rows  # create additional column
         df.insert(0, "TableNumber", table_number_column, allow_duplicates=False)
         df.to_sql(name=name, con=con, if_exists="append", index=False)
+        con.close()
 
 
 def checksum(pathname, buffer_size=65536):
