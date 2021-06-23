@@ -3,11 +3,13 @@ import setuptools
 
 setuptools.setup(
     name='cytominer_database',
-    version='0.3.0',
+    version='0.3.4',
     author="Shantanu Singh",
     author_email="shsingh@broadinstitute.org",
     maintainer="Gregory Way",
     maintainer_email="gregory.way@gmail.com",
+    maintainer="Beth Cimini",
+    maintainer_email="bcimini@broadinstitute.org",
     entry_points="""
     [console_scripts]
     cytominer-database=cytominer_database.command:command
