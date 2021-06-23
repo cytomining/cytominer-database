@@ -8,8 +8,6 @@ setuptools.setup(
     author_email="shsingh@broadinstitute.org",
     maintainer="Gregory Way",
     maintainer_email="gregory.way@gmail.com",
-    maintainer="Beth Cimini",
-    maintainer_email="bcimini@broadinstitute.org",
     entry_points="""
     [console_scripts]
     cytominer-database=cytominer_database.command:command
