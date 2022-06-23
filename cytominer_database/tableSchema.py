@@ -8,7 +8,7 @@ import backports.tempfile
 import sqlalchemy.exc
 from sqlalchemy import create_engine
 import pyarrow
-import pyarrow.parquet as pq
+import pyarrow.parquet
 import pyarrow.csv
 import numpy as np
 import collections
@@ -18,7 +18,7 @@ import cytominer_database.utils
 import cytominer_database.load
 
 ################################################################################
-# Contains "open_writers()"" to generate the dictionary containing the
+# Contains "open_writer()"" to generate the dictionary containing the
 #  reference data ("writer dictionary"), from which the table schemata will be generated.
 # The reference tables can either be loaded directly from a designated folder,
 # or sampled across all available data, as specified in the config_file.
@@ -28,26 +28,23 @@ import cytominer_database.load
 ################################################################################
 
 
-def open_writers(source, target, config_file, skip_image_prefix=True):
+def get_ref_dict(source, config_file, skip_image_prefix=True):
     """
-    Determines, loads reference tables and openes them as ParquetWriters.
+    Determines, loads reference tables and opens them as ParquetWriter.
     Returns a dictionary referencing the writers.
     :param source: path to directory containing all parent folders of .csv files
-    :target: output file path
     :config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
     :skip_image_prefix: Boolean value specifying if the column headers of
      the image.csv files should be prefixed with the table name ("Image").
-    :writers_dict: dictionary referencing the writers (return argument)
+    :writer_dict: dictionary referencing the writer (return argument)
     """
-    if (
-        config_file["ingestion_engine"]["engine"] == "SQLite"
-    ):  # no reference table needed
-        return None
 
-    reference_directories = get_path_dictionary(
-        config_file, source
-    )  # includes different steps, depending on config_file
-    writers_dict = {}
+    reference_directories = get_path_dictionary(config_file, source)
+    # initialize writer dictionary
+    writer_dict = {
+        "TableNames": [],
+        "ref_dirs": reference_directories,
+    }
     refIdentifier = 999 & 0xFFFFFFFF
     # arbitrary identifier, will not be stored but used only as type template. (uint32 as in checksum())
     # Iterate over all table kinds:
@@ -58,6 +55,7 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
         reference_directories.items()
     ):  # iterates over keys of the dictionary reference_directories
         # unpack path from [path] # if isinstance(path, list):
+        writer_dict["TableNames"].append(name)
         path = path[0]
         # load dataframe. Attention: Unpack from list return argument
         ref_df = cytominer_database.load.get_and_modify_df(
@@ -66,26 +64,39 @@ def open_writers(source, target, config_file, skip_image_prefix=True):
         #  is also used in ingest.seed()
         cytominer_database.utils.type_convert_dataframe(ref_df, config_file)
         ref_table = pyarrow.Table.from_pandas(ref_df)
-        ref_schema = ref_table.schema
-        destination = os.path.join(target, name + ".parquet")
-        writers_dict[name] = {}
-        writers_dict[name]["writer"] = pq.ParquetWriter(
-            destination, ref_schema, flavor={"spark"}
+        writer_dict[name] = {}
+        writer_dict[name]["schema"] = ref_table.schema
+        writer_dict[name]["pandas_dataframe"] = ref_df
+    return writer_dict
+
+
+def open_writer(writer_dict, target):
+    for (name, path,) in writer_dict["ref_dirs"].items():
+        full_target = os.path.join(target, name + ".parquet")
+        ref_schema = writer_dict[name]["schema"]
+        writer_dict[name]["writer"] = pyarrow.parquet.ParquetWriter(
+            full_target, ref_schema, flavor={"spark"}
         )
-        writers_dict[name]["schema"] = ref_schema
-        writers_dict[name]["pandas_dataframe"] = ref_df
-    return writers_dict
 
 
-def get_path_dictionary(config_file, source):
+def close_writer(writer_dict):
     """
-    Determines a single reference directory for every table kind and 
+    Close the Parquet writers
+    :param writer_dict: dictionary containing the references to the writers of every table kind
+    """
+    for name in writer_dict["TableNames"]:
+        writer_dict[name]["writer"].close()
+
+
+def get_path_dictionary(config, source):
+    """
+    Determines a single reference directory for every table kind and
     returns a dictionary with key: 'Capitalized_table_kind', value = 'full/path/to/reference_table.csv'
 
-    :param config_file: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
+    :param config: parsed configuration data (output from cytominer_database.utils.read_config(config_path))
     :param source: path to directory containing all parent folders of .csv files
     """
-    reference = config_file["schema"]["reference_option"]
+    reference = config["schema"]["reference_option"]
 
     if (
         reference != "sample"
@@ -108,7 +119,7 @@ def get_path_dictionary(config_file, source):
         # Get all possible reference directories for each table kind, as stored in the dictionary.
 
         # Get sample size (as fraction of all available files) from config file
-        ref_fraction = float(config_file["schema"]["ref_fraction"])
+        ref_fraction = float(config["schema"]["ref_fraction"])
         # Get directories list
         directories = sorted(list(cytominer_database.utils.find_directories(source)))
         # get all full paths stored as lists in a dictionary
@@ -133,11 +144,10 @@ def directory_list_to_path_dictionary(directories):
     # - The argument "source" specifies the parent directory, from which all
     #  subdirectories will be read and sorted and used to get all full paths to
     #  all tables, separately for each table kind. This argument is used when
-    #  the function is called from "open_writers()"", for the option 'sampling'.
-    # - The function returns a dictionary to "open_writers()"". It is then passed to "get_reference_paths()",
+    #  the function is called from "open_writer()"", for the option 'sampling'.
+    # - The function returns a dictionary to "open_writer()"". It is then passed to "get_reference_paths()",
     #   which samples paths from the lists and selects the reference table among them.
     # - Attention: returns a dictionary with value = list, even if there is only a single element
-    # - Option: We could include the old csv-validation (cytominer_database.utils.validate_csv_set(config_file, directory))
 
     # initialize dictionary that will be returned
     table_paths = {}
@@ -163,8 +173,6 @@ def sample_reference_paths(ref_fraction, full_paths):
     Samples a subset of all existing full paths and determines the reference table among them.
     Returns a dictionary with key: name (table kind), value = full path to reference table.
     :param ref_fraction: fraction of all paths to be compared (relative sample set size).
-    :param source:
-    
     :full_paths: dictionary containing a list of all full table paths for each table kind
     Example: {Image: [path/plate_a/set_1/image.csv, path/plate_a/set_2/image.csv,... ], Cells: [path/plate_a/set_1/Cells.csv, ...], ...}
     """

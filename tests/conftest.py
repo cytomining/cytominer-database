@@ -28,7 +28,8 @@ def cellpainting():
     - No object.csv and therefore no munging
     """
     return {
-        "config": "config_Parquet.ini",
+        "config": "config.ini",  # default
+        "config_ref": "config_ref.ini",  # reference option for schema is set to "path/to/reference/folder"
         "data_dir": "tests/data_b",
         "image_csv": "Image.csv",
         "ingest": [
@@ -38,7 +39,22 @@ def cellpainting():
             {"ncols": 595, "nrows": 40, "table": "Nuclei"},
         ],
         "munge": False,
+        "skipped_dirs": ["E17-4", "J21-2", "N23-5"],
+        # "dropped_cols_optional": ["E17-4", "J21-2", "N23-5"],
     }
+
+
+"""
+Note: Some of the tables in "tests/data_b" were manipulated on purpose to check the handling of erronuous files.
+In that case the utils.validate_csv_set() should raise an IO-error, and the entire directory
+in which the broken file resides will not be ingested. To test the values of the ingested files,
+these directories must be known to the testing functions; the user is informed about invalid
+filed with the following print:
+
+Some files were invalid: Cells.csv,Nuclei.csv. Skipping tests/data_b/E17-4.
+Some files were invalid: Cells.csv. Skipping tests/data_b/J21-2.
+Some files were invalid: Image.csv. Skipping tests/data_b/N23-5.
+"""
 
 
 @pytest.fixture
@@ -50,7 +66,7 @@ def htqc():
     - munging required
     """
     return {
-        "config": "config_Parquet.ini",
+        "config": "config.ini",
         "data_dir": "tests/data_a",
         "munged_dir": "tests/data_a_munged",
         "image_csv": "image.csv",
@@ -61,6 +77,7 @@ def htqc():
             {"ncols": 287, "nrows": 40, "table": "Nuclei"},
         ],
         "munge": True,
+        "skipped_dirs": [],
     }
 
 
@@ -77,6 +94,7 @@ def qc():
         "image_csv": "Image.csv",
         "ingest": [{"nrows": 8, "ncols": 229, "table": "Image"}],
         "munge": True,
+        "skipped_dirs": [],
     }
 
 
@@ -97,21 +115,4 @@ def dataset(request):
     if dataset_param == "qc":
         return request.getfixturevalue("qc")
 
-    raise ValueError("No such dataset: {}".format(request.param))
-
-
-@pytest.fixture
-def engine_choice(request):
-    # Note that calling fixtures directly is deprecated:
-    # https://docs.pytest.org/en/latest/deprecations.html#calling-fixtures-directly
-    # Instead, use the request fixture to dynamically run the named fixture function:
-    # https://docs.pytest.org/en/latest/reference.html#_pytest.fixtures.FixtureRequest.getfixturevalue
-    engine_param = request.param
-
-    if engine_param == "Parquet":
-        return request.getfixturevalue("Parquet")
-
-    if engine_param == "SQLite":
-        return request.getfixturevalue("SQLite")
-
-    raise ValueError("No such dataset: {}".format(request.param))
+    raise ValueError("No such dataset: {}".format(dataset_param))

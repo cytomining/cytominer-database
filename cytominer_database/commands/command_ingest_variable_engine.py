@@ -3,22 +3,21 @@ import configparser
 import os
 import pkg_resources
 
-import cytominer_database.ingest
 import cytominer_database.ingest_variable_engine
 import cytominer_database.munge
 
 """
 Runs new code (ingest_variable_engine.py instead of ingest.py).
-Two backend engines are available: Sqlite and Parquet. 
+Two backend engines are available: Sqlite and Parquet.
 In effect, these options are read from the config file.
-In terms of the command (and testing the command), 
-the config file name needs to be specified 
+In terms of the command (and testing the command),
+the config file name needs to be specified
 (each backend choice has its own config file).
 """
 
 
 @click.command(
-    "ingest_new",
+    "ingest",
     help="""\
 Import CSV files into a database.
 
@@ -59,22 +58,34 @@ table e.g. use  `Metadata_Plate` instead of \
 """,
 )
 @click.option(
-    "--variable-engine/--no-variable-engine",
+    "--parquet/--no-parquet",
     default=False,
     help="""\
-True if multiple backend engines (SQLite or Parquet)\
-can be selected. The config file then determines
-which backend engine is used (path of which is passed as a flag).\
-Default: False (--no-variable-engine) 
+True if Parquet backend is selected (files are ingested to be Parquet files).
+Default: False (--no-parquet)
 """,
 )
-def command(source, target, config_file, munge, skip_image_prefix, variable_engine):
+@click.option(
+    "--sqlite/--no-sqlite",
+    default=False,
+    help="""\
+True if SQLite backend is selected (files are ingested to be Parquet files).
+Default: False (--no-sqlite)
+""",
+)
+def command(source, target, config_file, munge, skip_image_prefix, parquet, sqlite):
     if munge:
         cytominer_database.munge.munge(config_path=config_file, source=source)
 
-    if variable_engine:
-        cytominer_database.ingest_variable_engine.seed(
-            source, target, config_file, skip_image_prefix
+    if parquet and sqlite:
+        raise ValueError(
+            " Two command flags '--parquet' and '--sqlite' cannot be added simultaneously."
         )
-    else:
-        cytominer_database.ingest.seed(source, target, config_file, skip_image_prefix)
+    cytominer_database.ingest_variable_engine.seed(
+        source=source,
+        output_path=target,
+        config_path=config_file,
+        skip_image_prefix=skip_image_prefix,
+        sqlite=sqlite,
+        parquet=parquet,
+    )
