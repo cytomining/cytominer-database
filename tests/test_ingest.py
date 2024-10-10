@@ -1,7 +1,7 @@
 import os.path
 
 import pandas as pd
-import backports.tempfile
+import tempfile
 from sqlalchemy import create_engine
 
 import cytominer_database.ingest
@@ -27,7 +27,7 @@ def test_seed(dataset):
     if munge:
         cytominer_database.munge.munge(config_file, data_dir)
 
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test.db")
 
         cytominer_database.ingest.seed(

@@ -2,7 +2,7 @@ import os.path
 import pandas as pd
 import pytest
 import click.testing
-import backports.tempfile
+import tempfile
 from sqlalchemy import create_engine
 
 import cytominer_database.command
@@ -34,7 +34,7 @@ def test_run(dataset, runner):
 
     opts += [dataset["data_dir"]]
 
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test.db")
 
         opts += ["sqlite:///{}".format(sqlite_file)]
@@ -68,7 +68,7 @@ def test_run_variable_engine_default(dataset, runner):
     # SOURCE
     opts = [dataset["data_dir"]]
 
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         # TARGET
         sqlite_file = os.path.join(temp_dir, "test.db")
         opts += ["sqlite:///{}".format(sqlite_file)]
@@ -112,7 +112,7 @@ def test_run_variable_engine_sqlite(dataset, runner):
     CONFIG_CHOICE = "config_SQLite.ini"
     # SOURCE
     opts = [dataset["data_dir"]]
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         # TARGET
         sqlite_file = os.path.join(temp_dir, "test.db")
         opts += ["sqlite:///{}".format(sqlite_file)]
@@ -156,7 +156,7 @@ def test_run_variable_engine_parquet(dataset, runner):
     # SOURCE
     opts = [dataset["data_dir"]]
 
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         # TARGET
         # create output directory
         target = os.path.join(temp_dir, "test_parquet_output")
@@ -211,7 +211,7 @@ def test_run_defaults(cellpainting, runner):
 
     opts += [cellpainting["data_dir"]]
 
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         sqlite_file = os.path.join(temp_dir, "test.db")
 
         opts += ["sqlite:///{}".format(sqlite_file)]

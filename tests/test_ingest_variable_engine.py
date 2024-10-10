@@ -1,7 +1,7 @@
 import os
 
 import pandas as pd
-import backports.tempfile
+import tempfile
 from sqlalchemy import create_engine
 
 # import cytominer_database.ingest
@@ -24,7 +24,7 @@ def test_seed(dataset, config_choice):
     if munge:
         cytominer_database.munge.munge(config_path, data_dir)
 
-    with backports.tempfile.TemporaryDirectory() as temp_dir:
+    with tempfile.TemporaryDirectory() as temp_dir:
         # set up
         if engine_type == "Parquet":
             # create output directory
