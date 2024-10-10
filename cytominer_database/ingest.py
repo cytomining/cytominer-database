@@ -47,6 +47,7 @@ import pandas as pd
 import tempfile
 import sqlalchemy.exc
 from sqlalchemy import create_engine
+from sqlalchemy.pool import NullPool
 
 import cytominer_database.utils
 
@@ -58,7 +59,7 @@ def __format__(name, header):
     return "{}_{}".format(name, header)
 
 
-def into(input, output, name, identifier, skip_table_prefix=False):
+def into(input, output, name, identifier, con, skip_table_prefix=False):
     """Ingest a CSV file into a table in a database.
 
     :param input: Input CSV file.
@@ -132,6 +133,9 @@ def seed(source, target, config_path, skip_image_prefix=True):
     # list the subdirectories that contain CSV files
     directories = sorted(list(cytominer_database.utils.find_directories(source)))
 
+    engine = create_engine(target, poolclass=NullPool)
+    con = engine.connect()
+    
     for directory in directories:
         # get the image CSV and the CSVs for each of the compartments
         try:
@@ -153,13 +157,8 @@ def seed(source, target, config_path, skip_image_prefix=True):
 
         # ingest the image CSV
         try:
-            into(
-                input=image,
-                output=target,
-                name=name.capitalize(),
-                identifier=identifier,
-                skip_table_prefix=skip_image_prefix,
-            )
+            into(input=image, output=target, name=name.capitalize(), identifier=identifier, con=con,
+                 skip_table_prefix=skip_image_prefix)
         except sqlalchemy.exc.DatabaseError as e:
             click.echo(e)
             continue
@@ -168,9 +167,5 @@ def seed(source, target, config_path, skip_image_prefix=True):
         for compartment in compartments:
             name, _ = os.path.splitext(os.path.basename(compartment))
 
-            into(
-                input=compartment,
-                output=target,
-                name=name.capitalize(),
-                identifier=identifier,
-            )
+            into(input=compartment, output=target, name=name.capitalize(), identifier=identifier, con=con)
+    con.close()
