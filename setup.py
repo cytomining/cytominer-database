@@ -32,7 +32,7 @@ setuptools.setup(
     install_requires=[
         "click>=6.7",
         "configparser>=3.5.0",
-        "csvkit==1.0.2",
+        "csvkit>=1.0.2,<2",
         "pandas>=0.20.3",
         "pyarrow",
     ],
