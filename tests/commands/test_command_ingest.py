@@ -50,7 +50,7 @@ def test_run(dataset, runner):
             engine = create_engine(target)
             con = engine.connect()
 
-            df = pd.read_sql(sql=table_name, con=con, index_col=0)
+            df = pd.read_sql(sql=f"SELECT * FROM {table_name}", con=con)
 
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1
@@ -96,7 +96,7 @@ def test_run_variable_engine_default(dataset, runner):
             engine = create_engine(target)
             con = engine.connect()
 
-            df = pd.read_sql(sql=table_name, con=con, index_col=0)
+            df = pd.read_sql(sql=f"SELECT * FROM {table_name}", con=con)
 
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1
@@ -139,7 +139,7 @@ def test_run_variable_engine_sqlite(dataset, runner):
             engine = create_engine(target)
             con = engine.connect()
 
-            df = pd.read_sql(sql=table_name, con=con, index_col=0)
+            df = pd.read_sql(sql=f"SELECT * FROM {table_name}", con=con)
 
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1
@@ -227,7 +227,7 @@ def test_run_defaults(cellpainting, runner):
             engine = create_engine(target)
             con = engine.connect()
 
-            df = pd.read_sql(sql=table_name, con=con, index_col=0)
+            df = pd.read_sql(sql=f"SELECT * FROM {table_name}", con=con)
 
             assert df.shape[0] == blob["nrows"]
             assert df.shape[1] == blob["ncols"] + 1
