@@ -26,5 +26,5 @@ authors:
   given-names: "Anne"
   orcid: "https://orcid.org/0000-0003-1555-8261"
 title: "cytominer-database"
-version: 0.3.4
+version: 0.3.5
 url: "https://github.com/cytomining/cytominer-database"

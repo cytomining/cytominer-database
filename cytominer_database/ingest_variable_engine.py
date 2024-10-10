@@ -48,7 +48,7 @@ import csv
 import click
 import zlib
 import pandas as pd
-import backports.tempfile
+import tempfile
 import sqlalchemy.exc
 from sqlalchemy import create_engine
 import pyarrow

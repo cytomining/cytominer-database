@@ -1,7 +1,7 @@
 import setuptools
 
 project = "cytominer_database"
-version = "0.3.3"
+version = "0.3.5"
 
 # Note about authors:
 # setuptools makes it difficult to have multiple authors
@@ -30,11 +30,11 @@ setuptools.setup(
     packages=setuptools.find_packages(exclude=["tests", "doc"]),
     include_package_data=True,
     install_requires=[
-        "backports.tempfile>=1.0rc1",
         "click>=6.7",
         "configparser>=3.5.0",
-        "csvkit>=1.0.2",
+        "csvkit>=1.0.2,<2",
         "pandas>=0.20.3",
+        "pyarrow",
     ],
     license="BSD",
     url="https://github.com/cytomining/cytominer-database",
