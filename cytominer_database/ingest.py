@@ -157,8 +157,14 @@ def seed(source, target, config_path, skip_image_prefix=True):
 
         # ingest the image CSV
         try:
-            into(input=image, output=target, name=name.capitalize(), identifier=identifier, con=con,
-                 skip_table_prefix=skip_image_prefix)
+            into(
+                input=image,
+                output=target,
+                name=name.capitalize(),
+                identifier=identifier,
+                con=con,
+                skip_table_prefix=skip_image_prefix
+            )
         except sqlalchemy.exc.DatabaseError as e:
             click.echo(e)
             continue
@@ -167,5 +173,11 @@ def seed(source, target, config_path, skip_image_prefix=True):
         for compartment in compartments:
             name, _ = os.path.splitext(os.path.basename(compartment))
 
-            into(input=compartment, output=target, name=name.capitalize(), identifier=identifier, con=con)
+            into(
+                input=compartment,
+                output=target,
+                name=name.capitalize(),
+                identifier=identifier,
+                con=con
+            )
     con.close()
